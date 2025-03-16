@@ -210,7 +210,119 @@
 	/r 0  %% reclamades
 	/n (el Vallès Oriental)  %% nom normatiu
 	/i 41  %% codi territorial
-      >>
+      >> 
+  /GG <<
+	/f 7  %% total fosses
+	/e 3  %% exhumades
+	/r 3  %% reclamades
+	/n (les Garrigues)  %% nom normatiu
+	/i 18  %% codi territorial
+      >> 
+  /CB <<
+	/f 1  %% total fosses
+	/e 1  %% exhumades
+	/r 0  %% reclamades
+	/n (la Conca de Barberà)  %% nom normatiu
+	/i 16  %% codi territorial
+      >> 
+  /AP <<
+	/f 16  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alt Penedès)  %% nom normatiu
+	/i 03  %% codi territorial
+      >> 
+  /BR <<
+	/f 33  %% total fosses
+	/e 2  %% exhumades
+	/r 10  %% reclamades
+	/n (el Barcelonès)  %% nom normatiu
+	/i 13  %% codi territorial
+      >> 
+  /MM <<
+	/f 66  %% total fosses
+	/e 0  %% exhumades
+	/r 4  %% reclamades
+	/n (el Maresme)  %% nom normatiu
+	/i 21  %% codi territorial
+      >> 
+  /PR <<
+	/f 5  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Priorat)  %% nom normatiu
+	/i 29  %% codi territorial
+      >> 
+  /AC <<
+	/f 81  %% total fosses
+	/e 14  %% exhumades
+	/r 55  %% reclamades
+	/n (l'Alt Camp)  %% nom normatiu
+	/i 01  %% codi territorial
+      >> 
+  /BP <<
+	/f 9  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Penedès)  %% nom normatiu
+	/i 12  %% codi territorial
+      >> 
+  /GF <<
+	/f 59  %% total fosses
+	/e 0  %% exhumades
+	/r 38  %% reclamades
+	/n (el Garraf)  %% nom normatiu
+	/i 17  %% codi territorial
+      >> 
+  /BT <<
+	/f 2  %% total fosses
+	/e 0  %% exhumades
+	/r 1  %% reclamades
+	/n (el Baix Llobregat)  %% nom normatiu
+	/i 11  %% codi territorial
+      >> 
+  /TT <<
+	/f 3  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Terra Alta)  %% nom normatiu
+	/i 37  %% codi territorial
+      >> 
+  /RE <<
+	/f 155  %% total fosses
+	/e 5  %% exhumades
+	/r 87  %% reclamades
+	/n (la Ribera d'Ebre)  %% nom normatiu
+	/i 30  %% codi territorial
+      >> 
+  /BC <<
+	/f 4  %% total fosses
+	/e 1  %% exhumades
+	/r 2  %% reclamades
+	/n (el Baix Camp)  %% nom normatiu
+	/i 08  %% codi territorial
+      >> 
+  /TR <<
+	/f 85  %% total fosses
+	/e 2  %% exhumades
+	/r 44  %% reclamades
+	/n (el Tarragonès)  %% nom normatiu
+	/i 36  %% codi territorial
+      >> 
+  /MT <<
+	/f 19  %% total fosses
+	/e 1  %% exhumades
+	/r 9  %% reclamades
+	/n (el Montsià)  %% nom normatiu
+	/i 22  %% codi territorial
+      >> 
+  /BB <<
+	/f 48  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Ebre)  %% nom normatiu
+	/i 09  %% codi territorial
+      >> 
 
 >> def
 
@@ -253,8 +365,8 @@ findfont /dHack exch def
    cQ dup
    gsave 4 copy 1 1 1 setrgbcolor gruixF 2 mul setlinewidth rectstroke grestore  %% perfilem en blanc el quadrat
    rectfill  %% omplim de negre
-   comarquesVSfosses araC known
-   {  %% aquesta pregunta de si existeix la comarca un cop fetes totes a /comarquesVSfosses no l'haurem de fer
+%   comarquesVSfosses araC known
+%   {  %% aquesta pregunta de si existeix la comarca un cop fetes totes a /comarquesVSfosses no l'haurem de fer
     comarquesVSfosses araC get dup /e get /araE exch def dup /r get /araR exch def /f get dup /araFosses exch def  %% fosses exhumades, reclamades i totals
     sqrt ceiling dup mul sqrt cvi /finsXY exch def  %% nombre de tessel·les de costat
     finsXY 0 ne
@@ -336,10 +448,10 @@ findfont /dHack exch def
       }if
      }for
     }for
-   }
-   {
-	   %araC == quit
-   }ifelse
+%   }
+%   {
+%	   araC == quit
+%   }ifelse
   }ifelse
  }for
  /araX 0 def  %% ara no fa re

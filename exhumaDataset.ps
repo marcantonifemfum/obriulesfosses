@@ -1,0 +1,94 @@
+%!
+%% explorador de dades del dataset de Fosses Comunes a Catalunya 1936-77
+%% un cop passat el geojson a geojson.ps via llegeixJson.ps
+
+%% l'estructura del dataset de fosses és un diccionari (que cal executar) on de la clau /features hi penja una array amb un diccionari per fossa
+(/var/www/html/www.obriulesfosses.cat/Fosses\ comunes\ a\ Catalunya_20250316.geojsonps) (r) file
+cvx exec
+
+%% la mida de l'array és el nombre de fosses comunes
+/features get dup length ==
+
+/arrayFosses exch def  %% desem l'array amb totes les fosses
+
+%% aquest és el desori comarcal de Justícia (amb comarques repetides) del dataset del 16.03.2025, que normalitzem via el codi alfabètic comarcal de
+%% https://ca.wikipedia.org/wiki/Comarques_de_Catalunya
+%% i que hem implementat dins faComarques.ps al diccionari /comarquesVSfosses
+<<
+  (Priorat) /PR
+  (Val d'Aran) /VN
+  (Osona) /OS
+  (Noguera) /NG
+  (Ribera d'Ebre) /RE
+  (Cerdanya \(Girona\)) /CD
+  (Alt Penedès) /AP
+  (Vallès Occidental) /VC
+  (Pallars Jussà - Pallars Jussà) /PJ
+  (Solsonès) /SL
+  (Bages) /BG
+  (Terra Alta) /TT
+  (Lluçanès) /LL
+  (Alt Empordà) /AE
+  (Pallars Sobirà) /PS
+  (Garrigues) /GG
+  (Baix Camp - Baix Camp) /BC
+  (Pallars Jussà) /PJ
+  (Alt Camp) /AC
+  (Barcelonès) /BR
+  (Conca de Barberà) /CB
+  (Garraf) /GF
+  (Anoia) /AI
+  (Moianès) /MO
+  (Maresme) (MM)
+  (Pla de l'Estany) /PE
+  (Montsià) /MT
+  (Baix Penedès) /BP
+  (Pla d'Urgell) /PU
+  (Berguedà) /BD
+  (Baix Empordà) /BM
+  (Baix Ebre) /BB
+  (Tarragonès) /TR
+  (Segrià) /SI
+  (Gironès) /GN
+  (Selva) /SV
+  (Ripollès) /RI
+  (Baix Camp) /BC
+  (Segarra) /SR
+  (Baix Llobregat) /BT
+  (Cerdanya \(Lleida\)) /CD
+  (Alt Urgell) /AU
+  (Urgell) /UR
+  (Vallès Oriental) /VR
+  (Garrotxa) /GX
+>> /desoriComarcal exch def
+
+%% fem un buidat de les comarques dins del diccionari per poder comptar quantes fosses hi ha a cadasccuna
+/datasetComarques <<>> def
+%% posem el numerador a zero
+desoriComarcal
+{
+ pop 
+ datasetComarques exch 0 put
+}forall
+
+arrayFosses
+{  %% forall per totes les fosses i comptar-les per comarques
+ (properties) get (comarca) get dup
+ datasetComarques exch known
+ {
+  dup datasetComarques exch get 1 add datasetComarques 3 1 roll put
+ }
+ {
+  dup desoriComarcal exch known
+  {
+   dup datasetComarques exch get 1 add datasetComarques 3 1 roll put
+  }
+  {
+   == (\n\n >>>> HI HA HAGUT UN CANVI DE DENOMINACIONS COMARCAL O S'HA AFEGIT UNA COMARCA VERGE\n\n) print flush quit
+  }ifelse
+ }ifelse
+}forall
+
+datasetComarques dup length ==
+datasetComarques{== ==}forall
+

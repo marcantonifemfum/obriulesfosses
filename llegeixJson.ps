@@ -1,0 +1,1254 @@
+%!
+%#  `GNU GPL llegeixJson.ps v.1.0´ és un lector de dades JavaScript Object Notation a PostScript,
+%#  de manera que convertim la sintaxi de JSON a sintaxi PS.
+%#  Font original del format http://www.json.org/
+%#  Validador http://jsonformatter.curiousconcept.com
+%#  Per a intèrprets `GNU GPL Ghostscript´ però també pot córrer amb l'Adobe Acrobat Distiller, i amb
+%#  certs canvis en el protocol d'escriptura de fitxers, amb MacOSX PSNormalizer Framework/Apple pstopdf.
+%# 
+%#  `Copyleft 2013 :: l'Ametlla de Merola :: Marc Antoni Malagarriga i Picas´
+%#  `<http://www.femfum.com> | <marcantoni@femfum.com>´
+%#  `http://www.femfum.com/bin/llegeixJson.ps.html´
+%# 
+%#  Aquest programa és programari lliure: podeu redistribuir-lo i/o modificar-lo
+%#  sota els termes de la Llicència Pública General de GNU publicada per la Free
+%#  Software Foundation, ja sigui la versió 3 de la Llicència, o (a la seva elecció)
+%#  qualsevol versió posterior.
+%# 
+%#  Aquest programa es distribueix amb l'esperança que sigui útil, però SENSE CAP GARANTIA;
+%#  ni tan sols la garantia implícita MERCANTIL o d'APTITUD PER A UN OBJECTIU PARTICULAR.
+%#  Consulteu els detalls de la Llicència Pública General de GNU per a més informació.
+%# 
+%#  Haurieu de rebre una còpia de la Llicència Pública General de GNU junt amb aquest
+%#  programa. En cas contrari, consulteu <http://www.gnu.org/licenses/>
+%# 
+%# 
+%#  `GNU GPL llegeixJson.ps v.1.0´ is a JavaScript Object Notation data reader to PostScript,
+%#  so it works as a JSON to PS syntax parser.
+%#  For `GNU GPL Ghostscript´ interpreter, but also for Adobe Acrobat Distiller, and even with some
+%#  changes on the writable files strategy, with the MacOSX PSNormalizer Framework/Apple pstopdf.
+%# 
+%#  `Copyleft 2013 :: l'Ametlla de Merola :: Marc Antoni Malagarriga i Picas´
+%#  `<http://www.femfum.com> | <marcantoni@femfum.com>´
+%#  `http://www.femfum.com/bin/llegeixJson.ps.html´
+%# 
+%#  This program is free software: you can redistribute it and/or modify
+%#  it under the terms of the GNU General Public License as published by
+%#  the Free Software Foundation, either version 3 of the License, or
+%#  (at your option) any later version.
+%# 
+%#  This program is distributed in the hope that it will be useful,
+%#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+%#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%#  GNU General Public License for more details.
+%# 
+%#  You should have received a copy of the GNU General Public License
+%#  along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+%# La sintaxi JSON permet organitzar sense limitacions de recursivitat, qualsevol tipus de dada: cadenes de text, caràcters
+%# unicode, numèrics diversos, booleans, nulls, diccionaris (ojectes) clau/valor i paquets de dades (arrays) indexades.
+%# A nivell d'objectes, sintaxi i dades, les principals equivalències entre els dos lleguatges de programació són:
+%# Els objectes JSON { ... } es transformen en diccionaris << ... >> PS
+%# Les cadenes JSON " ... " es transformen en cadenes ( ... ) PS
+%# El separador de cadena/valor JSON : es transforma en un espai en blanc a PS
+%# El separador d'elements d'una array JSON , es transforma en un espai en blanc a PS
+%# Dins una cadena, els caràcters unicode JSON de 4 dígits hexa \u#### es transformen en caràcters octal \### a PS
+%# La resta d'elements JSON/PS són equivalents: arrays [ ... ], numèrics, booleans, nulls, \n, \r, \f, \t, \b
+
+%# Aprofitant que els fitxers .json no són mai gaire grans, l'estratègia utilitzada per aquest torsimany (parser), és
+%# reescriure'ls directament, analitzant caràcter a caràcter, tot repicant paral·lelament els canvis sintàctics cap a
+%# PostScript en un nou fitxer de sortida amb el resultat.
+
+%% lína de comandes Ghostscript:
+%% gs -q -dNOSAFER -o re.pdf -sDEVICE=pdfwrite -c .setpdfwrite -f llegeixJson.ps 
+
+
+%# path al fitxer .JSON com a fitxer de lectura
+%% (aviam.json)
+%% (/Users/femfum/Downloads/maqetta/plugins/org.dojotoolkit.optimizer.servlet_0.4.6/syncloader.json)
+%% (/Users/femfum/Downloads/maqetta/siteConfig/widgetPalette.json)
+%% (/Users/femfum/Downloads/maqetta/plugins/org.dojotoolkit.optimizer.servlet_0.4.6/zazl.json)
+%% (/Users/femfum/Downloads/maqetta/plugins/org.dojotoolkit.optimizer.servlet_0.4.6/zazlUsingESPrima.json)
+%% (/Users/femfum/Downloads/maqetta/plugins/org.dojotoolkit.optimizer.amd_0.4.6/optimizer/package.json)
+%%(/Users/femfum/Downloads/maqetta/siteConfig/defaultThemeSet.json)
+%%(/Users/femfum/JBC/JSON2PS/categoriesISO8859-1_real.json)
+%%(/Users/femfum/JBC/JSON2PS/1293_xFamiliaDarticle.json)
+%%(/Users/femfum/Polynorma/jsons/capsEnBlanc/678.json)
+
+%%(/Users/femfum/JBC/JSON6Q/4000210.json)
+%%(/Users/femfum/JBC/JSON6Q/4000586.json)
+%(/Users/femfum/OnEtsOncleGuillem/fosses/mapaDeFossesComunes_Catalunya_030517.json)
+(/var/www/html/www.obriulesfosses.cat/Fosses comunes a Catalunya_20250316.geojson)
+dup /JSONpath exch def (r) file /JSONin exch def
+
+%# el fitxer d'escriptura tindrà el mateix nom que el .JSON de lectura, amb l'extensió ps afegida .JSONps
+JSONpath dup length dup /araVA exch def 2 add string dup 3 -1 roll 0 exch putinterval dup araVA (ps) putinterval
+(w) file /PSout exch def
+
+
+%% haurem de tenir cura d'un seguit de gatells i dades ... 
+/eSCaPe false def  %% gatell per saber si tenim actiu el caràcter \ o no
+/"oBeRT false def  %% gatell per saber si som fora o dins d'una cadena, per tal de substituir " per ( o )
+/noCR false def  %% gatell per saber si hem ignorat el darrer retorn de carro
+/uHEXstring false def  %% gatell per saber si hem de repicar de 0 a 9 i de aA a fF dins uDECstring via uBIN 
+/iHEX 0 def  %% índex comptador de dígits hexadecimals per no sobreixir uDECstring i petar uBIN
+4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a octal \### de 2 en 2 dígits
+uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+
+%% també podríem treballar amb l'encoding de la taula WinAnsi modificada per la sintaxi de JSON a PS
+%% systemdict /EncodingDirectory get /WinAnsiEncoding get
+%% dup length array copy /xifratDeJSONaPS exch def
+
+%% treballarem amb un encoding farcit dels seus mateixos índex, sempre que el caràcter sigui transparent al format ... 
+256 array /xifratDeJSONaPS exch def
+0 1 255
+{  %% farcim els 256 enters ídems al seu índex
+ xifratDeJSONaPS exch dup put
+}for
+%% ...però quan el caràcter sigui potencialment transformable, durà un procediment al seu índex:
+
+%% si som fora d'una cadena, convertirem els objectes {} a diccionaris, doncs funcionen amb la lògica de clau/valor
+%% si no, els esriurem de forma idem!
+%% { = 123
+xifratDeJSONaPS 123
+{
+ "oBeRT
+ {
+  ({) writestring
+ }
+ {
+  (<<) writestring
+ }
+ ifelse
+} put
+%% } = 125
+xifratDeJSONaPS 125
+{
+ "oBeRT
+ {
+  (}) writestring
+ }
+ {
+  (>>) writestring
+ }
+ ifelse
+} put
+
+%% si som fora d'una cadena, convertim el separador : string:value a espai en blanc pel clau/valor
+%% si no, l'esriurem de forma idem!
+%% : = 58
+xifratDeJSONaPS 58
+{
+ "oBeRT
+ {
+  (:) writestring
+ }
+ {
+  ( ) writestring
+ }
+ ifelse
+} put
+
+%% si som fora d'una cadena, convertim el separador , a espai en blanc
+%% si no, l'esriurem de forma idem!
+%% , = 44
+xifratDeJSONaPS 44
+{
+ "oBeRT
+ {
+  (,) writestring
+ }
+ {
+  ( ) writestring
+ }
+ ifelse
+} put
+
+%% convertim el delimitador d'strings " en ( o ) en funció del valor del gatell "oBeRT
+%% dins una string ("oBeRT=true), si ", 34 decimal, ha estat precedit de \ (eSCaPe=true),
+%% escrivim el caràcter " i tornem a desactivar el gatell (eSCaPe=false), si no, o escrivim ) o abans si uHEXstring=true
+%% llegim uBIN per passar-ho a octal per escriure els dos bytes i finalment tornem a desactivar el gatell (oBeRT=false)
+%% " = 34
+xifratDeJSONaPS 34
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   (") writestring /eSCaPe false def
+  }
+  {
+   (\)) writestring /"oBeRT false def
+  } ifelse
+ }
+ {
+  (\() writestring /"oBeRT true def
+ } ifelse
+} put
+
+%% activem a true el gatell eSCaPe del caràcter d'escape \ però sense escriure re de moment
+%% \ = 92
+xifratDeJSONaPS 92
+{
+ pop /eSCaPe true def
+} put
+
+%% si l'espai en blanc és dins una string ("oBeRT = true) i el gatell eSCaPe és a true, escriurem (\\\\ ) i tancarem el gatell
+%% tret que uHEXstring ens digui que hem de repicar 4 caràcters hexa a octal de 2 en 2 o si "oBeRT=false escrivim un 32 idem
+%%   = 32
+xifratDeJSONaPS 32
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   (\\\\ ) writestring /eSCaPe false def
+  }
+  {
+   ( ) writestring
+  } ifelse
+ }
+ {
+  ( ) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si el retorn de carro (CR) 13 decimal, ha estat precedit de \ (eSCaPe=true),
+%% ignorem ambdós caràcters sense escriure res, del contrari l'escrivim ídem
+%% CR = 13
+xifratDeJSONaPS 13
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   /noCR true def /eSCaPe false def
+  }
+  {
+   (\015) writestring
+  } ifelse
+ }
+ {
+  (\015) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si el LineFeed (LF) 10 decimal, ha estat precedit de \ i CR, o sigui noCR a true
+%% ignorem el caràcter sense escriure res, del contrari l'escrivim ídem
+%% LF = 10
+xifratDeJSONaPS 10
+{
+ "oBeRT
+ {
+  noCR
+  {
+   /noCR false def
+  }
+  {
+   (\012) writestring
+  } ifelse
+ }
+ {
+  (\012) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si /, 47 decimal, ha estat precedit de \ (eSCaPe=true),
+%% escrivim el caràcter / i tornem a desactivar el gatell (eSCaPe=false), si no també fem el mateix, doncs sembla que no
+%% pas tothom dins a una string, per exemple per descriure un adreça, hi posa el caràcter d'escape:
+%% (/Users/femfum/Downloads/maqetta/plugins/org.dojotoolkit.optimizer.servlet_0.4.6/syncloader.json)
+%% / = 47
+xifratDeJSONaPS 47
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   (/) writestring
+   /eSCaPe false def
+  }
+  {
+   (/) writestring
+  } ifelse
+ }
+ {  %% això en un JSON validat no hauria de passar mai
+  (/) writestring
+ }ifelse
+} put
+
+%% dins una string ("oBeRT=true), si n (newline), 110 decimal, ha estat precedit de \ (eSCaPe=true),
+%% escrivim \n i tornem a desactivar el gatell (eSCaPe=false), si no escribim només n
+%% n = 110
+xifratDeJSONaPS 110
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   (\\n) writestring /eSCaPe false def
+  }
+  {
+   (n) writestring
+  } ifelse
+ }
+ {
+  (n) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si r (carriage return), 114 decimal, ha estat precedit de \ (eSCaPe=true),
+%% escrivim \r i tornem a desactivar el gatell (eSCaPe=false), si no escribim només r
+%% r = 114
+xifratDeJSONaPS 114
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   (\\r) writestring /eSCaPe false def
+  }
+  {
+   (r) writestring
+  } ifelse
+ }
+ {
+  (r) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si t (horizontal tab), 116 decimal, ha estat precedit de \ (eSCaPe=true),
+%% escrivim \t i tornem a desactivar el gatell (eSCaPe=false), si no escribim només t
+%% t = 116
+xifratDeJSONaPS 116
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   (\\t) writestring /eSCaPe false def
+  }
+  {
+   (t) writestring
+  } ifelse
+ }
+ {
+  (t) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si u, 117 decimal, ha estat precedit de \ (eSCaPe=true), no escriurem res i activarem
+%% uHEXstring=true per tal que de 0 a 9 i de aA a fF farceixin uDECstring, també desactivarem el gatell (eSCaPe=false)
+%% i esperarem que ", quan tanqui, escrigui uDECstring i desactivi uHEXstring=false, i si no, escriurem només u
+%% u = 117
+xifratDeJSONaPS 117
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   pop /uHEXstring true def /eSCaPe false def
+  }
+  {
+   (u) writestring
+  } ifelse
+ }
+ {
+  (u) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si a, 97 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% a = 97
+xifratDeJSONaPS 97
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (a) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (a) writestring
+  } ifelse
+ }
+ {
+  (a) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si A, 65 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% A = 65
+xifratDeJSONaPS 65
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (A) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (A) writestring
+  } ifelse
+ }
+ {
+  (A) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si b (backspace o no), 98 decimal, ha estat precedit de \ (eSCaPe=true), escrivim \b i tornem
+%% a desactivar el gatell (eSCaPe=false), si no escribim només b, i si té uHEXstring=true, l'escriurem dins uBIN eliminant
+%% de l'stack el .JSONps, i si no l'escriurem normalment dins el fitxer .JSONps
+%% b = 98
+xifratDeJSONaPS 98
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   (\\b) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (b) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (b) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (b) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si B, 66 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% B = 66
+xifratDeJSONaPS 66
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (B) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (B) writestring
+  } ifelse
+ }
+ {
+  (B) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si c, 99 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% c = 99
+xifratDeJSONaPS 99
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (c) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (c) writestring
+  } ifelse
+ }
+ {
+  (c) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si C, 67 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% C = 67
+xifratDeJSONaPS 67
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (C) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (C) writestring
+  } ifelse
+ }
+ {
+  (C) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si d, 100 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% d = 100
+xifratDeJSONaPS 100
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (d) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (d) writestring
+  } ifelse
+ }
+ {
+  (d) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si D, 68 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% D = 68
+xifratDeJSONaPS 68
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (D) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (D) writestring
+  } ifelse
+ }
+ {
+  (D) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si e, 101 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% e = 101
+xifratDeJSONaPS 101
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (e) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (e) writestring
+  } ifelse
+ }
+ {
+  (e) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si E, 69 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% E = 69
+xifratDeJSONaPS 69
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (E) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (E) writestring
+  } ifelse
+ }
+ {
+  (E) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si f (formfeed o no), 102 decimal, ha estat precedit de \ (eSCaPe=true), escrivim \f
+%% i tornem a desactivar el gatell (eSCaPe=false), si no escribim només f, i si té uHEXstring=true, l'escriurem dins uBIN
+%% eliminant de l'stack el .JSONps, i si no l'escriurem normalment dins el fitxer .JSONps
+%% f = 102
+xifratDeJSONaPS 102
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   (\\f) writestring
+   /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (f) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (f) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (f) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si F, 70 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% F = 70
+xifratDeJSONaPS 70
+{
+ "oBeRT
+ {
+  uHEXstring
+  {
+   uBIN (F) writestring
+   iHEX 1 add dup 4 eq
+   {
+    pop /iHEX 0 def
+    uBIN dup flushfile closefile dup dup dup
+    (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+    uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+    dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+    %% inicialitzem el fitxer i la cadena hexa d'escriptura
+    4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+    uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+   }
+   {
+    /iHEX exch def pop
+   }ifelse
+  }
+  {
+   (F) writestring
+  } ifelse
+ }
+ {
+  (F) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 0, 48 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 0 = 48
+xifratDeJSONaPS 48
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (0) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (0) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (0) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (0) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 1, 49 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 1 = 49
+xifratDeJSONaPS 49
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (1) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (1) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (1) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (1) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 2, 50 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 2 = 50
+xifratDeJSONaPS 50
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (2) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (2) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (2) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (2) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 3, 51 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 3 = 51
+xifratDeJSONaPS 51
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (3) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (3) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (3) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (3) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 4, 52 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 4 = 52
+xifratDeJSONaPS 52
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (4) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (4) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (4) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (4) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 5, 53 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 5 = 53
+xifratDeJSONaPS 53
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (5) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (5) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (5) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (5) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 6, 54 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 6 = 54
+xifratDeJSONaPS 54
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (6) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (6) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (6) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (6) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 7, 55 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 7 = 55
+xifratDeJSONaPS 55
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (7) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (7) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (7) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (7) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 8, 56 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 8 = 56
+xifratDeJSONaPS 56
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (8) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (8) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (8) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (8) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), si 9, 57 decimal, té uHEXstring=true, l'escriurem dins uBIN eliminant de l'stack el .JSONps
+%% si no l'escriurem normalment dins el fitxer .JSONps
+%% 9 = 57
+xifratDeJSONaPS 57
+{
+ "oBeRT
+ {
+  eSCaPe
+  {
+   dup (\\) writestring (9) writestring /eSCaPe false def
+  }
+  {
+   uHEXstring
+   {
+    uBIN (9) writestring
+    iHEX 1 add dup 4 eq
+    {
+     pop /iHEX 0 def
+     uBIN dup flushfile closefile dup dup dup
+     (\\) writestring uDECstring 0 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring (\\) writestring
+     uDECstring 2 2 getinterval /ASCIIHexDecode filter read pop 8 3 string cvrs
+     dup length 3 exch sub exch /3z (000) def 3z 3 1 roll putinterval 3z writestring /uHEXstring false def
+     %% inicialitzem el fitxer i la cadena hexa d'escriptura
+     4 string /uDECstring exch def  %% cadena que s'escriurà en hexa però que serà convertida a base 8 \### de 2 en 2 dígits
+     uDECstring /NullEncode filter /uBIN exch def  %% fitxer d'escriptura de la cadena hexadecimal de 4 dígits
+    }
+    {
+     /iHEX exch def pop
+    }ifelse
+   }
+   {
+    (9) writestring
+   } ifelse
+  } ifelse
+ }
+ {
+  (9) writestring
+ } ifelse
+} put
+
+%% dins una string ("oBeRT=true), escrivim sempre (, 40 decmal, blindat amb conrabarra \\\( i desactivem el gatell
+%% (eSCaPe=false) a pinyó fix, si no, escrivim ( senzill
+%% ( = 40
+xifratDeJSONaPS 40
+{
+ "oBeRT
+ {
+  (\\\() writestring /eSCaPe false def
+ }
+ {
+  (\() writestring
+ }ifelse
+} put
+
+%% dins una string ("oBeRT=true), escrivim sempre ), 41 decimal, blindat amb contrabarra \\\) i desactivem el gatell
+%% (eSCaPe=false) a pinyó fix, si no, escrivim ) senzill
+%% ) = 41
+xifratDeJSONaPS 41
+{
+ "oBeRT
+ {
+  (\\\)) writestring /eSCaPe false def
+ }
+ {
+  (\)) writestring
+ }ifelse
+} put
+
+%% loop de repicat d'objectes de JSON a PS
+{  %% loop
+ JSONin read  %% llegim caràcter a caràcter
+ {
+  xifratDeJSONaPS exch get dup type
+  /integertype eq
+  {  %% repiquem el caràcter ídem
+   PSout exch write
+  }
+  {  %% executem l'algorisme específic de conversió del caràcter
+   PSout exch exec
+  }ifelse
+ }
+ {  %% sortim
+  PSout dup flushfile closefile
+  JSONin dup flushfile closefile
+  exit
+ }ifelse
+} loop
+
+pstack  %% hi ha merda?
+
