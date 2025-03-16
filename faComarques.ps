@@ -1,0 +1,362 @@
+%!
+%% donat un ample determinat, generem una reticula de quadrats x,y per tal de representar esquemàticament les 43 comarques de Catalunya
+%% https://ca.wikipedia.org/wiki/Comarques_de_Catalunya
+%% cada comarca és un quadrat i a dins hi podem veure el nombre de fosses, destriant quines han estat exhumades, quines no i quines hem exigit d'exhumar
+%% hauríem d'escriure en paral·lel a JS/Canvas per tal s'adapti dinàmicament a qualsevol tipus de finestra/pantalla?
+
+/xComarques 595 def  %% ample donat
+
+/nComarques  %% retícula comarcal de Catalunya en base al codi alfabètic oficial
+[ %0   %1   %2   %3   %4   %5   %6   %7   %8
+  null null null (VN) null null null null null  %% 0
+  null null null (AG) (PS) null null null null  %% 1
+  null null null (PJ) (AU) (CD) (RI) (GX) (AE)  %% 2
+  null null (NG) (SL) (BD) (LL) (OS) (PE) (BM)  %% 3
+  null null (PU) (SR) (BG) (MO) (SV) (GN) null  %% 4
+  null null (SI) (UR) (AI) (VC) (VR) null null  %% 5
+  null null (GG) (CB) (AP) (BR) (MM) null null  %% 6
+  null (PR) (AC) (BP) (GF) (BT) null null null  %% 7
+  null (TT) (RE) (BC) (TR) null null null null  %% 8
+  (MT) (BB) null null null null null null null  %% 9
+] def
+
+/comarquesVSfosses
+<<  %% estructura possible dels diccionaris comarcals, en base al codi alfabètic oficial, que hauran de xuclar les dades del dataset oficial i el dataset de l'acció
+  /VN <<
+	/f 1  %% total fosses
+	/e 0  %% exhumades
+	/r 1  %% reclamades
+	/n (l'Aran)  %% nom normatiu
+	/i 39  %% codi territorial
+      >>
+  /AG <<
+	/f 2  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alta Ribagorça)  %% nom normatiu
+	/i 05  %% codi territorial
+      >>
+  /PS <<
+	/f 10  %% total fosses
+	/e 2  %% exhumades
+	/r 3  %% reclamades
+	/n (el Pallars Sobirà)  %% nom normatiu
+	/i 26  %% codi territorial
+      >>
+  /PJ <<
+	/f 43  %% total fosses
+	/e 5  %% exhumades
+	/r 0  %% reclamades
+	/n (el Pallars Jussà)  %% nom normatiu
+	/i 25  %% codi territorial
+      >>
+  /AU <<
+	/f 58  %% total fosses
+	/e 15  %% exhumades
+	/r 30  %% reclamades
+	/n (l'Alt Urgell)  %% nom normatiu
+	/i 04  %% codi territorial
+      >>
+  /CD <<
+	/f 0  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Cerdanya)  %% nom normatiu
+	/i 15  %% codi territorial
+      >>
+  /RI <<
+	/f 7  %% total fosses
+	/e 0  %% exhumades
+	/r 2  %% reclamades
+	/n (el Ripollès)  %% nom normatiu
+	/i 31  %% codi territorial
+      >>
+  /GX <<
+	/f 27  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Garrotxa)  %% nom normatiu
+	/i 19  %% codi territorial
+      >>
+  /AE <<
+	/f 127  %% total fosses
+	/e 3  %% exhumades
+	/r 66  %% reclamades
+	/n (l'Alt Empordà)  %% nom normatiu
+	/i 02  %% codi territorial
+      >>
+  /NG <<
+	/f 15  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Noguera)  %% nom normatiu
+	/i 23  %% codi territorial
+      >>
+  /SL <<
+	/f 227  %% total fosses
+	/e 12  %% exhumades
+	/r 58  %% reclamades
+	/n (el Solsonès)  %% nom normatiu
+	/i 35  %% codi territorial
+      >>
+  /BD <<
+	/f 25  %% total fosses
+	/e 1  %% exhumades
+	/r 2  %% reclamades
+	/n (el Berguedà)  %% nom normatiu
+	/i 14  %% codi territorial
+      >>
+  /LL <<
+	/f 36  %% total fosses
+	/e 0  %% exhumades
+	/r 20  %% reclamades
+	/n (el Lluçanès)  %% nom normatiu
+	/i 43  %% codi territorial
+      >>
+  /OS <<
+	/f 49  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (Osona)  %% nom normatiu
+	/i 24  %% codi territorial
+      >>
+  /PE <<
+	/f 81  %% total fosses
+	/e 1  %% exhumades
+	/r 1  %% reclamades
+	/n (Pla de l'Estany)  %% nom normatiu
+	/i 28  %% codi territorial
+      >>
+  /BM <<
+	/f 100  %% total fosses
+	/e 4  %% exhumades
+	/r 66  %% reclamades
+	/n (el Baix Empordà)  %% nom normatiu
+	/i 10  %% codi territorial
+      >>
+  /PU <<
+	/f 121  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Pla d'Urgell)  %% nom normatiu
+	/i 27  %% codi territorial
+      >>
+  /SR <<
+	/f 25  %% total fosses
+	/e 1  %% exhumades
+	/r 4  %% reclamades
+	/n (la Segarra)  %% nom normatiu
+	/i 32  %% codi territorial
+      >>
+  /BG <<
+	/f 144  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Bages)  %% nom normatiu
+	/i 07  %% codi territorial
+      >>
+  /MO <<
+	/f 9  %% total fosses
+	/e 1  %% exhumades
+	/r 1  %% reclamades
+	/n (el Moianès)  %% nom normatiu
+	/i 42  %% codi territorial
+      >>
+  /SV <<
+	/f 4  %% total fosses
+	/e 1  %% exhumades
+	/r 1  %% reclamades
+	/n (la Selva)  %% nom normatiu
+	/i 34  %% codi territorial
+      >>
+  /GN <<
+	/f 80  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Gironès)  %% nom normatiu
+	/i 20  %% codi territorial
+      >>
+  /SI <<
+	/f 10  %% total fosses
+	/e 1  %% exhumades
+	/r 3  %% reclamades
+	/n (el Seguià)  %% nom normatiu
+	/i 33  %% codi territorial
+      >>
+  /UR <<
+	/f 196  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Urgell)  %% nom normatiu
+	/i 38  %% codi territorial
+      >>
+  /AI <<
+	/f 1  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Anoia)  %% nom normatiu
+	/i 06  %% codi territorial
+      >>
+  /VC <<
+	/f 4  %% total fosses
+	/e 2  %% exhumades
+	/r 2  %% reclamades
+	/n (el Vallès Occidental)  %% nom normatiu
+	/i 40  %% codi territorial
+      >>
+  /VR <<
+	/f 48  %% total fosses
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Vallès Oriental)  %% nom normatiu
+	/i 41  %% codi territorial
+      >>
+
+>> def
+
+/xReticula 9 def
+/yReticula 10 def
+/iReticula 0 def
+
+%% càlcul del format de pàgina (pantalla)
+xComarques xReticula div dup /cQ exch def
+yReticula mul /yPagina exch def  %% y
+<<
+  /PageSize
+  [
+   xComarques  %% x
+   yPagina  %% y
+  ]
+>>setpagedevice
+
+/glifF (F) def  %% glif utilitzat per representar una fossa
+/gruixF 1 def  %% gruix del perfilat blanc del quadrat comarcal
+/araX 0 def
+/araY yPagina cQ sub def 
+
+%% font del glif que assenyala fosses
+(/var/www/html/www.pliegos.net/maker/UBESH_/UBESH/Hack-Bold.ttf)
+%(/usr/share/fonts/truetype/lato/Lato-Heavy.ttf)
+findfont /dHack exch def
+
+0 1 yReticula 1 sub
+{  %% for generador de les 43 comarques (de dalt a baix i d'esquerra a dreta)
+ xReticula mul /iY exch def
+ 0 1 xReticula 1 sub
+ {
+  dup iY add nComarques exch get dup /araC exch def null eq  %% a quina comarca toca el quadrat que pintem ara?
+  {  %% no hi ha comarca
+   cQ mul araY cQ dup gsave 1 1 1 setrgbcolor gruixF 2 mul setlinewidth rectstroke grestore  %% perfilem en blanc
+  }
+  {  %% comarca
+   cQ mul araY 2 copy 2 array astore /LLc exch def  %% x,y d'inici al xamfrà de baix a l'esquerra del quadrat de la comarca
+   cQ dup
+   gsave 4 copy 1 1 1 setrgbcolor gruixF 2 mul setlinewidth rectstroke grestore  %% perfilem en blanc el quadrat
+   rectfill  %% omplim de negre
+   comarquesVSfosses araC known
+   {  %% aquesta pregunta de si existeix la comarca un cop fetes totes a /comarquesVSfosses no l'haurem de fer
+    comarquesVSfosses araC get dup /e get /araE exch def dup /r get /araR exch def /f get dup /araFosses exch def  %% fosses exhumades, reclamades i totals
+    sqrt ceiling dup mul sqrt cvi /finsXY exch def  %% nombre de tessel·les de costat
+    finsXY 0 ne
+    {  %% evitem la divisió per zero quan una comarca no té fosses
+     cQ gruixF sub finsXY div /tssll exch def  %% calculem la mida de la tessel·la que ha d'omplir el quadrat comarcal
+    }if
+
+    /femF true def  %% gatell per saber si hem exhaurit el nombre de fosses i hem de pintar o no el glif
+    /iF 0 def  %% comptador de fosses per comarca
+    /iFe 0 def  %% comptador de fosses exhumades per comarca
+    /iFr 0 def  %% comptador de fosses reclamades per comarca
+    araE 0 eq {false}{true}ifelse /FEMe exch def
+    araR 0 eq {false}{true}ifelse /FEMr exch def
+    araE araR add dup /MAXsesr exch def  %% total de fosses sense exhumar i sense reclamar
+    araFosses gt
+    {
+     (\n >>> LES FOSSES PER EXHUMAR + RECLAMADES NO PODEN SUPERAR EL TOTAL, TENIU UN ERROR a la comarca: ) print flush araC print flush (\n\n)print flush quit
+    }if
+
+    0 1 finsXY 1 sub
+    {  %% for generador del tessel·lat comarcal de fosses (de baix a dalt i d'esquerra a dreta)
+     /YxT exch def
+     0 1 finsXY 1 sub
+     {
+      iF 1 add /iF exch def
+      femF
+      {  %% pintem el glif amb el color que toqui de la fossa
+       LLc aload pop YxT tssll mul add gruixF add exch 3 -1 roll tssll mul add exch 2 copy 2 array astore /xyT exch def tssll dup
+       
+       false  %% pintem el perfil quadrat de la comarca i el cercle?
+       {
+        gsave 0 setlinewidth 1 0 0 setrgbcolor rectstroke grestore  %% perfilem en vermell la tessel·la
+        gsave 1 1 0 setrgbcolor newpath xyT aload pop tssll 2 div dup 4 -1 roll add 3 1 roll add tssll 2 div 0 360 arc fill grestore  %% fem una rodona blanca
+       }
+       {  %% 4 coordenades que sobren
+	pop pop pop pop
+       }ifelse
+
+       gsave  %% hi centrem un glif tipogràfic acolorit segons categoria
+       dHack tssll scalefont setfont 0 0 moveto glifF true charpath pathbbox
+       3 index 2 div /ajustX exch def  %% per ajustar la posició x del moveto
+       3 -1 roll sub 3 1 roll exch sub  %% ample i alt del glif inscrit
+       tssll exch sub 2 div  %% x moveto
+       exch tssll exch sub 2 div  %% y moveto
+       xyT aload pop 3 -1 roll add 3 1 roll add ajustX sub gruixF finsXY div sub exch  %% ajustem el marge blanc de la x pel nombre de tessel·les
+       %% pintem el glif de la fossa segons
+       FEMe
+       {
+        0 1 0 setrgbcolor  %% en verd exhumades
+	iFe 1 add /iFe exch def
+	iFe araE eq
+	{
+         /FEMe false def
+	}if
+       }
+       {
+	FEMr
+	{
+         1 0 0 setrgbcolor  %% en vermell reclamades
+	 iFr 1 add /iFr exch def
+	 iFr araR eq
+	 {
+          /FEMr false def
+	 }if
+	}
+	{
+         1 1 1 setrgbcolor  %% en blanc ni exhumades ni reclamades
+	}ifelse
+       }ifelse
+       moveto glifF show
+       grestore
+      }
+      {  %% fora l'índex de filera
+       pop
+      }ifelse
+      iF araFosses eq
+      {
+       /femF false def
+      }if
+     }for
+    }for
+   }
+   {
+	   %araC == quit
+   }ifelse
+  }ifelse
+ }for
+ /araX 0 def  %% ara no fa re
+ araY cQ sub /araY exch def 
+
+% clear  %% brossa per comarca que podríem evitar?
+
+}for
+
+%% clam vertical
+gsave
+dHack cQ .55 mul scalefont setfont
+cQ dup 3 div sub cQ dup .3 mul add translate
+90 rotate 0 0 moveto 1 0 0 setrgbcolor
+(Obriu les fosses d'una vegada!) show
+grestore
+
+showpage
+
+(BROSSA?)pstack
