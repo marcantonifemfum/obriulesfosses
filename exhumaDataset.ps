@@ -2,18 +2,18 @@
 %% explorador de dades del dataset de Fosses Comunes a Catalunya 1936-77
 %% un cop passat el geojson a geojson.ps via llegeixJson.ps
 
-%% l'estructura del dataset de fosses és un diccionari (que cal executar) on de la clau /features hi penja una array amb un diccionari per fossa
+%% l'estructura del dataset oficial de fosses és un diccionari (que cal executar) on de la clau /features hi penja una array amb un diccionari per fossa
 (/var/www/html/www.obriulesfosses.cat/Fosses\ comunes\ a\ Catalunya_20250316.geojsonps) (r) file
 cvx exec
 
-%% la mida de l'array és el nombre de fosses comunes
-/features get dup length ==
+%% la mida de l'array és el nombre oficial de fosses comunes
+/features get dup length 4 string cvs (\n\n)print flush (NOMBRE TOTAL DE FOSSES COMUNES SEGONS EL DATASET OFICIAL... ) print flush print flush (\n\n)print flush
 
-/arrayFosses exch def  %% desem l'array amb totes les fosses
+/arrayFosses exch def  %% desem l'array del dataset oficial amb totes les fosses
 
-%% aquest és el desori comarcal de Justícia (amb comarques repetides) del dataset del 16.03.2025, que normalitzem via el codi alfabètic comarcal de
+%% aquest és el desori comarcal de Justícia del dataset del 16.03.2025, que normalitzem via codi alfabètic comarcal (comarques repetides tindran el mateix codi)
 %% https://ca.wikipedia.org/wiki/Comarques_de_Catalunya
-%% i que hem implementat dins faComarques.ps al diccionari /comarquesVSfosses
+%% aquests dos caràcters per comarca els hem implementat dins faComarques.ps al diccionari /comarquesVSfosses
 <<
   (Priorat) /PR
   (Val d'Aran) /VN
@@ -60,35 +60,82 @@ cvx exec
   (Urgell) /UR
   (Vallès Oriental) /VR
   (Garrotxa) /GX
->> /desoriComarcal exch def
+>> /desoriComarcal exch def  %% diccionari normalitzador: nom comarcal del dataset oficial / codi alfabètic comarcal
 
-%% fem un buidat de les comarques dins del diccionari per poder comptar quantes fosses hi ha a cadasccuna
+%% fem un buidat de les comarques cap a /datasetComarques per poder comptar quantes fosses hi ha a cadascuna i quines s'han exhumat (les 2 dades en una array [# #])
 /datasetComarques <<>> def
-%% posem el numerador a zero
+%% posem els numeradors a zero
 desoriComarcal
 {
  pop 
- datasetComarques exch 0 put
+ datasetComarques exch
+ [
+  0  %% nombre total de fosses de la comarca segons el dataset oficial
+  0  %% nombre de fosses que s'han exhumat a la comarca segons el dataset oficial
+ ] put
 }forall
 
 arrayFosses
-{  %% forall per totes les fosses i comptar-les per comarques
- (properties) get (comarca) get dup
- datasetComarques exch known
+{  %% forall per totes les fosses, comptant per comarques
+ (properties) get dup  %% diccionari amb les dades de la fossa
+ (conservaci_) get (Excavada) eq  %% s'ha exhumat?
  {
-  dup datasetComarques exch get 1 add datasetComarques 3 1 roll put
+  /xhmd true def
  }
  {
+  /xhmd false def
+ }ifelse
+ (comarca) get dup  %% nom suigeneris de la comarca
+ datasetComarques exch known  %% ja l'havíem desat?
+ {  %% com que ja l'havíem desat...
+  dup datasetComarques exch get aload pop exch 1 add exch  %% li sumem 1 al nombre total de fosses (índex 0 de l'array)
+  xhmd  %% s'ha exhumat?
+  {  %% li sumem 1 al nombre de fosses exhumades (índex 1 de l'array)
+   1 add
+  }if
+  2 array astore datasetComarques 3 1 roll put
+ }
+ {  %% com que encara no l'havíem desat...
   dup desoriComarcal exch known
-  {
-   dup datasetComarques exch get 1 add datasetComarques 3 1 roll put
+  {  %% ens assegurem que estigui dins el diccionari normalitzador
+   dup datasetComarques exch get aload pop exch 1 add exch  %% li sumem 1 al nombre total de fosses (índex 0 de l'array)
+   xhmd  %% s'ha exhumat?
+   {  %% li sumem 1 al nombre de fosses exhumades (índex 1 de l'array)
+    1 add
+   }if
+   2 array astore datasetComarques 3 1 roll put
   }
-  {
-   == (\n\n >>>> HI HA HAGUT UN CANVI DE DENOMINACIONS COMARCAL O S'HA AFEGIT UNA COMARCA VERGE\n\n) print flush quit
+  {  %% si no hi és, és que hi ha canvis o errors al dataset oficial i aturem la feina
+   == (\n\n >>>> HI HA HAGUT UN CANVI DE DENOMINACIONS COMARCALS O S'HA AFEGIT UNA COMARCA VERGE\n\n) print flush quit
   }ifelse
  }ifelse
 }forall
 
-datasetComarques dup length ==
+datasetComarques length 3 string cvs (NOBRE SUIGENERIS DE COMARQUES SEGONS EL DATASET OFICIAL... ) print flush print flush (\n\n)print flush
+(BUIDAT DEL DICCIONARI /datasetComarques ...\n\n)print flush
 datasetComarques{== ==}forall
+
+%% cal sumar les fosses de les comarques duplicades (ara 3) via el seu valor ídem de codi alfabètic
+%% llavors, muntem un nou diccionari /2glifsAfosses on hi desarem els parells: codi alfabètic de 2 caràcters i array de dades de fosses
+/2glifsAfosses <<>> def
+desoriComarcal
+{  %% forall a /desoriComarcal per capturar comarca a comarca el seu codi alfabètic de 2 caràcters
+ /araCODIalfabetic exch def
+ %% a través del nom suigeneris anem a capturar a /datasetComarques l'array amb les dades de les fosses
+ datasetComarques exch get
+ %% amb el parell codi alfabètic de 2 caràcters i l'array de fosses, bastim el nou diccionari /2glifsAfosses, o l'afegim si ja existeix
+ 2glifsAfosses araCODIalfabetic known
+ {  %% es deu tractar d'una comarca repetida, doncs el codi comarcal ja hi és
+  2glifsAfosses araCODIalfabetic get  %% capturem les dades de la que ja hi és
+  aload pop 3 -1 roll aload pop exch 4 -1 roll add 3 1 roll add 2 array astore  %% hi sumem les dades de la repetida
+  2glifsAfosses exch araCODIalfabetic exch put  %% desem
+  (comarcaREPE)==
+ }
+ {  %% és nova
+  2glifsAfosses exch araCODIalfabetic exch put  %% desem
+ }ifelse
+}forall
+
+%% aquest diccionari és el que treballarà a faComarques.ps
+2glifsAfosses{== ==}forall
 

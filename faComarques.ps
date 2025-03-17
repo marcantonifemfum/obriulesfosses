@@ -1,7 +1,14 @@
 %!
 %% donat un ample determinat, generem una reticula de quadrats x,y per tal de representar esquemàticament les 43 comarques de Catalunya
 %% https://ca.wikipedia.org/wiki/Comarques_de_Catalunya
-%% cada comarca és un quadrat i a dins hi podem veure el nombre de fosses, destriant quines han estat exhumades, quines no i quines hem exigit d'exhumar
+
+%% cada comarca és un quadrat i a dins hi podem veure el nombre de fosses (F), destriant per color quines han estat exhumades, quines no i quines hem exigit d'exhumar
+
+%% treballarem amb 3 datasets:
+%% el dataset oficial de Fosses Comunes a Catalunya https://analisi.transparenciacatalunya.cat/Legislaci-just-cia/Fosses-comunes-a-Catalunya/6js6-vud6/about_data
+%% el dataset privat de fosses documentades que no estan incloses al dataset oficial (per crear encara)
+%% el dataset privat de tràmits de reclamació d'exhumació fossa a fossa
+
 %% hauríem d'escriure en paral·lel a JS/Canvas per tal s'adapti dinàmicament a qualsevol tipus de finestra/pantalla?
 
 /xComarques 595 def  %% ample donat
@@ -20,318 +27,434 @@
   (MT) (BB) null null null null null null null  %% 9
 ] def
 
+%% protocol de desat de dades a /comarquesVSfosses
+%% el diccionari /comarquesVSfosses classifica les comarques pel seu codi alfabètic de 2 caràcters en caixa alta
+%% CAPTURA DE DADES DEL DATASET OFICIAL
+%% a l'executar exhumaDataset.ps:
+%% el diccionari /desoriComarcal classifica les comarques tal i com les denomina el dataset oficial (hi ha repeticions, etc) i en dóna els 2 caràcters del codi
+%% com que a /datasetComarques s'hi haurà desat el nom suigeneris, com a clau, i l'array [total de fosses i les exhumades], com a valor
+%% llavors, hi podrem pentinar el nom suigeneris de la comarca amb l'array de fosses, veure a /desoriComarcal a quin codi alfabètic correspon i, a partir d'aquí,
+%% muntem un tercer diccionari /2glifsAfosses on hi haurà normalitzada la comarca (a través del codi de 2 caràcters) i el total de fosses (array amb 2 dades)
+%% a l'executar faComarques.ps:
+%% a través d'aquests dos caràcters alfabètics comarcals, com a clau, anem a cercar la comarca dins /comarquesVSfosses per afegir-hi les dades de l'array a /f i /e
+%% CAPTURA DE DADES DEL DATASET PRIVAT DE FOSSES DOCUMENTADES NO INCLOSES A L'OFICIAL
+%% pendent encara
+%% CAPTURA DE DADES DEL DATASET PRIVAT DE TRÀMITS DE RECLAMACIÓ
+%% pendent encara
+
+%% lògica de les fosses:
+%% /o + /p = /f sempre
+%% /e + /r = /f quan haguem pentinat al 100% una comarca
+
 /comarquesVSfosses
-<<  %% estructura possible dels diccionaris comarcals, en base al codi alfabètic oficial, que hauran de xuclar les dades del dataset oficial i el dataset de l'acció
+<<  %% estructura possible dels diccionaris comarcals, en base al codi alfabètic oficial, on s'hi hauran de desar les dades dels 3 datasets
   /VN <<
-	/f 1  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 1  %% reclamades
+	/r 0  %% reclamades
 	/n (l'Aran)  %% nom normatiu
 	/i 39  %% codi territorial
       >>
   /AG <<
-	/f 2  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (l'Alta Ribagorça)  %% nom normatiu
 	/i 05  %% codi territorial
       >>
   /PS <<
-	/f 10  %% total fosses
-	/e 2  %% exhumades
-	/r 3  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (el Pallars Sobirà)  %% nom normatiu
 	/i 26  %% codi territorial
       >>
   /PJ <<
-	/f 43  %% total fosses
-	/e 5  %% exhumades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (el Pallars Jussà)  %% nom normatiu
 	/i 25  %% codi territorial
       >>
   /AU <<
-	/f 58  %% total fosses
-	/e 15  %% exhumades
-	/r 30  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (l'Alt Urgell)  %% nom normatiu
 	/i 04  %% codi territorial
       >>
   /CD <<
 	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (la Cerdanya)  %% nom normatiu
 	/i 15  %% codi territorial
       >>
   /RI <<
-	/f 7  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 2  %% reclamades
+	/r 0  %% reclamades
 	/n (el Ripollès)  %% nom normatiu
 	/i 31  %% codi territorial
       >>
   /GX <<
-	/f 27  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (la Garrotxa)  %% nom normatiu
 	/i 19  %% codi territorial
       >>
   /AE <<
-	/f 127  %% total fosses
-	/e 3  %% exhumades
-	/r 66  %% reclamades
+	/f 0   %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (l'Alt Empordà)  %% nom normatiu
 	/i 02  %% codi territorial
       >>
   /NG <<
-	/f 15  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (la Noguera)  %% nom normatiu
 	/i 23  %% codi territorial
       >>
   /SL <<
-	/f 227  %% total fosses
-	/e 12  %% exhumades
-	/r 58  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (el Solsonès)  %% nom normatiu
 	/i 35  %% codi territorial
       >>
   /BD <<
-	/f 25  %% total fosses
-	/e 1  %% exhumades
-	/r 2  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (el Berguedà)  %% nom normatiu
 	/i 14  %% codi territorial
       >>
   /LL <<
-	/f 36  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 20  %% reclamades
+	/r 0  %% reclamades
 	/n (el Lluçanès)  %% nom normatiu
 	/i 43  %% codi territorial
       >>
   /OS <<
-	/f 49  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (Osona)  %% nom normatiu
 	/i 24  %% codi territorial
       >>
   /PE <<
-	/f 81  %% total fosses
-	/e 1  %% exhumades
-	/r 1  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (Pla de l'Estany)  %% nom normatiu
 	/i 28  %% codi territorial
       >>
   /BM <<
-	/f 100  %% total fosses
-	/e 4  %% exhumades
-	/r 66  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (el Baix Empordà)  %% nom normatiu
 	/i 10  %% codi territorial
       >>
   /PU <<
-	/f 121  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (el Pla d'Urgell)  %% nom normatiu
 	/i 27  %% codi territorial
       >>
   /SR <<
-	/f 25  %% total fosses
-	/e 1  %% exhumades
-	/r 4  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (la Segarra)  %% nom normatiu
 	/i 32  %% codi territorial
       >>
   /BG <<
-	/f 144  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (el Bages)  %% nom normatiu
 	/i 07  %% codi territorial
       >>
   /MO <<
-	/f 9  %% total fosses
-	/e 1  %% exhumades
-	/r 1  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (el Moianès)  %% nom normatiu
 	/i 42  %% codi territorial
       >>
   /SV <<
-	/f 4  %% total fosses
-	/e 1  %% exhumades
-	/r 1  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (la Selva)  %% nom normatiu
 	/i 34  %% codi territorial
       >>
   /GN <<
-	/f 80  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 0  %% reclamades
+	/r 1  %% reclamades
 	/n (el Gironès)  %% nom normatiu
 	/i 20  %% codi territorial
       >>
   /SI <<
-	/f 10  %% total fosses
-	/e 1  %% exhumades
-	/r 3  %% reclamades
-	/n (el Seguià)  %% nom normatiu
+	/f 0   %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Segrià)  %% nom normatiu
 	/i 33  %% codi territorial
       >>
   /UR <<
-	/f 196  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (l'Urgell)  %% nom normatiu
 	/i 38  %% codi territorial
       >>
   /AI <<
-	/f 1  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (l'Anoia)  %% nom normatiu
 	/i 06  %% codi territorial
       >>
   /VC <<
-	/f 4  %% total fosses
-	/e 2  %% exhumades
-	/r 2  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (el Vallès Occidental)  %% nom normatiu
 	/i 40  %% codi territorial
       >>
   /VR <<
-	/f 48  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (el Vallès Oriental)  %% nom normatiu
 	/i 41  %% codi territorial
       >> 
   /GG <<
-	/f 7  %% total fosses
-	/e 3  %% exhumades
-	/r 3  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (les Garrigues)  %% nom normatiu
 	/i 18  %% codi territorial
       >> 
   /CB <<
-	/f 1  %% total fosses
-	/e 1  %% exhumades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (la Conca de Barberà)  %% nom normatiu
 	/i 16  %% codi territorial
       >> 
   /AP <<
-	/f 16  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (l'Alt Penedès)  %% nom normatiu
 	/i 03  %% codi territorial
       >> 
   /BR <<
-	/f 33  %% total fosses
-	/e 2  %% exhumades
-	/r 10  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (el Barcelonès)  %% nom normatiu
 	/i 13  %% codi territorial
       >> 
   /MM <<
-	/f 66  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 4  %% reclamades
+	/r 0  %% reclamades
 	/n (el Maresme)  %% nom normatiu
 	/i 21  %% codi territorial
       >> 
   /PR <<
-	/f 5  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 0  %% reclamades
+	/r 1  %% reclamades
 	/n (el Priorat)  %% nom normatiu
 	/i 29  %% codi territorial
       >> 
   /AC <<
-	/f 81  %% total fosses
-	/e 14  %% exhumades
-	/r 55  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (l'Alt Camp)  %% nom normatiu
-	/i 01  %% codi territorial
+	/i 01 %% codi territorial
       >> 
   /BP <<
-	/f 9  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (el Baix Penedès)  %% nom normatiu
 	/i 12  %% codi territorial
       >> 
   /GF <<
-	/f 59  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 38  %% reclamades
+	/r 0  %% reclamades
 	/n (el Garraf)  %% nom normatiu
 	/i 17  %% codi territorial
       >> 
   /BT <<
-	/f 2  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 1  %% reclamades
+	/r 0  %% reclamades
 	/n (el Baix Llobregat)  %% nom normatiu
 	/i 11  %% codi territorial
       >> 
   /TT <<
-	/f 3  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (la Terra Alta)  %% nom normatiu
 	/i 37  %% codi territorial
       >> 
   /RE <<
-	/f 155  %% total fosses
-	/e 5  %% exhumades
-	/r 87  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (la Ribera d'Ebre)  %% nom normatiu
 	/i 30  %% codi territorial
       >> 
   /BC <<
-	/f 4  %% total fosses
-	/e 1  %% exhumades
-	/r 2  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (el Baix Camp)  %% nom normatiu
 	/i 08  %% codi territorial
       >> 
   /TR <<
-	/f 85  %% total fosses
-	/e 2  %% exhumades
-	/r 44  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 1  %% reclamades
 	/n (el Tarragonès)  %% nom normatiu
 	/i 36  %% codi territorial
       >> 
   /MT <<
-	/f 19  %% total fosses
-	/e 1  %% exhumades
-	/r 9  %% reclamades
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
 	/n (el Montsià)  %% nom normatiu
 	/i 22  %% codi territorial
       >> 
   /BB <<
-	/f 48  %% total fosses
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
 	/r 0  %% reclamades
 	/n (el Baix Ebre)  %% nom normatiu
 	/i 09  %% codi territorial
       >> 
-
 >> def
+
+%% FARCIM LES DADES DE LA INFOGRAFIA
+(exhumaDataset.ps) (r) file cvx exec
+%% farcim les dades a representar de /comarquesVSfosses
+2glifsAfosses
+{  %% forall per 2glifsAfosses
+ exch dup /ARA## exch def
+ comarquesVSfosses exch get
+ dup /f 3 index 0 get put  %% farcim (ara sense sumar) el nombre total oficial de fosses d'aquesta comarca
+ dup /e 4 -1 roll 1 get put  %% farcim (ara sense sumar) el nombre total oficial de fosses exhumades d'aquesta comarca
+ comarquesVSfosses exch ARA## exch put
+}forall
 
 /xReticula 9 def
 /yReticula 10 def
 /iReticula 0 def
 
 %% càlcul del format de pàgina (pantalla)
-xComarques xReticula div dup /cQ exch def
+xComarques xReticula div dup /cQ exch def  %% mida del quadrat comarcal
 yReticula mul /yPagina exch def  %% y
 <<
   /PageSize
@@ -340,6 +463,15 @@ yReticula mul /yPagina exch def  %% y
    yPagina  %% y
   ]
 >>setpagedevice
+
+%% pintem el pseudo triangle?
+false
+{
+ gsave
+ 0.5 0.5 0.5 setrgbcolor
+ 0 0 moveto cQ 0 lineto xComarques yPagina cQ 2 mul sub lineto xComarques yPagina lineto 0 yPagina lineto closepath fill
+ grestore
+}if
 
 /glifF (F) def  %% glif utilitzat per representar una fossa
 /gruixF 1 def  %% gruix del perfilat blanc del quadrat comarcal
