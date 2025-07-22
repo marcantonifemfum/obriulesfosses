@@ -3,6 +3,12 @@
 %% https://ca.wikipedia.org/wiki/Comarques_de_Catalunya
 %% http://srv.icgc.cat/vissir3/
 
+%% sortida a JPEG controlant la resolució per permetre zooms a pantalla fins a?
+%% gs -q -dNOSAFER -o re.jpg -sDEVICE=jpeg -r72 -dJPEGQ=100 faComarques_faHTML.ps
+%% control de la resolució
+%% -r72 ídem variables ps
+%% -r300 1.528 × 1.528
+
 %% cada comarca és un quadrat i a dins hi podem veure el nombre de fosses (f), destriant per color quines han estat exhumades, quines no i quines hem exigit d'exhumar
 
 %% treballarem amb 3 datasets:
@@ -33,8 +39,9 @@ true  %% si l'User Agent no treballa automàticament anem a una sortida A4
 useragentV
 {
  false /DINa4 exch def
- 3000 /AMPLEtalla exch def
- 10000 /ALTtalla exch def
+%%ATENCIÓ: a 72 ppp 1 punt = 1 píxel, i a aquests valors s'hi han de sumar els dos margeALvoltant 
+ 300 /AMPLEtalla exch def
+ 400 /ALTtalla exch def
  %% fruit de comparar el valor X,Y de pantalla de la variable de l'useragent
  ALTtalla AMPLEtalla gt /MESaltQUEample exch def
 
@@ -553,16 +560,30 @@ DINa4
    margeALvoltant 2 mul xComarques add
    margeALvoltant 2 mul yPagina add
   ]
+dup 4 1 roll
 >>setpagedevice
 
-%% pintem el pseudo triangle a sota de tot?
-false
+%% fem l'HTML?
+/femHTML true def
+
+femHTML
 {
- gsave
- 0.5 0.5 0.5 setrgbcolor
- 0 0 moveto cQ 0 lineto xComarques yPagina cQ 2 mul sub lineto xComarques yPagina lineto 0 yPagina lineto closepath fill
- grestore
-}if
+ /cols&fils exch def
+ /olucio 150 def  %% ídem a la variable -r de la línia de comanda del GS per la resolució d'escriptura del jpeg
+ /dHinting 72 def  %% constant divisora del valor de resolució amb què s'ha generat la imatge en jpeg per tal de trobar el multiplicador que ens localitzarà els píxels
+ olucio dHinting div /xHint exch def  %% multiplicador dels valors en punts per trobar el seu equivalent en píxels
+ %% on escrivim l'HTML
+ (43comarques.html) (w) file /43c exch def
+
+ 43c (<html><img src="re.jpg" alt="obriulesfosses.cat" usemap="#obriulesfosses" width=")writestring
+ 43c cols&fils 0 get xHint mul round cvi 128 string cvs writestring  %% píxels d'ample (haurien de quadrar amb els de l'UserAgent)
+ 43c (" height=")writestring
+ 43c cols&fils 1 get xHint mul round cvi 128 string cvs writestring  %% píxels d'alt (haurien de quadrar amb els de l'UserAgent)
+ 43c ("><map name="obriulesfosses">)writestring
+}
+{
+ pop
+}ifelse
 
 %% glif (efa) /f /F alternativa:
 %% Fhook | Ghestrokecyrillic | ghestrokecyrillic | ff | uni024D | florin | uni0191 | uni0493 | uni0492 | f_f 
@@ -771,8 +792,8 @@ true
 %% construïm el mapa de cairons comarcals com si no hi haguessin els 4 marges
 gsave
 %% posicionem l'inici de la graella de cairons comarcals en funció dels marges i el gruix de separació entre comarques
-margeALvoltant gruixF 2 mul xReticula 1 sub mul 2 div sub
-margeALvoltant gruixF 2 mul yReticula 1 sub mul 2 div add
+margeALvoltant gruixF 2 mul xReticula 1 sub mul 2 div sub dup /xmapaHTML exch def
+margeALvoltant gruixF 2 mul yReticula 1 sub mul 2 div add dup /ymapaHTML exch def
 translate
 
 0 1 yReticula 1 sub
@@ -849,6 +870,23 @@ translate
     %% /AA <</D << /S /Launch /F << /Type /Filespec /F pdfNEXT >> >> >>
     /ANN
     pdfmark
+
+    femHTML
+    {  %% per cada comarca
+     43c (<area shape="rect" coords=") writestring
+     43c pelRect 0 get xmapaHTML add xHint mul round cvi 128 string cvs writestring  %% la posició xLL ha de dur el multiplicador perquè quadri amb la resolució
+     43c (,)writestring
+     43c pelRect 1 get cols&fils 1 get ymapaHTML sub exch sub cQ sub xHint mul round cvi 128 string cvs writestring  %% la posició yLL ha de dur el multiplicador perquè quadri amb la resolució
+     43c (,)writestring
+     43c pelRect 2 get xmapaHTML add xHint mul round cvi 128 string cvs writestring  %% la posició xUR ha de dur el multiplicador perquè quadri amb la resolució
+     43c (,)writestring
+     43c pelRect 3 get cols&fils 1 get ymapaHTML sub exch sub cQ add xHint mul round cvi 128 string cvs writestring  %% la posició yUR ha de dur el multiplicador perquè quadri amb la resolució
+     43c (" alt=")writestring
+     43c araT writestring
+     43c (" href=")writestring
+     43c AliniesD1solOctet 0 get writestring
+     43c (.htm">)writestring
+    }if
 
     /femF true def  %% gatell per saber si hem exhaurit el nombre de fosses i hem de pintar o no el glif
     /iF 0 def  %% comptador de fosses per comarca
@@ -950,6 +988,12 @@ translate
 }for  %% de les Y per generar les 43 comarques (de dalt a baix i d'esquerra a dreta)
 grestore
 
+femHTML
+{
+ %% cua i tancament
+ 43c dup dup (</map></html>)writestring flushfile closefile
+}if
+
 %% clam
 gsave
 true
@@ -1031,3 +1075,4 @@ grestore
 showpage
 
 (BROSSA?)pstack
+
