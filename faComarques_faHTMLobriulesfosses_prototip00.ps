@@ -1,0 +1,1418 @@
+%!
+%% donat un ample determinat, generem una reticula de quadrats x,y per tal de representar esquemàticament les 43 comarques de Catalunya
+%% https://ca.wikipedia.org/wiki/Comarques_de_Catalunya
+%% http://srv.icgc.cat/vissir3/
+
+%% sortida a JPEG controlant la resolució per permetre zooms a pantalla fins a?
+%% gs -q -dNOSAFER -o re.jpg -sDEVICE=jpeg -r72 -dJPEGQ=100 faComarques_faHTML.ps
+%% control de la resolució
+%% -r72 ídem variables ps
+%% -r300 1.528 × 1.528
+%% la sortida a PNG dóna més qualitat, nitidesa i compressió que el JPEG a una mateixa resolució
+%% gs -q -dNOSAFER -r300 -sDEVICE=png16m -o re.png -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dMinFeatureSize=2 faComarques_faHTML.ps
+
+%% cada comarca és un quadrat i a dins hi podem veure el nombre de fosses (f), destriant per color quines han estat exhumades, quines no i quines hem exigit d'exhumar
+
+%% treballarem amb 3 datasets:
+%% el dataset oficial de Fosses Comunes a Catalunya https://analisi.transparenciacatalunya.cat/Legislaci-just-cia/Fosses-comunes-a-Catalunya/6js6-vud6/about_data
+	%% aquest dataset ha de contrastar-se sempre amb dues altres fonts de dades que dóna la Generalitat i que mai coincideixen:
+	%% Mapa de fosses del Banc de la Memòria Democràtica https://t.co/wJuec5l2um
+	%% Informatiu sobre el Cens de persones desaparegudes https://t.co/25N0Va0Uqf
+%% el dataset privat de fosses documentades que no estan incloses al dataset oficial (per crear encara)
+%% el dataset privat de tràmits de reclamació i tràmits d'exhumació fossa a fossa (per crear encara)
+
+%% podríem d'escriure en paral·lel a JS/Canvas per tal s'adapti dinàmicament a qualsevol tipus de finestra/pantalla?
+%% tooltips en canvas i altres formats: https://stackoverflow.com/questions/17064913/display-tooltip-in-canvas-graph
+
+%% decidim si ho adaptem a un format qualsevol (pantalles) o a un DINa4 vertical
+false  %% si l'User Agent no treballa automàticament anem a una sortida A4
+/useragentV exch def
+
+%%TAULA DE LA VERITAT PELS FORMATS DE PANTALLA/PÀGINA
+%% mentre sigui més alt que ample conserva el valor de la Y
+   %% true > useragentV / false > DINa4
+   %% true > MESaltQUEample
+%% però si és més ample que alt, llavors rectifica el valor de Y al quadrat amb marges de les 43 comarques
+   %% true  > useragentV / false > DINa4
+   %% false > MESaltQUEample
+%% per fer A4 desactivem l'User Agent
+   %% %% false > useragentV / true > DINa4
+
+useragentV
+{
+ false /DINa4 exch def
+%%ATENCIÓ: a 72 ppp 1 punt = 1 píxel 
+ %% pantalla del Tuxedo (16:9) 1920x1080
+ 800 /AMPLEtalla exch def  %% valors de pantalla del dispositiu
+ 1600 /ALTtalla exch def
+ %% fruit de comparar el valor X,Y de pantalla de la variable de l'useragent
+ ALTtalla AMPLEtalla gt /MESaltQUEample exch def
+
+}
+{  %% false: si l'User Agent detecta un dispositiu més ample que alt, llavors treballarem amb un quadrat per l'ample
+ true /DINa4 exch def  %% la sortida a A4 vertical serà bona quan la gent es vulguin tibar l'estat de l'acció en PDF
+}ifelse
+
+DINa4
+{  %% ample A4 vertical
+ 595
+ %% cal restar-li aquest marge perquè faci A4 exacte!
+ 54.1 2 mul sub
+}
+{  %% un ample qualsevol manat per la captura de la variable de l'usaragent de pantalla
+ AMPLEtalla
+}ifelse
+/xComarques exch def  %% ample donat
+
+/nComarques  %% retícula estrictament comarcal de Catalunya (sense marges) en base al codi alfabètic oficial (Lluçanès?) de les 43 comarques
+false
+{  %% aquest tancament perimetral no és coherent per les Garrigues (GG)
+ [  %0   %1   %2   %3   %4   %5   %6   %7  
+  [ (VN) null null null null null null null ]  %% 0
+  [ (AG) (PS) null (CD) null (GX) (AE) null ]  %% 1
+  [ null (PJ) (AU) (BD) (RI) (PE) (GN) (BM) ]  %% 2
+  [ null (NG) (SL) (BG) (LL) (MO) (SV) null ]  %% 3
+  [ null (PU) (SR) (AI) (OS) (VR) (MM) null ]  %% 4
+  [ null (SI) (UR) (CB) (VC) (BR) null null ]  %% 5
+  [ null null (GG) (AP) (BT) null null null ]  %% 6
+  [ (RE) (PR) (AC) (BP) (GF) null null null ]  %% 7
+  [ (TT) (BC) (TR) null null null null null ]  %% 8
+  [ null (BB) null null null null null null ]  %% 9
+  [ null (MT) null null null null null null ]  %% 10
+ ]
+}
+{  %% aquest tancament perimetral NOSE és coherent
+ [  %0   %1   %2   %3   %4   %5   %6   %7   %8
+  [ null (VN) null null null null null null null ]  %% 0
+  [ null null (AG) (PS) (AU) (CD) (RI) (GX) (AE) ]  %% 1
+  [ null null null (PJ) (BD) (LL) (PE) (BM) null ]  %% 2
+  [ null null (NG) (SL) (BG) (MO) (OS) (GN) (SV) ]  %% 3
+  [ (SI) (PU) (UR) (SR) (AI) (VC) (VR) (MM) null ]  %% 4
+  [ (RE) (GG) (CB) (AC) (AP) (GF) (BT) (BR) null ]  %% 5
+  [ null (TT) (PR) (TR) (BP) null null null null ]  %% 6
+  [ null (BB) (BC) null null null null null null ]  %% 7
+  [ (MT) null null null null null null null null ]  %% 8
+ ]
+}ifelse
+
+dup length
+/yReticula exch def  %% nombre de comarques d'alt
+dup 0 get length
+/xReticula exch def  %% nombre de comarques d'ample
+
+[  %% les posem seguides
+ exch
+ {
+  aload pop
+ }forall
+]
+def
+
+%% protocol de desat de dades a /comarquesVSfosses
+%% el diccionari /comarquesVSfosses classifica les comarques pel seu codi alfabètic de 2 caràcters en caixa alta
+%% CAPTURA DE DADES DEL DATASET OFICIAL
+%% a l'executar exhumaDataset.ps:
+%% el diccionari /desoriComarcal classifica les comarques tal i com les denomina el dataset oficial (hi ha repeticions, etc) i en dóna els 2 caràcters del codi
+%% com que a /datasetComarques s'hi haurà desat el nom suigeneris, com a clau, i l'array [total de fosses i les exhumades], com a valor
+%% llavors, hi podrem pentinar el nom suigeneris de la comarca amb l'array de fosses, veure a /desoriComarcal a quin codi alfabètic correspon i, a partir d'aquí,
+%% muntem un tercer diccionari /2glifsAfosses on hi haurà normalitzada la comarca (a través del codi de 2 caràcters) i el total de fosses (array amb 2 dades)
+%% a l'executar faComarques.ps:
+%% a través d'aquests dos caràcters alfabètics comarcals, com a clau, anem a cercar la comarca dins /comarquesVSfosses per afegir-hi les dades de l'array a /f i /e
+%% CAPTURA DE DADES DEL DATASET PRIVAT DE FOSSES DOCUMENTADES NO INCLOSES A L'OFICIAL
+%% pendent encara
+%% CAPTURA DE DADES DEL DATASET PRIVAT DE TRÀMITS DE RECLAMACIÓ I RESPOSTES
+%% pendent encara
+
+%% lògica de les fosses:
+%% /o + /p = /f sempre
+%% /e + /r = /f quan haguem pentinat al 100% una comarca
+
+/comarquesVSfosses
+<<  %% estructura possible dels diccionaris comarcals, en base al codi alfabètic oficial, on s'hi hauran de desar les dades dels 3 datasets
+  /VN <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Aran)  %% nom normatiu
+	/i 39  %% codi territorial
+      >>
+  /AG <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alta Ribagorça)  %% nom normatiu
+	/i 05  %% codi territorial
+      >>
+  /PS <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Pallars Sobirà)  %% nom normatiu
+	/i 26  %% codi territorial
+      >>
+  /PJ <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Pallars Jussà)  %% nom normatiu
+	/i 25  %% codi territorial
+      >>
+  /AU <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alt Urgell)  %% nom normatiu
+	/i 04  %% codi territorial
+      >>
+  /CD <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Cerdanya)  %% nom normatiu
+	/i 15  %% codi territorial
+      >>
+  /RI <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Ripollès)  %% nom normatiu
+	/i 31  %% codi territorial
+      >>
+  /GX <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Garrotxa)  %% nom normatiu
+	/i 19  %% codi territorial
+      >>
+  /AE <<
+	/f 0   %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alt Empordà)  %% nom normatiu
+	/i 02  %% codi territorial
+      >>
+  /NG <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Noguera)  %% nom normatiu
+	/i 23  %% codi territorial
+      >>
+  /SL <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Solsonès)  %% nom normatiu
+	/i 35  %% codi territorial
+      >>
+  /BD <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Berguedà)  %% nom normatiu
+	/i 14  %% codi territorial
+      >>
+  /LL <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Lluçanès)  %% nom normatiu
+	/i 43  %% codi territorial
+      >>
+  /OS <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (Osona)  %% nom normatiu
+	/i 24  %% codi territorial
+      >>
+  /PE <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (Pla de l'Estany)  %% nom normatiu
+	/i 28  %% codi territorial
+      >>
+  /BM <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Empordà)  %% nom normatiu
+	/i 10  %% codi territorial
+      >>
+  /PU <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Pla d'Urgell)  %% nom normatiu
+	/i 27  %% codi territorial
+      >>
+  /SR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Segarra)  %% nom normatiu
+	/i 32  %% codi territorial
+      >>
+  /BG <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Bages)  %% nom normatiu
+	/i 07  %% codi territorial
+      >>
+  /MO <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Moianès)  %% nom normatiu
+	/i 42  %% codi territorial
+      >>
+  /SV <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Selva)  %% nom normatiu
+	/i 34  %% codi territorial
+      >>
+  /GN <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 1  %% reclamades
+	/n (el Gironès)  %% nom normatiu
+	/i 20  %% codi territorial
+      >>
+  /SI <<
+	/f 0   %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Segrià)  %% nom normatiu
+	/i 33  %% codi territorial
+      >>
+  /UR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Urgell)  %% nom normatiu
+	/i 38  %% codi territorial
+      >>
+  /AI <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Anoia)  %% nom normatiu
+	/i 06  %% codi territorial
+      >>
+  /VC <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Vallès Occidental)  %% nom normatiu
+	/i 40  %% codi territorial
+      >>
+  /VR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Vallès Oriental)  %% nom normatiu
+	/i 41  %% codi territorial
+      >> 
+  /GG <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (les Garrigues)  %% nom normatiu
+	/i 18  %% codi territorial
+      >> 
+  /CB <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Conca de Barberà)  %% nom normatiu
+	/i 16  %% codi territorial
+      >> 
+  /AP <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alt Penedès)  %% nom normatiu
+	/i 03  %% codi territorial
+      >> 
+  /BR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Barcelonès)  %% nom normatiu
+	/i 13  %% codi territorial
+      >> 
+  /MM <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Maresme)  %% nom normatiu
+	/i 21  %% codi territorial
+      >> 
+  /PR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 1  %% reclamades
+	/n (el Priorat)  %% nom normatiu
+	/i 29  %% codi territorial
+      >> 
+  /AC <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alt Camp)  %% nom normatiu
+	/i 01 %% codi territorial
+      >> 
+  /BP <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Penedès)  %% nom normatiu
+	/i 12  %% codi territorial
+      >> 
+  /GF <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Garraf)  %% nom normatiu
+	/i 17  %% codi territorial
+      >> 
+  /BT <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Llobregat)  %% nom normatiu
+	/i 11  %% codi territorial
+      >> 
+  /TT <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Terra Alta)  %% nom normatiu
+	/i 37  %% codi territorial
+      >> 
+  /RE <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Ribera d'Ebre)  %% nom normatiu
+	/i 30  %% codi territorial
+      >> 
+  /BC <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Camp)  %% nom normatiu
+	/i 08  %% codi territorial
+      >> 
+  /TR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 1  %% reclamades
+	/n (el Tarragonès)  %% nom normatiu
+	/i 36  %% codi territorial
+      >> 
+  /MT <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Montsià)  %% nom normatiu
+	/i 22  %% codi territorial
+      >> 
+  /BB <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Ebre)  %% nom normatiu
+	/i 09  %% codi territorial
+      >> 
+>> def
+
+%% FARCIM LES DADES DE LA INFOGRAFIA
+%%+URL
+%% localhost Tuxedo
+(exhumaDataset_prototip00.ps) (r) file cvx exec
+%% servidor bTactic
+%% ?
+
+%% farcim les dades a representar de /comarquesVSfosses
+2glifsAfosses
+{  %% forall per 2glifsAfosses
+ exch dup /ARA## exch def
+ comarquesVSfosses exch get
+ dup /f 3 index 0 get put  %% farcim (ara sense sumar) el nombre total oficial de fosses d'aquesta comarca
+ dup /e 4 -1 roll 1 get put  %% farcim (ara sense sumar) el nombre total oficial de fosses exhumades d'aquesta comarca
+ comarquesVSfosses exch ARA## exch put
+}forall
+
+/iReticula 0 def
+
+%% mòdul pel format de pàgina i/o pantalla)
+xComarques xReticula div dup /cQ exch def  %% mòdul del quadrat comarcal
+
+DINa4
+{
+ pop 842
+ %% cal restar-li aquest marge perquè faci A4 exacte!
+ 54.1 2 mul sub
+}
+{
+ useragentV
+ {  %% hi posaríem el valor de la variable de l'useragent de la Y de la pantalla
+  MESaltQUEample  %% per saber la ràtio, aquí hauríem de comparar el valor X,Y de pantalla de la variable de l'useragent
+  {  %% si és més alt que ample treballem amb el valor Y de pantalla de la variable useragent
+   pop ALTtalla
+  }
+  {  %% si és més ample que alt treballem amb el quadrat de les 43 comarques
+   yReticula mul
+  }ifelse
+ }
+ {
+  yReticula mul
+ }ifelse
+}ifelse
+/yPagina exch def  %% y
+
+/margeALvoltant cQ def
+
+<<
+  /PageSize
+  [
+   margeALvoltant 2 mul xComarques add
+   margeALvoltant 2 mul yPagina add
+  ]
+dup 4 1 roll
+>>setpagedevice
+
+%% fem l'HTML?
+/femHTML true def
+
+femHTML
+{
+ /cols&fils exch def
+%% hauríem d'establir un mètode pel càlcul de la resolució en funció de la mida en píxels de la pantalla per ponderar els zooms que pugui fer l'usuari (mòbil/pissarreta)
+ /olucio 72 def  %% ídem a la variable -r de la línia de comanda del GS per la resolució d'escriptura del jpeg
+ /dHinting 72 def  %% constant divisora del valor de resolució amb què s'ha generat la imatge en jpeg per tal de trobar el multiplicador que ens localitzarà els píxels
+ olucio dHinting div /xHint exch def  %% multiplicador dels valors en punts per trobar el seu equivalent en píxels
+ %% on escrivim l'HTML
+ (43comarques.html) (w) file /43c exch def
+
+ 43c (<html>
+ <head>
+<style>
+.tooltip {
+        display: inline-block;
+        position: relative;
+        /* border-bottom: 2px solid #ff5733; */
+        text-align: left;
+    }
+
+.tooltip .bottom {
+    min-width:200px;
+    top:40px;
+    left:50%;
+    transform:translate(-50%, 0);
+    padding:10px 20px;
+    color:#444444;
+    background-color:#EEEEEE;
+    font-weight:normal;
+    font-size:13px;
+    border-radius:8px;
+    position:absolute;
+    z-index:99999999;
+    box-sizing:border-box;
+    border: 3px solid #ff5733;
+    box-shadow:0 1px 8px rgba(0,0,0,0.5);
+    visibility:hidden; opacity:0; transition:opacity 0.8s;
+}
+
+.tooltip:hover .bottom {
+    visibility:visible; opacity:1;
+}
+
+.tooltip .bottom i {
+    position:absolute;
+    bottom:100%;
+    left:50%;
+    margin-left:-12px;
+    width:24px;
+    height:12px;
+    overflow:hidden;
+}
+
+.tooltip .bottom i::after {
+    content:&#39;&#39;;
+    position:absolute;
+    width:12px;
+    height:12px;
+    left:50%;
+    transform:translate(-50%,50%) rotate(45deg);
+    background-color:#EEEEEE;
+    box-shadow:0 1px 8px rgba(0,0,0,0.5);
+}
+
+.tooltip .right {
+    min-width:200px;
+    top:50%;
+    left:100%;
+    margin-left:20px;
+    transform:translate(0, -50%);
+    padding:10px 20px;
+    color:#444444;
+    background-color:#EEEEEE;
+    font-weight:normal;
+    font-size:13px;
+    border-radius:8px;
+    position:absolute;
+    z-index:99999999;
+    border: 3px solid #ff5733;
+    box-sizing:border-box;
+    box-shadow:0 1px 8px rgba(0,0,0,0.5);
+    visibility:hidden; opacity:0; transition:opacity 0.8s;
+}
+
+.tooltip:hover .right {
+    visibility:visible; opacity:1;
+}
+
+.tooltip .right i {
+    position:absolute;
+    top:50%;
+    right:100%;
+    margin-top:-12px;
+    width:12px;
+    height:24px;
+    overflow:hidden;
+}
+
+.tooltip .right i::after {
+    content:&#39;&#39;;
+    position:absolute;
+    width:12px;
+    height:12px;
+    left:0;
+    top:50%;
+    transform:translate(50%,-50%) rotate(-45deg);
+    background-color:#EEEEEE;
+    box-shadow:0 1px 8px rgba(0,0,0,0.5);
+}
+
+.tooltip .MAXright {
+    min-width:500px;
+    top:50%;
+    left:100%;
+    margin-left:20px;
+    transform:translate(0, -50%);
+    padding:10px 20px;
+    color:#444444;
+    background-color:#EEEEEE;
+    font-weight:normal;
+    font-size:13px;
+    border-radius:8px;
+    position:absolute;
+    z-index:99999999;
+    border: 3px solid #ff5733;
+    box-sizing:border-box;
+    box-shadow:0 1px 8px rgba(0,0,0,0.5);
+    visibility:hidden; opacity:0; transition:opacity 0.8s;
+}
+
+.tooltip:hover .MAXright {
+    visibility:visible; opacity:1;
+}
+
+.tooltip .MAXright i {
+    position:absolute;
+    top:50%;
+    right:100%;
+    margin-top:-12px;
+    width:12px;
+    height:24px;
+    overflow:hidden;
+}
+
+.tooltip .MAXright i::after {
+    content:&#39;&#39;;
+    position:absolute;
+    width:12px;
+    height:12px;
+    left:0;
+    top:50%;
+    transform:translate(50%,-50%) rotate(-45deg);
+    background-color:#EEEEEE;
+    box-shadow:0 1px 8px rgba(0,0,0,0.5);
+}
+
+    .tooltip .left {
+        min-width: 200px;
+        top: 50%;
+        right: 100%;
+        margin-right: 20px;
+        transform: translate(0, -50%);
+        padding: 10px 20px;
+        color: #444444;
+        background-color: #EEEEEE;
+        font-weight: normal;
+        font-size: 13px;
+        border-radius: 8px;
+        position: absolute;
+        z-index: 99999999;
+        box-sizing: border-box;
+        border: 3px solid #ff5733;
+        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.8s;
+    }
+
+    .tooltip:hover .left {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .tooltip .left i {
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        margin-top: -12px;
+        width: 12px;
+        height: 24px;
+        overflow: hidden;
+    }
+
+    .tooltip .left i::after {
+        content: '';
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        left: 0;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        background-color: #EEEEEE;
+        border: 3px solid #ff5733;
+        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .tooltip .top {
+        min-width: 200px;
+        top: -20px;
+        left: 50%;
+        transform: translate(-50%, -100%);
+        padding: 10px 20px;
+        color: #444444;
+        background-color: #EEEEEE;
+        font-weight: normal;
+        font-size: 13px;
+        border-radius: 8px;
+        position: absolute;
+        z-index: 99999999;
+        box-sizing: border-box;
+        border: 3px solid #ff5733;
+        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.8s;
+    }
+
+    .tooltip:hover .top {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .tooltip .top i {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -12px;
+        width: 24px;
+        height: 12px;
+        overflow: hidden;
+    }
+
+    .tooltip .top i::after {
+        content: &#39;
+        &#39;
+        ;
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(45deg);
+        background-color: #EEEEEE;
+        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    @media(max-width: 100%) {
+        body {toolTipWrap
+            margin-top: 10%;
+        }
+        .tooltip>.toolTipWrap i:after {
+          content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    left: 0;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    border: 3px solid #ff5733;
+        }
+        .tooltip>.toolTipWrap {
+            left: 50% !important;
+            top: auto !important;
+            transform: translateX(-50%);
+            right: auto !important;
+            bottom: 150% !important;
+        }
+
+        .tooltip>.toolTipWrap i {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-top: 0px;
+            width: 12px;
+            height: 24px;
+            overflow: hidden;
+            transform: rotate(90deg) translateX(-50%);
+            background: transparent;
+        }
+    }
+</style>
+ </head><body>
+ <img src="re.png" alt="obriulesfosses.cat" usemap="#obriulesfosses" width=")writestring
+ 43c cols&fils 0 get xHint mul round cvi 128 string cvs writestring  %% píxels d'ample (haurien de quadrar amb els de l'UserAgent)
+ 43c (" height=")writestring
+ 43c cols&fils 1 get xHint mul round cvi 128 string cvs writestring  %% píxels d'alt (haurien de quadrar amb els de l'UserAgent)
+ 43c ("><map name="obriulesfosses">)writestring
+}
+{
+ pop
+}ifelse
+
+%% glif (efa) /f /F alternativa:
+%% Fhook | Ghestrokecyrillic | ghestrokecyrillic | ff | uni024D | florin | uni0191 | uni0493 | uni0492 | f_f 
+/glifF (\000) def  %% glif utilitzat per representar una fossa
+
+/gruixF cQ 100 div def  %% el gruix del perfilat blanc del quadrat comarcal va en funció de la mida de la comarca
+/araX 0 def
+/araY yPagina cQ sub def 
+
+%% font del glif que assenyala fosses
+%(/var/www/html/www.pliegos.net/maker/UBESH_/UBESH/Hack-Bold.ttf)  %% si el path és massa llarg (com aquest, el talla? i hi posa un font de sunstitució Helvetica?)
+%(Hack-Bold.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf)
+(/usr/share/fonts/truetype/ubuntu/UbuntuMono-B.ttf)
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+dup length array copy dup 0
+%/Fhook put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+/f put
+%/uni0191 put
+%/uni0493 put
+%/uni0492 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /dUbuntu_WApMono exch definefont pop
+/dUbuntu_WApMono findfont
+/dHack exch def
+
+%% tipus que podem cridar
+(/usr/share/fonts/truetype/ubuntu/Ubuntu-Th.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
+%(/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf)
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+dup length array copy dup 0
+%/Fhook put
+/uni0191 put
+
+%/uni0492 put
+
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0493 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /dUbuntu_WAp exch definefont pop
+/dUbuntu_WAp findfont
+/dUbuntu exch def
+
+%% tipus que podem cridar
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf)
+(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+dup length array copy dup 0
+%/Fhook put
+/uni0191 put
+
+%/uni0492 put
+
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0493 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /dUbuntu_WAp exch definefont pop
+/dUbuntu_WAp findfont
+/dUbuntuB exch def
+
+%% pintem el ponent en groc?
+true
+{
+ false
+ {
+  DINa4
+  {  %% just al format A4
+   gsave
+   0 yPagina cQ 9 mul sub gruixF add moveto cQ gruixF sub yPagina cQ 9 mul sub gruixF add lineto
+   cQ gruixF sub yPagina cQ 7 mul sub gruixF add lineto cQ 2 mul gruixF sub yPagina cQ 7 mul sub gruixF add lineto
+   cQ 2 mul gruixF sub dup yPagina cQ 4 mul sub gruixF add lineto yPagina cQ 3 mul sub gruixF add lineto
+   cQ 3 mul gruixF sub yPagina cQ 3 mul sub gruixF add lineto cQ 3 mul gruixF sub yPagina lineto
+   0 yPagina lineto closepath
+   closepath 1 1 0 setrgbcolor fill
+   grestore
+  }
+  {  %% just al format de les 43 comarques
+   gsave
+   1 1 0 setrgbcolor
+   0 0 margeALvoltant cQ 2 mul add margeALvoltant 2 mul cQ 11 mul add rectfill
+   grestore
+  }ifelse
+ }
+ {
+  gsave
+  1 1 0 setrgbcolor
+  0 0 margeALvoltant cQ 3 mul add margeALvoltant 2 mul yPagina add
+  rectfill
+  grestore
+ }ifelse
+}if
+
+%% pintem el mar al sud?
+true
+{
+ DINa4
+ {
+  gsave
+  0 0 1 setrgbcolor
+  0 0 moveto margeALvoltant gruixF 8 mul sub
+  yPagina margeALvoltant add xComarques sub gruixF 6 mul sub lineto
+  margeALvoltant 2 mul xComarques add margeALvoltant 2 mul yPagina add lineto
+  margeALvoltant 2 mul xComarques add 0 lineto
+  closepath fill
+  grestore
+ }
+ {  %% just al format de les 43 comarques?
+  MESaltQUEample
+  {  %% SI
+   gsave
+   0 0 1 setrgbcolor
+   0 0 moveto margeALvoltant gruixF 8 mul sub
+   yPagina margeALvoltant add xComarques sub gruixF 6 mul sub lineto
+   margeALvoltant 2 mul xComarques add margeALvoltant 2 mul yPagina add lineto
+   margeALvoltant 2 mul xComarques add 0 lineto
+   closepath fill
+   grestore
+  }
+  {  %% NO, i ens adaptem al format quadrat de les 43 comarques
+   gsave
+   0 0 1 setrgbcolor
+   0 0 moveto margeALvoltant 2 mul xComarques add dup 0 lineto margeALvoltant 2 mul yPagina add lineto
+   closepath fill
+   grestore
+  }ifelse
+ }ifelse
+}if
+
+%% pintem en vermell el nord?
+true
+{
+ DINa4
+ {
+  gsave
+  1 0 0 setrgbcolor
+  margeALvoltant cQ 2 mul add gruixF 5 mul sub
+  yPagina gruixF 7 mul add
+  margeALvoltant cQ 7 mul add gruixF 12 mul add
+  margeALvoltant cQ add gruixF 6 mul sub rectfill
+  grestore
+ }
+ {  %% just al format de les 43 comarques?
+  MESaltQUEample  %% és més alt que ample?
+  {  %% SI
+   gsave
+   1 0 0 setrgbcolor
+   margeALvoltant cQ 2 mul add gruixF 5 mul sub
+   yPagina gruixF 7 mul add
+   margeALvoltant cQ 7 mul add gruixF 10 mul add
+   margeALvoltant cQ add gruixF 7 mul sub rectfill
+   grestore
+  }
+  { %% NO, és més ample que alt i llavors fem el format de les 43 comarques
+   gsave
+   1 0 0 setrgbcolor
+   margeALvoltant cQ 2 mul add gruixF 5 mul sub
+   yPagina gruixF 7 mul add
+   margeALvoltant cQ 7 mul add gruixF 12 mul add
+   margeALvoltant cQ add gruixF 6 mul sub rectfill
+   grestore
+  }ifelse
+ }ifelse
+}if
+
+%% construïm el mapa de cairons comarcals com si no hi haguessin els 4 marges
+gsave
+%% posicionem l'inici de la graella de cairons comarcals en funció dels marges i el gruix de separació entre comarques
+margeALvoltant gruixF 2 mul xReticula 1 sub mul 2 div sub dup /xmapaHTML exch def
+margeALvoltant gruixF 2 mul yReticula 1 sub mul 2 div add dup /ymapaHTML exch def
+translate
+
+0 1 yReticula 1 sub
+{  %% for de les Y per generar les 43 comarques (de dalt a baix i d'esquerra a dreta)
+ dup /yCairo exch def  %% tècniques per perfilar els cairons de manera que no calvalquin
+ xReticula mul /iY exch def
+ 0 1 xReticula 1 sub
+ {  %% for de les X
+  dup iY add nComarques exch get dup /araC exch def null eq  %% a quina comarca toca el quadrat que pintem ara?
+  {  %% no hi ha comarca
+   pop  %%cQ mul araY cQ dup gsave 1 1 1 setrgbcolor gruixF 2 mul setlinewidth rectstroke grestore  %% perfilem en blanc
+  }
+  {  %% comarca
+               dup gruixF 2 mul mul exch  %% tècniques per perfilar els cairons de manera que no calvalquin
+   cQ mul
+               add  %% tècniques per perfilar els cairons de manera que no calvalquin
+   araY
+   2 copy 2 array astore /LLc exch def  %% x,y d'inici al xamfrà de baix a l'esquerra del quadrat de la comarca
+   cQ dup
+   4 copy rectfill  %% omplim de negre
+   %% dues tècniques per perfilar els cairons de manera que no calvalquin malament quan tessel·lem (p.e. si perfilem pel centre del gruix del filet)
+   false  %% tècniques per perfilar els cairons de manera que no calvalquin
+   {  %% el gruix del filet per l'interior del cairó
+    gsave 4 copy
+    gruixF sub exch gruixF sub exch 4 -1 roll gruixF 2 div add 4 1 roll 3 -1 roll gruixF 2 div add 3 1 roll
+    1 1 1 setrgbcolor gruixF setlinewidth rectstroke grestore  %% perfilem en blanc el quadrat
+   }
+   {  %% el gruix del filet per l'exterior del cairó o el centre de la vora
+    false
+    {  %% l'exterior
+     gsave 4 copy
+     gruixF add exch gruixF add exch 4 -1 roll gruixF 2 div sub 4 1 roll 3 -1 roll gruixF 2 div sub 3 1 roll
+     1 1 1 setrgbcolor gruixF setlinewidth rectstroke grestore  %% perfilem en blanc el quadrat
+    }
+    {  %% el centre
+     gsave 4 copy
+     1 1 1 setrgbcolor gruixF 2 mul setlinewidth rectstroke grestore  %% perfilem en blanc el quadrat
+    }ifelse
+   }ifelse
+   2 index add exch 3 index add exch 4 array astore /pelRect exch def  %% /ANN
+
+   araC (BM)eq
+   {  %% si som al Baix Empordà
+    pelRect /d19361977 exch def  %% per situar la data a la part blava
+   }if
+
+%   {  %% aquesta pregunta de si existeix la comarca un cop fetes totes a /comarquesVSfosses no l'haurem de fer
+    comarquesVSfosses araC get dup
+    /e get /araE exch def dup /n get /araN exch def dup /r get /araR exch def /f get dup /araFosses exch def  %% fosses exhumades, reclamades i totals
+    sqrt ceiling dup mul sqrt cvi /finsXY exch def  %% nombre de tessel·les de costat
+    finsXY 0 ne
+    {  %% evitem la divisió per zero quan una comarca no té fosses
+     cQ gruixF sub finsXY div /tssll exch def  %% calculem la mida de la tessel·la que ha d'omplir el quadrat comarcal
+    }if
+
+%%ANOTACIÓ de PDF
+    mark
+    /Rect pelRect
+    /Subtype /Widget
+    /Ff 65536
+    %% generem un nom únic amb la posicio X Y de la comarca
+    /T 
+    LLc 0 get 64 string cvs dup length
+    LLc 1 get 64 string cvs
+    dup length 3 -1 roll add 1 add string dup /araT exch def
+    /NullEncode filter /fT exch def
+    fT exch writestring fT (_) writestring fT exch writestring
+    fT dup flushfile closefile araT
+    %% aquest tooltip ha d'ensenyar per pantalla les dades comarcals de l'acció
+    /TU  %% aquesta cadena s'ha de desxifrar a 1 sol octet WinAnsi
+    araN
+    (/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+    (r) file cvx exec
+    AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+    /FT /Btn
+    /H /N  %% a Viewer de Firefox li és indiferent i sempre mostra el text en negatiu, a l'Okular 24.08 activa l'area però no ensenya el text!
+    %% en cas que vinculessim a una pàgina informativa de la web sobre l'estat de l'acció a la comarca
+    %% /AA <</D << /S /Launch /F << /Type /Filespec /F pdfNEXT >> >> >>
+    /ANN
+    pdfmark
+
+    femHTML
+    {  %% per cada comarca
+     43c (<area shape="rect" coords=") writestring
+     43c pelRect 0 get xmapaHTML add xHint mul round cvi 128 string cvs writestring  %% la posició xLL ha de dur el multiplicador perquè quadri amb la resolució
+     43c (,)writestring
+     43c pelRect 1 get cols&fils 1 get ymapaHTML sub exch sub cQ sub xHint mul round cvi 128 string cvs writestring  %% la posició yLL ha de dur el multiplicador perquè quadri amb la resolució
+     43c (,)writestring
+     43c pelRect 2 get xmapaHTML add xHint mul round cvi 128 string cvs writestring  %% la posició xUR ha de dur el multiplicador perquè quadri amb la resolució
+     43c (,)writestring
+     43c pelRect 3 get cols&fils 1 get ymapaHTML sub exch sub cQ add xHint mul round cvi 128 string cvs writestring  %% la posició yUR ha de dur el multiplicador perquè quadri amb la resolució
+     43c (" alt=")writestring
+     43c araT writestring
+     43c (" href=")writestring
+     43c AliniesD1solOctet 0 get writestring
+     43c (.htm" title=")writestring
+     43c AliniesD1solOctet 0 get writestring
+     43c (">)writestring
+    }if
+
+    /femF true def  %% gatell per saber si hem exhaurit el nombre de fosses i hem de pintar o no el glif
+    /iF 0 def  %% comptador de fosses per comarca
+    /iFe 0 def  %% comptador de fosses exhumades per comarca
+    /iFr 0 def  %% comptador de fosses reclamades per comarca
+    araE 0 eq {false}{true}ifelse /FEMe exch def
+    araR 0 eq {false}{true}ifelse /FEMr exch def
+    araE araR add dup /MAXsesr exch def  %% total de fosses sense exhumar i sense reclamar
+    araFosses gt
+    {
+     (\n >>> LES FOSSES PER EXHUMAR + RECLAMADES NO PODEN SUPERAR EL TOTAL, TENIU UN ERROR a la comarca: ) print flush araC print flush (\n\n)print flush quit
+    }if
+
+    0 1 finsXY 1 sub
+    {  %% for generador del tessel·lat comarcal de fosses (de baix a dalt i d'esquerra a dreta)
+     /YxT exch def
+     0 1 finsXY 1 sub
+     {  %% for
+      iF 1 add /iF exch def
+      femF
+      {  %% pintem el glif amb el color que toqui de la fossa
+       LLc aload pop
+       gruixF 2 div sub  %% correcció Y de la línia de base pel glif de les fosses
+       YxT tssll mul add gruixF add exch 3 -1 roll tssll mul add exch 2 copy 2 array astore /xyT exch def tssll
+
+       dup
+       false  %% pintem el perfil quadrat de la comarca i el cercle?
+       {
+        gsave 0 setlinewidth 1 0 0 setrgbcolor rectstroke grestore  %% perfilem en vermell la tessel·la
+        gsave 1 1 0 setrgbcolor newpath xyT aload pop tssll 2 div dup 4 -1 roll add 3 1 roll add tssll 2 div 0 360 arc fill grestore  %% fem una rodona blanca
+       }
+       {  %% 4 coordenades que sobren
+        pop pop pop pop
+       }ifelse
+
+       gsave  %% hi centrem un glif tipogràfic acolorit segons categoria
+       dHack tssll scalefont setfont 0 0 moveto glifF true charpath pathbbox
+       3 index 2 div /ajustX exch def  %% per ajustar la posició x del moveto
+       3 -1 roll sub 3 1 roll exch sub  %% ample i alt del glif inscrit
+       tssll exch sub 2 div  %% x moveto
+       exch tssll exch sub 2 div  %% y moveto
+       xyT aload pop 3 -1 roll add 3 1 roll add ajustX sub gruixF finsXY div sub exch  %% ajustem el marge blanc de la x pel nombre de tessel·les
+       %% pintem el glif de la fossa segons
+       FEMe
+       {
+        0 1 0 setrgbcolor  %% en verd exhumades
+	iFe 1 add /iFe exch def
+	iFe araE eq
+	{
+         /FEMe false def
+	}if
+       }
+       {
+	FEMr
+	{
+         1 0 0 setrgbcolor  %% en vermell reclamades
+	 iFr 1 add /iFr exch def
+	 iFr araR eq
+	 {
+          /FEMr false def
+	 }if
+	}
+	{
+         1 1 1 setrgbcolor  %% en blanc ni exhumades ni reclamades
+	}ifelse
+       }ifelse
+       moveto glifF show
+       grestore
+      }
+      {  %% fora l'índex de filera
+       pop
+      }ifelse
+      iF araFosses eq
+      {
+       /femF false def
+      }if
+     }for
+    }for
+%   }
+%   {
+%	   araC == quit
+%   }ifelse
+  }ifelse
+ }for  %% de les X
+
+ /araX 0 def  %% ara no fa re
+ araY
+               %yCairo
+               gruixF 2 mul
+
+	       %UUUUUUUU
+	       sub  %% tècniques per perfilar els cairons de manera que no calvalquin
+
+ cQ sub
+ /araY exch def 
+
+% clear  %% brossa per comarca que podríem evitar?
+
+}for  %% de les Y per generar les 43 comarques (de dalt a baix i d'esquerra a dreta)
+grestore
+
+femHTML
+{
+ %% cua i tancament
+ 43c dup dup (</map></body></html>)writestring flushfile closefile
+}if
+
+%% clam al tac vermell
+gsave
+true
+{
+ 1 -0.01 0
+ {  %% for pel multiplicador del cos que fa que hi càpiga per l'ample establert
+  dUbuntu cQ 3 -1 roll mul scalefont setfont
+  1 1 1 setrgbcolor
+  (Que mai ningú no pugui dir)
+  (/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup stringwidth pop
+  cQ 8 mul  %% ample establert per tal hi càpiga
+  exch sub
+  dup gruixF 8 mul gt  %% marge mínim tolerable
+  {
+   2 div cQ 2 mul add margeALvoltant add
+   yPagina cQ .1 mul add
+   margeALvoltant add gruixF add
+   moveto show exit
+  }
+  {
+   pop pop
+  }ifelse
+ }for
+
+ 1 -0.01 0
+ {  %% for pel multiplicador del cos que fa que hi càpiga per l'ample establert
+  dUbuntuB cQ 3 -1 roll mul scalefont setfont
+  0 0 0 setrgbcolor
+  %(d'aquesta fossa mai n'han reclamat l'exhumació)
+  (mai no han reclamat l'exhumació d'aquesta fossa)
+  (/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup stringwidth pop
+  cQ 8 mul  %% ample establert per tal hi càpiga
+  exch sub
+  dup gruixF 8 mul gt  %% marge mínim tolerable
+  {
+   2 div cQ 2 mul add margeALvoltant add
+   yPagina cQ .3 mul add
+   gruixF 10 mul add  %% correcció Y de la línia de base
+   moveto show exit
+  }
+  {
+   pop pop
+  }ifelse
+ }for
+
+%% clam vertical a la mar blava
+
+%% datem
+  gsave
+  1 1 1 setrgbcolor
+  dUbuntuB cQ 2 div scalefont setfont
+  d19361977 2 2 getinterval aload pop cQ 1.6 div add exch cQ add exch moveto (1936)show
+  d19361977 2 2 getinterval aload pop cQ 6 div add exch cQ add exch moveto (1977)show
+  grestore
+
+ 1 -0.01 0
+ {  %% for pel multiplicador del cos que fa que hi càpiga per l'ample establert
+  dUbuntuB cQ 3 -1 roll mul scalefont setfont
+  1 1 1 setrgbcolor
+  (Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!)
+  (/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup stringwidth pop
+  %% altura del tac vermell
+  DINa4
+  {
+   margeALvoltant cQ add gruixF 6 mul sub
+  }
+  {  %% just al format de les 43 comarques?
+   MESaltQUEample  %% és més alt que ample?
+   {  %% SI
+    margeALvoltant cQ add gruixF 7 mul sub
+   }
+   {  %% NO
+    margeALvoltant cQ add gruixF 6 mul sub
+   }ifelse
+  }ifelse
+   %% i el restem de la Y del format de pàgina
+   femHTML
+   {
+    cols&fils 1 get
+   }
+   {
+    842
+   }ifelse
+   margeALvoltant sub  %% marge inferior
+   exch sub
+   %% ample establert per tal hi càpiga
+   exch sub
+   dup gruixF 4 mul gt  %% marge mínim tolerable
+   {
+    DINa4
+    {
+     595
+    }
+    {
+     cols&fils 0 get
+    }ifelse
+    exch sub
+    margeALvoltant .1 mul add
+    margeALvoltant dup .3 mul sub
+    translate 90 rotate 0 0 moveto
+    show exit
+   }
+   {
+    pop pop
+   }ifelse
+ }for
+}if
+%% Que mai ningú no pugui dir: «d'aquesta fossa mai n'han reclamat l'exhumació»
+grestore
+
+showpage
+
+(BROSSA?)pstack
+
