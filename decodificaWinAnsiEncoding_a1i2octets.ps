@@ -1,0 +1,139 @@
+%!
+%% desxifrador a n octets i xifrador a 1 sol octet de WinAnsiEncoding
+%% dexifrem parcialment per la necessitat puntual dels missatges JS de la componedora UB amb els accents catalans i la Ç en caixa baixa i alta, i el punt volat
+%% cal entendre bé la filosofia del GS que, a partir del decimal 128, desplega alguns glifs de les cadenes de text a 2 octets amb l'excepció, p.e. del /Euro o /bullet a 3
+
+%% és cridat per tallerdetipografia_componedoraRIMDA00.ps diverses vegades
+
+%% array de 256 literals, detectables per 1 sol octet, amb el que rexifrarem la tipografia de treball de la componedora
+systemdict /EncodingDirectory get /WinAnsiEncoding get /WAE exch def
+
+%% de moment no el fem servir
+%systemdict /AdobeGlyphList get /AGL exch def  %% diccionari de /nomDelGlif ###codi decimal Unicode (o una array si n'hi ha més d'1)
+
+
+/AliniesD1solOctet [] def  %% les línies un cop llegides i xifrades a 1 sol octet WinAnsi
+/araLinia () def  %% on muntem la línia que desxifrem
+/BS false def  %% gatell per saber si hem llegit una contrabarra (Back Slash)
+/OS2 false def  %% gatell per saber si hem llegit un octet senyal d'1 octet de més
+/OS3 false def  %% gatell per saber si hem llegit un octet senyal de 2 octets de més
+
+%% la cadena de text o ve de l'stack o l'escrivim aqui
+%(\\n…ÀÈÉÍÓÚÏÜÇ\\n…àèéíïóúüç\\n…ae i ou\\n…s\\'acabat!\\n)  %% exemple complet de com funciona del desxifrat/xifrat a simple, doble i triple octet, retorns i apòstrofs
+%(\\A\\)  %% cas de la contrabarra sola o repetida o sense l'apòstrof o la n esperades, amb un altre glif qualsevol que li segueixi o a la cua de la cadena
+%(\\n\\'\\n\\'\\n\\n)  %% cas de l'apostrof i el retorn de carro
+%(…)  %% cas de l'el·lipsi de triple octet
+
+{  %% forall d'anàlisi de la cadena de text per rexifrar-la a 1 octet en els casos on es desplega en 2 i fer els retorns de carro
+ dup 92 eq  %% és una contrabarra?
+ {  %% és una \
+  BS
+  {   %% si després d'una contrabarra en ve una altra, hem d'escriure les dues
+    araLinia dup length dup /araVa exch def 2 add string dup 3 -1 roll 0 exch putinterval
+    dup 3 -1 roll araVa exch put dup araVa 1 add 92 put /araLinia exch def
+   /BS false def  %% gatell per saber si hem llegit una contrabarra (Back Slash)
+  }
+  {  %% és la primera contrabarra
+   pop /BS true def  %% gatell per saber si hem llegit una contrabarra (Back Slash)
+  }ifelse
+ }
+ {
+  BS
+  {  %% si BS és a true i no li segueix ni una n ni un ' llavors vol dir que s'ha d'escriure la contrabarra i l'actual octet
+   dup 110 eq 1 index 39 eq or  %% llavors potser un retorn de carro n o un apòstrof
+   {
+    110 eq  %% és una n de retorn de carro?
+    {  %% és un retorn de carro
+     %% tret que araLinia no sigui buida la desem a AliniesD1solOctet
+     araLinia length 0 ne
+     {
+      AliniesD1solOctet length dup /araVa exch def 1 add array dup 0 AliniesD1solOctet putinterval  %% fem créixer l'array per la darrera línia a incloure
+      dup araVa araLinia put /AliniesD1solOctet exch def
+      /araLinia () def  %% inicialitzem la línia on desxifrem
+     }if
+     %% desem una cadena buida () a AliniesD1solOctet
+     AliniesD1solOctet length dup /araVa exch def 1 add array dup 0 AliniesD1solOctet putinterval  %% fem créixer l'array per la darrera línia a incloure
+     dup araVa () put /AliniesD1solOctet exch def
+%RETORNdeCARRO
+    }
+    {  %% és un apòstrof
+     araLinia dup length dup /araVa exch def 1 add string dup 3 -1 roll 0 exch putinterval
+     dup araVa 39 put /araLinia exch def
+%APOSTROF
+    }ifelse
+   }
+   {  %% si no és cap dels dos llavors hem d'escriure l'anterior contrabarra i l'octet actual
+    araLinia dup length dup /araVa exch def 2 add string dup 3 -1 roll 0 exch putinterval
+    dup araVa 92 put dup araVa 1 add 4 -1 roll put /araLinia exch def 
+   }ifelse
+   /BS false def  %% gatell per saber si hem llegit una contrabarra (Back Slash)
+  }
+  {  %% aquí filtrarem la resta de glifs o amb triple, doble octet o senzill
+   dup 194 eq 1 index 195 eq or  %% potser algun dels dos senyals de glifs a doble octet
+   {  %% octet senyal
+    194 eq
+    {
+     /FEM64 false def
+    }
+    {
+     /FEM64 true def
+    }ifelse
+    /OS2 true def  %% gatell per saber si hem llegit un octet senyal d'1 octet de més
+%194o195
+   }
+   {  %% caràcter d'1 octet o lligat a un senyal
+    OS2  %% ve d'un senyal?
+    {  %% perquè el segon octet és a 64 de distància del seu glif
+     FEM64
+     {
+      64 add  %% WAE exch get  %% és una manera de comprovar-ho
+     }if
+     /OS2 false def  %% gatell per saber si hem llegit un octet senyal d'1 octet de més
+    }
+    {  %% triple octet?
+     dup 226 eq  %% detector de l'el·lipsi
+     {
+      pop /OS3 true def
+     }
+     {
+      OS3
+      {
+       dup 128 eq  %% detector de l'el·lipsi
+       {
+        pop
+       }
+       {
+        dup 166 eq  %% detector de l'el·lipsi
+	{
+         pop 133  %% fem l'el·lipsi!
+	}if
+	/OS3 false def
+       }ifelse
+      }if
+     }ifelse
+    }ifelse
+    OS3 not
+    {  %% sempre que no estiguem desxifrant un glif de triple octet
+     araLinia dup length dup /araVa exch def 1 add string dup 3 -1 roll 0 exch putinterval
+     dup araVa 4 -1 roll put /araLinia exch def
+    }if
+   }ifelse
+  }ifelse
+ }ifelse
+}forall  %% d'anàlisi de la cadena de text per rexifrar-la a 1 octet en els casos on es desplega en 2 i fer els retorns de carro
+
+BS
+{  %% però si BS és a true voldrà dir que encara li manca ficar-hi una darrera contrabarra a la cua de la darrera string
+ araLinia dup length dup /araVa exch def 1 add string dup 3 -1 roll 0 exch putinterval
+ dup araVa 92 put /araLinia exch def
+}if
+
+%% tret que la darrera araLinia no sigui buida la desem a AliniesD1solOctet
+araLinia length 0 ne
+{  %% en acabat de llegir la cadena ens queda la darrera línia a desar a /AliniesD1solOctet
+ AliniesD1solOctet length dup /araVa exch def 1 add array dup 0 AliniesD1solOctet putinterval  %% fem créixer l'array per la darrera línia a incloure
+ dup araVa araLinia put /AliniesD1solOctet exch def
+}if
+
+%AliniesD1solOctet pstack
+

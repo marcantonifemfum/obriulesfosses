@@ -16,22 +16,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET')
  putenv('laX=');
  putenv('laY=');
  putenv('laH=');
+ putenv('elD=');
+ putenv('UA=');
 
  // capturem les variables de la URL
  // minimitzem el trànsit de dades a través de variables d'entorn i així ens estalviem d'escriure les dades a disc
  // de manera que, un cop capturades les variables de la URL, en fem un putenv de cadascuna, per després
  // llegir-les de dins el .ps a través de l'operador getenv del GS
 
- $width = $_GET['laX'];
- $height = $_GET['laY'];
- $qhe = $_GET['laH'];
+ $width = $_GET['laX'];  //la X de la pantalla del client
+ $height = $_GET['laY'];  //la Y de la pantalla del client
+ $qhe = $_GET['laH'];  //l'hora del client
+ $qde = $_GET['elD'];  //el dia del client
+ $uaV = $_GET['UA'];  //fem cas de l'User Agent?
 }
 else
 {  // Si fem POST: les variables vindran triades des d'index_##.php o index.html
  exit('no fem POST ara!');
 }
 
-echo(" >>>> ".$width . " x " . $height . " <br> " . $qhe);
+//echo(" >>>> ".$width . " x " . $height . " <br> " . $qhe);
 
 //amb l'hora del servidor en tenim prou com a nom únic?
 $PDFunic = date("d"."B"."H"."i"."s");
@@ -62,17 +66,24 @@ $pdfnomes = $PDFunic . "_obriulesfosses_prototip00.pdf";
 $pdfFile = $somaPDF . $pdfnomes;  // al localhost del Tuxedo podem treballar amb l'adreça absoluta
 //$pdfFile = "pdfs/" . $pdfnomes;  // al servidor de bTactic hem de treballar obligatòriament amb adreces relatives?
 
-//@EP aquí desem $PDFunic com a variable d'entorn per tal de capturar-la, si calgués, p.e. per desar-hi un HTML amb les dades de composició
+$pngnomes = $PDFunic . "_obriulesfosses.png";
+$pngFile = $somaHTML . $pngnomes;  // al localhost del Tuxedo podem treballar amb l'adreça absoluta
+// al servidor de bTactic hem de treballar?
+
+// desem $PDFunic com a variable d'entorn per tal de capturar-la al desar l'HTML
 putenv("MRCT_PDFunic=$PDFunic");  // desem el numèric únic a la variable d'entorn
 
 // variables definides dins la URL
 putenv("MRCT_width=$width");  // ample de composició de la imatge ídem a la pantalla del client
 putenv("MRCT_height=$height");  // alt de composició de la imatge ídem a la pantalla del client
 putenv("MRCT_qhe=$qhe");  // l'hora del client
+putenv("MRCT_qde=$qde");  // el dia del client
+putenv("MRCT_uaV=$uaV");  // fem cas de l'User Agent?
+putenv("MRCT_femHTML=false");  // fem l'HTML?
 
 // crida a partir de la versió GS 9.55 al localhost del MacBookAir
 //$command = $somaGS . "gs -q -dNOSAFER -o '" . $pdfFile . "' -dALLOWPSTRANSPARENCY -sDEVICE=pdfwrite -dAutoRotatePages=/None -dNEWPDF=false  -f '" . $PSapplet . "'";
-// @EP aquesta pel gs 9.55 localhost de Tuxedo
+// @EP aquesta pel gs 9.55 localhost de Tuxedo i el 10.0.0 del servidor de bTactic?
 $command = $somaGS . "gs -q -dNOSAFER -o '" . $pdfFile . "' -dALLOWPSTRANSPARENCY -sDEVICE=pdfwrite -dAutoRotatePages=/None -f '" . $PSapplet . "'";
 // el servidor de bTactic té un GPL Ghostscript 10.0.0 (2022-09-21)
 // https://obriulesfosses.cat/siPHPcridaGS.php
@@ -138,8 +149,8 @@ echo "</body></html>";
 
 // això és com un alert però més controlat per tal de redirigir un resultat cap a on es vulgui
 	  //$pr0mpt = rtrim($prompt);
-	  //FALS PROMPT
-          $pr0mpt = "QUÈ VOLS QUE ET DIGUI?";
+	  //text pel 2n prompt
+          $pr0mpt = "A Catalunya hi ha més d\\'un miler de fosses comunes de les quals no se n\\'ha exhumat ni un 10%.\\n\\nO B R I U   L E S   F O S S E S  emprèn la reclamació d\\'exhumació sistemàtica, comarca a comarca, de cadascuna de les fosses comunes del nostre país al departament de Justícia de la Generalitat i als ajuntaments.\\n\\nLa Desaparició Forçada o Involuntària dels nostres parents ens empeny a denunciar aquesta vergonya 87 anys després de la Guerra d\\'Espanya i 50 anys de polítiques d\\'aparador.\\n\\nSi prems…  [ Cancel·la ]  …podràs veure l\\'estat de l\\'actuació que ara mateix es centra a la comarca de les Garrigues\\n\\nSi prems…  [ D\\'acord ]  …s\\'obrirà un PDF amb la mateixa informació";
 
 // què caracu es desa quan llistem l'stack del ps?
 //var_dump($pr0mpt);
@@ -193,9 +204,31 @@ echo "<script>if (window.confirm('" . $pr0mpt . "')) {window.location.href='$bas
    closedir($manegal);
   }
 
-//@OBRIULESFOSSES * aquí és on ens en anem si cancel·lem
-exit("HO ANEM AQUÍ?????");
- 
+  //@OBRIULESFOSSES * aquí és on ens en anem si cancel·lem
+  // abans d'executar ens car redefinir la variable
+  putenv("MRCT_uaV=true");  // aquí SÍ que fem cas de l'User Agent!
+  putenv("MRCT_femHTML=true");  // fem l'HTML?
+  //gs -q -dNOSAFER -r300 -sDEVICE=png16m -o re.png -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dMinFeatureSize=2 faComarques_faHTML.ps
+  $command = $somaGS . "gs -q -dNOSAFER -r300 -o '" . $pngFile . "' -sDEVICE=png16m -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dMinFeatureSize=2 '" . $PSapplet . "'";
+  // aquí a banda de les comprovacions de possibles errors ens cal obrir l'HTML !!!
+  // en cas d'error, aquest és un mètode per capturar el prompt i presentar-lo embolicat d'html
+  ob_start();
+  $LaDarrera = passthru($command, $ElQtorna);  // $LaDarrera queda buida
+  $prompt = ob_get_contents();
+  ob_end_clean();
+
+  if ($ElQtorna == 0)
+  {
+   echo "<script>window.location.href='htmls/obriulesfosses_$PDFunic.html';</script>";
+//	  exit("AQUÍ ÉS ON HAURÍEM DE CARREGAR L'html");
+  }
+  else
+  { // podem provocar errors
+   // aquí llistem l'ERROR del prompt i demanem que s'enviï
+   echo "<center><span style='color:#ff0000;font-family:monospace;font-size:24px'><br><br>&gt;&gt;&gt; Hi ha hagut un ERROR a l'escriure l'HTML o el PNG &lt;&lt;&lt;</span>";
+   echo "<br><br><span style='color:#999999;font-family:monospace;font-size:24px'>".$prompt." + ".$ElQtorna."<br></span>";
+   exit("<br><p><br><p><span style='color:#ff0000;font-family:monospace;font-size:24px'><a style='color:#ff0000;font-family:monospace;font-size:24px' href='mailto:onetsoncleguillem@gmail.com'>podeu documentar-nos l'error via email? (<i>copieu i enganxeu el text en gris</i>) gr&agrave;cies!</a><br><br><br><br></center>");
+  }
  }
  else
  { // podem provocar errors executant sense interfície amb només comandes via URL (captura GET)

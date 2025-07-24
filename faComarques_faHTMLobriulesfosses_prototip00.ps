@@ -24,9 +24,112 @@
 %% podríem d'escriure en paral·lel a JS/Canvas per tal s'adapti dinàmicament a qualsevol tipus de finestra/pantalla?
 %% tooltips en canvas i altres formats: https://stackoverflow.com/questions/17064913/display-tooltip-in-canvas-graph
 
+%% capturem les variables d'entorn provinents de prototip00.php
+
+(MRCT_width) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /AMPLEtalla 595 def  %% A4 per defecte
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+%%TRUQUEM LA RATIO?
+%%pop 1000
+  /AMPLEtalla exch def  %% A4 per defecte
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /AMPLEtalla 595 def  %% A4 per defecte
+}ifelse
+
+(MRCT_height) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /ALTtalla 842 def  %% A4 per defecte
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+%%TRUQUEM LA RATIO?
+%%pop 1100  %% FALLA el text en vertical!
+  /ALTtalla exch def  %% A4 per defecte
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /ALTtalla 842 def  %% A4 per defecte
+}ifelse
+
+(MRCT_qhe) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /hora (a deshora) def  %% A4 per defecte
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  %cvx exec  %% és una string que hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+  /hora exch def  %% A4 per defecte
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /hora (a deshora) def  %% A4 per defecte
+}ifelse
+
+(MRCT_qde) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /dia (sine die) def  %% A4 per defecte
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  %cvx exec  %% és una string que hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+  /dia exch def  %% A4 per defecte
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /dia (sine die) def  %% A4 per defecte
+}ifelse
+
+(MRCT_uaV) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /useragentV false def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem A4 (false)
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+  /useragentV exch def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem A4 (false)
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /useragentV false def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem A4 (false)
+}ifelse
+
+(MRCT_PDFunic) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /IDunica (0123456789) def  %% seria fix
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  %cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+  /IDunica exch def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem A4 (false)
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /IDunica (0123456789) def  %% seria fix
+}ifelse
+
+
 %% decidim si ho adaptem a un format qualsevol (pantalles) o a un DINa4 vertical
-false  %% si l'User Agent no treballa automàticament anem a una sortida A4
-/useragentV exch def
+%false  %% si l'User Agent no treballa automàticament anem a una sortida A4
+%/useragentV exch def
 
 %%TAULA DE LA VERITAT PELS FORMATS DE PANTALLA/PÀGINA
 %% mentre sigui més alt que ample conserva el valor de la Y
@@ -43,8 +146,8 @@ useragentV
  false /DINa4 exch def
 %%ATENCIÓ: a 72 ppp 1 punt = 1 píxel 
  %% pantalla del Tuxedo (16:9) 1920x1080
- 800 /AMPLEtalla exch def  %% valors de pantalla del dispositiu
- 1600 /ALTtalla exch def
+% 800 /AMPLEtalla exch def  %% valors de pantalla del dispositiu
+% 1600 /ALTtalla exch def
  %% fruit de comparar el valor X,Y de pantalla de la variable de l'useragent
  ALTtalla AMPLEtalla gt /MESaltQUEample exch def
 
@@ -575,7 +678,10 @@ dup 4 1 roll
 >>setpagedevice
 
 %% fem l'HTML?
-/femHTML true def
+%(MRCT_uaV) getenv pop cvx exec
+(MRCT_femHTML) getenv pop cvx exec
+%pstack WWWWWWWWWWWWWWWWWWW
+/femHTML exch def
 
 femHTML
 {
@@ -584,12 +690,23 @@ femHTML
  /olucio 72 def  %% ídem a la variable -r de la línia de comanda del GS per la resolució d'escriptura del jpeg
  /dHinting 72 def  %% constant divisora del valor de resolució amb què s'ha generat la imatge en jpeg per tal de trobar el multiplicador que ens localitzarà els píxels
  olucio dHinting div /xHint exch def  %% multiplicador dels valors en punts per trobar el seu equivalent en píxels
- %% on escrivim l'HTML
- (43comarques.html) (w) file /43c exch def
+%%+URL
+ %% on escrivim l'HTML únic
+ (htmls/obriulesfosses_) dup length dup /araVa exch def IDunica length add 5 add string dup 3 -1 roll 0 exch putinterval
+ dup araVa dup IDunica length add /araVa2 exch def IDunica putinterval dup araVa2 (.html) putinterval
+ (w) file /43c exch def
 
  43c (<html>
  <head>
 <style>
+
+img {
+    max-width: 100%;
+//    max-height: 100%;
+}
+
+//els tooltips ara no els fem servir
+
 .tooltip {
         display: inline-block;
         position: relative;
@@ -868,10 +985,13 @@ femHTML
     }
 </style>
  </head><body>
- <img src="re.png" alt="obriulesfosses.cat" usemap="#obriulesfosses" width=")writestring
- 43c cols&fils 0 get xHint mul round cvi 128 string cvs writestring  %% píxels d'ample (haurien de quadrar amb els de l'UserAgent)
+ <img src=") writestring
+ 43c IDunica writestring
+ 43c (_obriulesfosses.png" alt="obriulesfosses.cat" usemap="#obriulesfosses" width=") writestring
+ 43c AMPLEtalla round cvi 128 string cvs writestring  %% píxels d'ample que quaden amb els de l'UserAgent
  43c (" height=")writestring
- 43c cols&fils 1 get xHint mul round cvi 128 string cvs writestring  %% píxels d'alt (haurien de quadrar amb els de l'UserAgent)
+ %% ens cal fer una regla de 3 entre ample/alt de cols&fils i AMPLEtalla (que serà el width) per tal de deduir l'height
+ 43c cols&fils aload pop AMPLEtalla mul exch div round cvi 128 string cvs writestring  %% píxels d'alt que quaden amb els de l'UserAgent)
  43c ("><map name="obriulesfosses">)writestring
 }
 {
@@ -1018,7 +1138,9 @@ true
   gsave
   0 0 1 setrgbcolor
   0 0 moveto margeALvoltant gruixF 8 mul sub
-  yPagina margeALvoltant add xComarques sub gruixF 6 mul sub lineto
+  yPagina margeALvoltant add xComarques sub gruixF 6 mul sub
+2 copy 2 array astore /mefecit exch def
+  lineto
   margeALvoltant 2 mul xComarques add margeALvoltant 2 mul yPagina add lineto
   margeALvoltant 2 mul xComarques add 0 lineto
   closepath fill
@@ -1130,8 +1252,13 @@ translate
 
    araC (BM)eq
    {  %% si som al Baix Empordà
-    pelRect /d19361977 exch def  %% per situar la data a la part blava
+    pelRect /d19361977 exch def  %% per situar el període a la part blava
    }if
+
+%   araC (MT)eq
+%   {  %% si som al Montsià
+%    pelRect /mefecit exch def  %% per situar la data i l'hora
+%   }if
 
 %   {  %% aquesta pregunta de si existeix la comarca un cop fetes totes a /comarquesVSfosses no l'haurem de fer
     comarquesVSfosses araC get dup
@@ -1158,7 +1285,8 @@ translate
     %% aquest tooltip ha d'ensenyar per pantalla les dades comarcals de l'acció
     /TU  %% aquesta cadena s'ha de desxifrar a 1 sol octet WinAnsi
     araN
-    (/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+    %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+    (decodificaWinAnsiEncoding_a1i2octets.ps)
     (r) file cvx exec
     AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
     /FT /Btn
@@ -1276,7 +1404,6 @@ translate
                %yCairo
                gruixF 2 mul
 
-	       %UUUUUUUU
 	       sub  %% tècniques per perfilar els cairons de manera que no calvalquin
 
  cQ sub
@@ -1293,7 +1420,7 @@ femHTML
  43c dup dup (</map></body></html>)writestring flushfile closefile
 }if
 
-%% clam al tac vermell
+%% clams als tacs vermell i blau
 gsave
 true
 {
@@ -1302,7 +1429,8 @@ true
   dUbuntu cQ 3 -1 roll mul scalefont setfont
   1 1 1 setrgbcolor
   (Que mai ningú no pugui dir)
-  (/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  (decodificaWinAnsiEncoding_a1i2octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
   dup stringwidth pop
@@ -1326,7 +1454,8 @@ true
   0 0 0 setrgbcolor
   %(d'aquesta fossa mai n'han reclamat l'exhumació)
   (mai no han reclamat l'exhumació d'aquesta fossa)
-  (/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  (decodificaWinAnsiEncoding_a1i2octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
   dup stringwidth pop
@@ -1347,19 +1476,21 @@ true
 %% clam vertical a la mar blava
 
 %% datem
-  gsave
-  1 1 1 setrgbcolor
-  dUbuntuB cQ 2 div scalefont setfont
-  d19361977 2 2 getinterval aload pop cQ 1.6 div add exch cQ add exch moveto (1936)show
-  d19361977 2 2 getinterval aload pop cQ 6 div add exch cQ add exch moveto (1977)show
-  grestore
+ gsave
+ 1 1 1 setrgbcolor
+ dUbuntuB cQ 2 div scalefont setfont
+ d19361977 2 2 getinterval aload pop cQ 1.6 div add exch cQ add exch moveto (1936)show
+ d19361977 2 2 getinterval aload pop cQ 6 div add exch cQ add exch moveto (1977)show
+ grestore
 
+ gsave
  1 -0.01 0
  {  %% for pel multiplicador del cos que fa que hi càpiga per l'ample establert
   dUbuntuB cQ 3 -1 roll mul scalefont setfont
   1 1 1 setrgbcolor
   (Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!)
-  (/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  (decodificaWinAnsiEncoding_a1i2octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
   dup stringwidth pop
@@ -1408,9 +1539,31 @@ true
     pop pop
    }ifelse
  }for
+ grestore
+
+ gsave
+ dUbuntuB cQ .2 mul dup /yLB exch def scalefont setfont
+ 1 1 1 setrgbcolor
+ useragentV
+ {  %% pantalla
+  margeALvoltant yLB moveto hora show ( | )show dia show
+ }
+ {  %% A4
+  mefecit aload pop exch atan rotate
+  margeALvoltant yLB neg moveto hora show ( | )show dia show
+ }ifelse
+ grestore
 }if
-%% Que mai ningú no pugui dir: «d'aquesta fossa mai n'han reclamat l'exhumació»
 grestore
+
+mark
+%% camps públics del Docinfo
+/Subject (Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!)
+/Title (OBRIU LES FOSSES!)
+/Author (copyleft 2025: Marcantoni Malagarriga-Picas <marcantoni@femfum.com> Eva Bosch Gibert <eva_bosch_gibert@hotmail.com>)
+/Keywords (DDHH, Spanish Civil War, fosses comunes, mass graves, ADN, Guerra d'Espanya, 1936-1977, Desaparició Forçada o Involuntària, Missing Persons, Enforced or Involuntary Disappearances)
+/Creator (https://github.com/marcantonifemfum/obriulesfosses)
+/DOCINFO pdfmark
 
 showpage
 

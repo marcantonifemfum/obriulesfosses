@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ca">
 <head>
 <meta charset="UTF-8">
 <title>&hellip;obriu les fosses d'una vegada!</title>
 <link rel="icon" type="image/x-icon" href="Fvermella.png">
 <script language="JavaScript">
-// l'hora del client
+// el dia i l'hora del client
 var _quinHoraEs = new Date().toLocaleTimeString();
+const options = {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
+var _quinDiaSom = new Date().toLocaleDateString("ca-ES", options); 
 //	setCookie('quinHoraEs', _quinHoraEs, 1);
 
 //
@@ -14,7 +21,7 @@ alert("O B R I U   L E S   F O S S E S   és una acció de #DDHH promoguda per f
 
 var ample = screen.width;
 var alt = screen.height;
-window.location = 'prototip00.php?laX=' + ample + '&laY=' + alt + '&laH=' + _quinHoraEs;
+window.location = 'prototip00.php?laX=' + ample + '&laY=' + alt + '&laH=' + _quinHoraEs + '&elD=' + _quinDiaSom + '&UA=false';
 </script>
 </head>
 <body></body>
