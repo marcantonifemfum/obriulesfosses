@@ -40,23 +40,28 @@ else
 //amb l'hora del servidor en tenim prou com a nom únic?
 $PDFunic = date("d"."B"."H"."i"."s");
 
+//@URL
 // EP! aquí cal veure si al servidor de bTactic podem posar-hi o no les 3 www al davant
-$baseURL = "http://localhost/www.obriulesfosses.cat/exhumeu/";  // localhost de Tuxedo
-//$baseURL = "https://www.obriulesfosses.cat/exhumeu/";  // servidor bTactic
+//$baseURL = "http://localhost/www.obriulesfosses.cat/exhumeu/";  // localhost de Tuxedo
+$baseURL = "https://www.obriulesfosses.cat/exhumeu/";  // servidor bTactic
 
+//@URL
 // adreça absoluta al directori dels PDFs resultants
-$somaPDF = "/var/www/html/www.obriulesfosses.cat/exhumeu/pdfs/";  // localhost Tuxedo
-//$somaPDF = "/wub/tallerdetipografia/caixista/pdfs/";  // EP! el GS del servidor bTactic no li agrada escriure sobre una adreça absoluta?
+//$somaPDF = "/var/www/html/www.obriulesfosses.cat/exhumeu/pdfs/";  // localhost Tuxedo
+$somaPDF = "pdfs/";  // EP! el GS del servidor bTactic escriur sobre una adreça relativa?
 
+//@URL
 // adreça absoluta al directori dels HTMLs resultants
-$somaHTML = "/var/www/html/www.obriulesfosses.cat/exhumeu/htmls/";  // localhost Tuxedo
-//$somaHTML = "/wub/tallerdetipografia/caixista/pdfs/";  // EP! el GS del servidor bTactic no li agrada escriure sobre una adreça absoluta?
+//$somaHTML = "/var/www/html/www.obriulesfosses.cat/exhumeu/htmls/";  // localhost Tuxedo
+$somaHTML = "htmls/";  // el servidor bTactic escriu sobre una adreça relativa?
 
-$somaGS = "/usr/bin/";  // path a l'executable de Ghostscript al localhost de Tuxedo
-//$somaGS = "/usr/local/bin/";  // path a l'executable de Ghostscript al servidor de la UB
+//@URL
+//$somaGS = "/usr/bin/";  // path a l'executable de Ghostscript al localhost de Tuxedo
+$somaGS = "/usr/bin/";  // sembla que pot cridar-se sense path a l'executable de Ghostscript al servidor de bTactic
 
-$baseurlPDF = "http://localhost/www.obriulesfosses.cat/exhumeu/pdfs/";  // base url al pdf al localhost de Tuxedo
-//$baseurlPDF = "https://www.ub.edu/tallerdetipografia/caixista/pdfs/";  // base url al pdf del servidor de la UB
+//@URL
+//$baseurlPDF = "http://localhost/www.obriulesfosses.cat/exhumeu/pdfs/";  // base url al pdf al localhost de Tuxedo
+$baseurlPDF = "https://www.obriulesfosses.cat/exhumeu/pdfs/";  // base url al pdf del servidor de bTactic
 
 $PSapplet = "faComarques_faHTMLobriulesfosses_prototip00.ps";
 
@@ -84,10 +89,10 @@ putenv("MRCT_femHTML=false");  // fem l'HTML?
 // crida a partir de la versió GS 9.55 al localhost del MacBookAir
 //$command = $somaGS . "gs -q -dNOSAFER -o '" . $pdfFile . "' -dALLOWPSTRANSPARENCY -sDEVICE=pdfwrite -dAutoRotatePages=/None -dNEWPDF=false  -f '" . $PSapplet . "'";
 // @EP aquesta pel gs 9.55 localhost de Tuxedo i el 10.0.0 del servidor de bTactic?
-$command = $somaGS . "gs -q -dNOSAFER -o '" . $pdfFile . "' -dALLOWPSTRANSPARENCY -sDEVICE=pdfwrite -dAutoRotatePages=/None -f '" . $PSapplet . "'";
+$command = $somaGS . "gs -q -dNOSAFER -o '" . $pdfFile . "' -sDEVICE=pdfwrite -dAutoRotatePages=/None -f '" . $PSapplet . "'";
 // el servidor de bTactic té un GPL Ghostscript 10.0.0 (2022-09-21)
 // https://obriulesfosses.cat/siPHPcridaGS.php
-// exit($command);
+//exit($command);
 
 // en cas d'error, aquest és un mètode per capturar el prompt i presentar-lo embolicat d'html
 ob_start();
@@ -112,7 +117,8 @@ if ($ElQtorna == 127)
 {  // el gs NO s'ha executat
 // exit("...sembla que el GS no s'ha executat");
  echo "<center><span style='color:#ff0000;font-family:monospace;font-size:24px'><br><br>&gt;&gt;&gt; l'int&egrave;rpret Ghostscript no s'ha executat &lt;&lt;&lt;</span>";
-//@@OBRIULESFOSSES
+ 
+ //@URL
  exit("<br><p><br><p><span style='color:#ff0000;font-family:monospace;font-size:24px'><a style='color:#ff0000;font-family:monospace;font-size:24px' href='mailto:onetsoncleguillem@gmail.com'>podeu documentar-nos l'error via email? (copieu i enganxeu el text en gris) gr&agrave;cies!</a><br><br><a style='color:#ff0000;font-family:monospace;font-size:18px' href='https://www.obriulesfosses.cat'>obriulesfosses.cat</a></center>");
 
 echo "</body></html>";
@@ -209,7 +215,8 @@ echo "<script>if (window.confirm('" . $pr0mpt . "')) {window.location.href='$bas
   putenv("MRCT_uaV=true");  // aquí SÍ que fem cas de l'User Agent!
   putenv("MRCT_femHTML=true");  // fem l'HTML?
   //gs -q -dNOSAFER -r300 -sDEVICE=png16m -o re.png -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dMinFeatureSize=2 faComarques_faHTML.ps
-  $command = $somaGS . "gs -q -dNOSAFER -r300 -o '" . $pngFile . "' -sDEVICE=png16m -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dMinFeatureSize=2 '" . $PSapplet . "'";
+// ATENCIÓ AL VALOR DE RESOLUCIÓ -r DE MOMENT TREBALLAREM SEMPRE A 72ppp (hauríem d'establir una variable en cas de ser dinàmic)
+  $command = $somaGS . "gs -q -dNOSAFER -r72 -o '" . $pngFile . "' -sDEVICE=png16m -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dMinFeatureSize=2 '" . $PSapplet . "'";
   // aquí a banda de les comprovacions de possibles errors ens cal obrir l'HTML !!!
   // en cas d'error, aquest és un mètode per capturar el prompt i presentar-lo embolicat d'html
   ob_start();
@@ -219,6 +226,7 @@ echo "<script>if (window.confirm('" . $pr0mpt . "')) {window.location.href='$bas
 
   if ($ElQtorna == 0)
   {
+//@URL
    echo "<script>window.location.href='htmls/obriulesfosses_$PDFunic.html';</script>";
 //	  exit("AQUÍ ÉS ON HAURÍEM DE CARREGAR L'html");
   }

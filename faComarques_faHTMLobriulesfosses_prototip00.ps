@@ -36,8 +36,8 @@
  {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
   cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
 %%TRUQUEM LA RATIO?
-%%pop 1000
-  /AMPLEtalla exch def  %% A4 per defecte
+%pop 1000
+  /AMPLEtalla exch def
  }ifelse
 }
 {  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
@@ -54,8 +54,8 @@
  {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
   cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
 %%TRUQUEM LA RATIO?
-%%pop 1100  %% FALLA el text en vertical!
-  /ALTtalla exch def  %% A4 per defecte
+%pop 1000  %% FALLA el text en vertical?
+  /ALTtalla exch def
  }ifelse
 }
 {  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
@@ -680,13 +680,16 @@ dup 4 1 roll
 %% fem l'HTML?
 %(MRCT_uaV) getenv pop cvx exec
 (MRCT_femHTML) getenv pop cvx exec
-%pstack WWWWWWWWWWWWWWWWWWW
 /femHTML exch def
 
 femHTML
 {
  /cols&fils exch def
-%% hauríem d'establir un mètode pel càlcul de la resolució en funció de la mida en píxels de la pantalla per ponderar els zooms que pugui fer l'usuari (mòbil/pissarreta)
+ %% establim el càlcul pel multiplicador del factor de correcció per les posicions del mapa d'imatge HTML de manera que, treballant sempre a la resolució fixa de 72ppp,
+ %% els píxels d'ample de la imatge (a 72ppp sempre superaran als de la pantalla) s'adaptaran als de la pantalla (pensant en els zooms que pugui fer l'usuari)
+ AMPLEtalla 100 mul cols&fils 0 get div 100 div
+ /mfcmHtml exch def
+
  /olucio 72 def  %% ídem a la variable -r de la línia de comanda del GS per la resolució d'escriptura del jpeg
  /dHinting 72 def  %% constant divisora del valor de resolució amb què s'ha generat la imatge en jpeg per tal de trobar el multiplicador que ens localitzarà els píxels
  olucio dHinting div /xHint exch def  %% multiplicador dels valors en punts per trobar el seu equivalent en píxels
@@ -698,11 +701,24 @@ femHTML
 
  43c (<html>
  <head>
+<meta charset="UTF-8">
+<title>OBRIU LES FOSSES!</title>
+<link rel="icon" type="image/x-icon" href="https://www.obriulesfosses.cat/Fvermella.png">
 <style>
 
 img {
+// caixa perfectament a l'ample de la pantalla (que no de la finestra)
     max-width: 100%;
-//    max-height: 100%;
+ //   max-height: 100%;
+             margin: 0;
+            padding: 0;
+}
+
+html, body {
+// caixa perfectament a l'ample de la pantalla (que no de la finestra)
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 //els tooltips ara no els fem servir
@@ -1006,11 +1022,13 @@ img {
 /araX 0 def
 /araY yPagina cQ sub def 
 
+%%URL
 %% font del glif que assenyala fosses
 %(/var/www/html/www.pliegos.net/maker/UBESH_/UBESH/Hack-Bold.ttf)  %% si el path és massa llarg (com aquest, el talla? i hi posa un font de sunstitució Helvetica?)
 %(Hack-Bold.ttf)
 %(/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf)
-(/usr/share/fonts/truetype/ubuntu/UbuntuMono-B.ttf)
+%(/usr/share/fonts/truetype/ubuntu/UbuntuMono-B.ttf)
+(UbuntuMono-B.ttf)  %% adreça relativa
 findfont
 %% codifiquem pels accents catalans i els possibles glifs alternatius de la F
 dup length dict begin
@@ -1036,8 +1054,10 @@ currentdict end /dUbuntu_WApMono exch definefont pop
 /dUbuntu_WApMono findfont
 /dHack exch def
 
+%%URL
 %% tipus que podem cridar
-(/usr/share/fonts/truetype/ubuntu/Ubuntu-Th.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-Th.ttf)
+(Ubuntu-Th.ttf)  %% adreça relativa
 %(/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf)
 %(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
 %(/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf)
@@ -1068,9 +1088,11 @@ currentdict end /dUbuntu_WAp exch definefont pop
 /dUbuntu_WAp findfont
 /dUbuntu exch def
 
+%%URL
 %% tipus que podem cridar
 %(/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf)
-(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
+(Ubuntu-C.ttf)  %% adreça relativa
 findfont
 %% codifiquem pels accents catalans i els possibles glifs alternatius de la F
 dup length dict begin
@@ -1285,6 +1307,7 @@ translate
     %% aquest tooltip ha d'ensenyar per pantalla les dades comarcals de l'acció
     /TU  %% aquesta cadena s'ha de desxifrar a 1 sol octet WinAnsi
     araN
+%%URL
     %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
     (decodificaWinAnsiEncoding_a1i2octets.ps)
     (r) file cvx exec
@@ -1299,13 +1322,25 @@ translate
     femHTML
     {  %% per cada comarca
      43c (<area shape="rect" coords=") writestring
-     43c pelRect 0 get xmapaHTML add xHint mul round cvi 128 string cvs writestring  %% la posició xLL ha de dur el multiplicador perquè quadri amb la resolució
+     43c pelRect 0 get xmapaHTML add xHint mul round cvi
+%.818
+mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+     128 string cvs writestring  %% la posició xLL ha de dur el multiplicador perquè quadri amb la resolució
      43c (,)writestring
-     43c pelRect 1 get cols&fils 1 get ymapaHTML sub exch sub cQ sub xHint mul round cvi 128 string cvs writestring  %% la posició yLL ha de dur el multiplicador perquè quadri amb la resolució
+     43c pelRect 1 get cols&fils 1 get ymapaHTML sub exch sub cQ sub xHint mul round cvi
+%.818
+mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+     128 string cvs writestring  %% la posició yLL ha de dur el multiplicador perquè quadri amb la resolució
      43c (,)writestring
-     43c pelRect 2 get xmapaHTML add xHint mul round cvi 128 string cvs writestring  %% la posició xUR ha de dur el multiplicador perquè quadri amb la resolució
+     43c pelRect 2 get xmapaHTML add xHint mul round cvi
+%.818
+mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+     128 string cvs writestring  %% la posició xUR ha de dur el multiplicador perquè quadri amb la resolució
      43c (,)writestring
-     43c pelRect 3 get cols&fils 1 get ymapaHTML sub exch sub cQ add xHint mul round cvi 128 string cvs writestring  %% la posició yUR ha de dur el multiplicador perquè quadri amb la resolució
+     43c pelRect 3 get cols&fils 1 get ymapaHTML sub exch sub cQ add xHint mul round cvi
+%.818
+mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+     128 string cvs writestring  %% la posició yUR ha de dur el multiplicador perquè quadri amb la resolució
      43c (" alt=")writestring
      43c araT writestring
      43c (" href=")writestring
@@ -1429,6 +1464,7 @@ true
   dUbuntu cQ 3 -1 roll mul scalefont setfont
   1 1 1 setrgbcolor
   (Que mai ningú no pugui dir)
+%%URL
   %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
   (decodificaWinAnsiEncoding_a1i2octets.ps)
   (r) file cvx exec
@@ -1454,6 +1490,7 @@ true
   0 0 0 setrgbcolor
   %(d'aquesta fossa mai n'han reclamat l'exhumació)
   (mai no han reclamat l'exhumació d'aquesta fossa)
+%%URL
   %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
   (decodificaWinAnsiEncoding_a1i2octets.ps)
   (r) file cvx exec
@@ -1486,9 +1523,10 @@ true
  gsave
  1 -0.01 0
  {  %% for pel multiplicador del cos que fa que hi càpiga per l'ample establert
-  dUbuntuB cQ 3 -1 roll mul scalefont setfont
+  dUbuntuB cQ 3 -1 roll mul dup /araCOS exch def scalefont setfont
   1 1 1 setrgbcolor
   (Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!)
+%%URL
   %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
   (decodificaWinAnsiEncoding_a1i2octets.ps)
   (r) file cvx exec
@@ -1530,7 +1568,25 @@ true
      cols&fils 0 get
     }ifelse
     exch sub
-    margeALvoltant .1 mul add
+
+    femHTML
+    {
+     dup araCOS add cols&fils 0 get ge
+     {
+      pop cols&fils 0 get araCOS 2.5 mul margeALvoltant ge
+      {
+       araCOS 3 div sub
+      }
+      {
+       araCOS sub
+      }ifelse
+     }if
+%%ERROR al marge vertical?
+    }
+    {
+     margeALvoltant .1 mul add
+    }ifelse
+
     margeALvoltant dup .3 mul sub
     translate 90 rotate 0 0 moveto
     show exit
