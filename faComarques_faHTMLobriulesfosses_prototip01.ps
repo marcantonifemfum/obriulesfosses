@@ -1044,7 +1044,7 @@ translate
     araN
 %%URL
     %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
-    (decodificaWinAnsiEncoding_a1i2octets.ps)
+    (decodificaWinAnsiEncoding_a1i2i3octets.ps)
     (r) file cvx exec
     AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
     /FT /Btn
@@ -1201,7 +1201,7 @@ true
   (Que mai ningú no pugui dir)
 %%URL
   %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
-  (decodificaWinAnsiEncoding_a1i2octets.ps)
+  (decodificaWinAnsiEncoding_a1i2i3octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
   dup stringwidth pop
@@ -1227,7 +1227,7 @@ true
   (mai no han reclamat l'exhumació d'aquesta fossa)
 %%URL
   %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
-  (decodificaWinAnsiEncoding_a1i2octets.ps)
+  (decodificaWinAnsiEncoding_a1i2i3octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
   dup stringwidth pop
@@ -1263,7 +1263,7 @@ true
   (Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!)
 %%URL
   %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
-  (decodificaWinAnsiEncoding_a1i2octets.ps)
+  (decodificaWinAnsiEncoding_a1i2i3octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
   dup stringwidth pop
@@ -1338,17 +1338,17 @@ true
  useragentV
  {  %% pantalla
   margeALvoltant yLB moveto hora show ( | )show
-  dia %(decodificaWinAnsiEncoding_a1i2octets.ps)
-  %(r) file cvx exec
-  %AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dia (decodificaWinAnsiEncoding_a1i2i3octets.ps)
+  (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
   show
  }
  {  %% A4
   mefecit aload pop exch atan rotate
   margeALvoltant yLB neg moveto hora show ( | )show
-  dia %(decodificaWinAnsiEncoding_a1i2octets.ps)
-  %(r) file cvx exec
-  %AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dia (decodificaWinAnsiEncoding_a1i2i3octets.ps)
+  (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
   show
  }ifelse
  grestore
@@ -1358,9 +1358,11 @@ grestore
 mark
 %% camps públics del Docinfo
 /Subject (Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!)
-/Title (OBRIU LES FOSSES!)
+/Title (www.obriulesfosses.cat | OBRIU LES FOSSES!)
 /Author (copyleft 2025: Marcantoni Malagarriga-Picas <marcantoni@femfum.com> Eva Bosch Gibert <eva_bosch_gibert@hotmail.com>)
 /Keywords (DDHH, Spanish Civil War, fosses comunes, mass graves, ADN, Guerra d'Espanya, 1936-1977, Desaparició Forçada o Involuntària, Missing Persons, Enforced or Involuntary Disappearances)
+(decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
 /Creator (https://github.com/marcantonifemfum/obriulesfosses)
 /DOCINFO pdfmark
 

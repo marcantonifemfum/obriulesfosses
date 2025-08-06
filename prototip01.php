@@ -63,10 +63,10 @@ $somaGS = "/usr/bin/";  // sembla que també pot cridar-se sense path a l'execut
 $baseurlPDF = "http://localhost/www.obriulesfosses.cat/exhumeu/pdfs/";  // base url al pdf al localhost de Tuxedo
 //$baseurlPDF = "https://www.obriulesfosses.cat/exhumeu/pdfs/";  // base url al pdf del servidor de bTactic
 
-$PSapplet = "faComarques_faHTMLobriulesfosses_prototip00.ps";
+$PSapplet = "faComarques_faHTMLobriulesfosses_prototip01.ps";
 
 // i la cridarem després de l'execució
-$pdfnomes = $PDFunic . "_obriulesfosses_prototip00.pdf";
+$pdfnomes = $PDFunic . "_obriulesfosses_prototip01.pdf";
 
 $pdfFile = $somaPDF . $pdfnomes;  // al localhost del Tuxedo podem treballar amb l'adreça absoluta
 //$pdfFile = "pdfs/" . $pdfnomes;  // al servidor de bTactic hem de treballar obligatòriament amb adreces relatives?
