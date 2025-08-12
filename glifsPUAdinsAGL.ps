@@ -1,0 +1,32 @@
+%!
+%% quins glifs de l'Adobe Glyph List no són normatius doncs tenen el seu codepoint dins la Private User Area (PUA)
+
+/glifsPUAdelAGL <<>> def  %% desarem la clau valor, /nom #codepoint, dels glifs no normatius dins la PUA
+
+%%ATENCIÓ:
+%% no cal anar a buscar l'encoding al systemdict i podem cridar una nova versió invertida de l'AGL que tracta els decimals directament com a claus del diccionari
+%% o sigui que ja no cal convertir-los ni a literals / ni a cadenes (), de manera que el valor és un array amb les n equivalències de nom
+
+ReverseAdobeGlyphList  %% parells #codepoint [/nomsequivalents]
+
+{  %% forall per tot el diccionari invertit de l'AGL
+ %% la PUA va de… <E000> 57344 …fins… <F8FF> 63743
+  exch dup 57344 ge
+ {
+  dup 63743 le
+  {  %% és un glif no normatiu dins l'àrea PUA
+   glifsPUAdelAGL 3 1 roll exch put  %% desem dins /glifsPUAdelAGL #codepoint [/nomsequivalents]
+  }
+  {  %% per sobre
+   pop pop
+  }ifelse
+ }
+ {  %% per sota
+  pop pop
+ }ifelse
+}forall
+
+glifsPUAdelAGL dup length ==  %% quants n'hi han?
+{  %% llistem el nom al prompt
+ exch pop ==
+}forall

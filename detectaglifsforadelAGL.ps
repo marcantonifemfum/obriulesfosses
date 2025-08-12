@@ -1,0 +1,35 @@
+%!
+%% dels Encoding predetermninats que hi ha dins l'intèpret GS detecta si hi ha cap glif que no estigui xifrat dins l'Adobe Glyph List
+
+systemdict /AdobeGlyphList get /araPla exch def  %% aquest és el diccionari de comparació que farem servir
+
+systemdict /EncodingDirectory get
+{  %% forall pe tots els Encodings del GS
+% /araEncoding exch def
+ exch 128 string cvs (\n\n >>> llegint... )print flush print flush
+ dup length 8 string cvs ( ...de... )print flush print flush ( ...glifs)print flush
+ 
+ /jalhemtrobat <<>> def  %% llista de glifs que NO hem trobat a l'AGL per a cada Encoding predeterminat
+ {  %% forall per tot l'Encoding predeterminat
+  /araGlif exch def
+  /Trobat false def
+  araPla
+  {  %% forall glif a glif per tot el diccionari de l'AGL
+   exch araGlif eq
+   {
+    /Trobat true def exit
+   }if
+   pop
+  }forall  %% glif a glif per tot el diccionari de l'AGL
+  Trobat not
+  {
+   jalhemtrobat araGlif known not
+   {
+    jalhemtrobat araGlif null put
+    (\n     !!!! NO hem trobat... )print flush araGlif 128 string cvs print flush
+   }if
+  }if
+ }forall  %% per tot l'Encoding predeterminat
+ (\n)print flush
+}forall  %% per tots els Encodings del GS
+
