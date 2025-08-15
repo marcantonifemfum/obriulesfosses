@@ -1,0 +1,18 @@
+%!
+%% analitzem el comportament de l'operador glyphshow:
+
+%% quan cridem el nom d'un glif que no existeix, no es queixa i hi compon el /.notdef
+%% des del primer cop que invoquem glyhshow (hi ha d'haver un moveto actiu) el posicionat de la resta és implícit al valor de l'ample de la caixa del glif
+
+(/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf) findfont 80 scalefont setfont
+
+10 10 moveto
+
+[/agrave/n/i/m/a /space /d/e /space /c/a/n/t/aixoNOhiES]
+
+{
+ glyphshow
+}forall
+
+showpage
+

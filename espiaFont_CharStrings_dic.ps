@@ -1,0 +1,221 @@
+%!
+%% This file is part of espiaFont_CharStrings_6.ps
+%% espiaFont_CharStrings_4.ps is free software; you can redistribute
+%% it and/or modify it under the terms of the GNU General Public License
+%% as published by the Free Software Foundation; either version 2 of the
+%% License, or (at your option) any later version.
+%% espiaFont_CharStrings_4.ps is distributed in the hope that it will
+%% be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+%% of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+%% GNU General Public License for more details.
+%% You should have received a copy of the GNU General Public License
+%% along with espiaFont_CharStrings_4.ps; if not, write to the Free Software
+%% Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+%%
+%% Aquesta eina espia el contingut del diccionari CharStrings d'una font PS, OTF, TTF o TTC
+%% tret que sigui de tecnologia CID, per treure'n el mapa de caràcters sota els parells:
+%% Glif - Nom Intern del Caràcter, i paginant el resultat en format A4.
+%% Per a intèrprets Ghostscript, MacOSX PSNormalizer i AdobeAcrobatDistiller
+%%
+%% FemFum PostScript Applet: espiaFont_CharStrings_6.ps
+%% (c) Marc Antoni Malagarriga i Picas 04.2011
+%% <marcantoni@femfum.com>
+%% http://www.femfum.com
+
+%% línia de comandes per cridar amb Ghostscript:
+%%ATENCIÓ* és fonamental el flag -dPDFSETTINGS=/prepress per assegurar-nos que s'incrustarà la font original al PDF
+%% gs -q -dNOSAFER -o out.pdf -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -c .setpdfwrite -f espiaFont_CharStrings_6.ps
+
+%# nom PS (literal o string) de la Font a espiar o en cas de treballar amb Ghostscript
+%# el path a disc del fitxer tipogràfic (dins una string)
+%%/Helvetica
+%%(/mastertipo10/564275_MetodologiesAssociades/twitterMaster/Ubuntu/Ubuntu-Regular.ttf)
+%%(/mastertipo10/564275_MetodologiesAssociades/JoseVillotGuisan/ENTREGA3/ENTREGA3_JoseVillotGuisan/DejaVuSans.ttf)
+%%(/mastertipo10/564275_MetodologiesAssociades/DavidMorenoJuste/ENTREGA3/ENTREGA3_DavidMorenoJuste/RailModelFont.ttf)
+%%(/mastertipo10/564275_MetodologiesAssociades/twitterMaster/dejavu-fonts-ttf-2.33/ttf/DejaVuSansMono.ttf)
+%%(/mastertipo10/564275_MetodologiesAssociades/CeciliaBrardaGuastoni/ENTREGA3/arial.ttf)
+%%(/Users/femfum/Desktop/Lletraferida.otf)
+%%(/Users/femfum/MultipleMaster/Myriad2/_MRG____.PFB)
+%%(/Users/femfum/MultipleMaster/AdobeSans_AdobeSerif/ZX______.PFB)
+
+%% tipus de lletra JBC / Montse Vila
+%%(/Users/femfum/JBC/empremt_JBC/MontseVila/hlb_____.PFB)  %% HelveticaNeue-Bold
+%%(/Users/femfum/JBC/empremt_JBC/MontseVila/hll_____.PFB) %% HelveticaNeue-Light
+%%(/Users/femfum/JBC/empremt_JBC/MontseVila/hlm_____.PFB)  %% HelveticaNeue-Medium 
+%%(/Users/femfum/JBC/empremt_JBC/MontseVila/hlr_____.PFB)  %% HelveticaNeue-Roman
+%(/Users/femfum/JBC/empremt_JBC/MontseVila/hlt_____.PFB)  %% HelveticaNeue-Thin
+%% les tipografies enviades per la Montse Vila per a MacOSX no són correctes o el GS no les llegeix...
+%%(/Users/femfum/JBC/empremt_JBC/MontseVila/Helvetica\ MAC/HelveNeuThi)
+
+%%(/Users/femfum/caixaDtipus/PepelPatau/BookCover/BookCover.otf)
+
+%(/Library/Fonts/MyriadPro-Semibold.otf)
+
+%(/Users/femfum/visuals2014/Trajana_Sans_Family_OTF/TrajanaSans-Bold.otf)
+%(/Users/femfum/visuals2014/Trajana_Sans_Family_OTF/TrajanaSans-DemiBold.otf)
+%(/Users/femfum/visuals2014/Trajana_Sans_Family_OTF/ambElaGem/TrajanaSans-Bold.otf)
+%(/Users/femfum/MultipleMaster/MoveMeMMwin/MoveMeMM.pfb)  %% una MultipleMaster que cridem de forma normal
+%(/Users/femfum/Downloads/FiraMono-Regular.otf)
+%(/Users/femfum/elageminada/Courier_Cat/COM_____.PFB)
+%(/Users/femfum/elageminada/ATypIBCN/NOTO/NotoSans-unhinted/NotoSans-Regular.ttf)
+%(/Users/femfum/calaixDtipus/Bohema\ Regular\ Alternative/bohema_regular_alternative.otf)
+%(/Users/femfum/calaixDtipus/Balius/Rioja-Mazuelo.otf)
+%(/Users/femfum/Polynorma/Tipus/FamiliaOptima/Optima/Optima.ttc)
+%(/Users/femfum/calaixDtipus/PepelPatau/furafont/tipus/Valliciergo.otf)
+%(/Users/femfum/calaixDtipus/PepelPatau/furafont/tipus/ot_cff/Dubai-Bold.otf)
+%(/Users/femfum/calaixDtipus/PepelPatau/Cinta\ Beta/Cinta\ Hair.otf)
+
+%(/Users/femfum/calaixDtipus/PepelPatau/FarreronsSerif-Light.otf)
+%(/Users/femfum/Sites/intranet.fub.edu/vi_suals14/Farrerons/FarreronsSerif-Italic.otf)
+%(/Users/femfum/calaixDtipus/PepelPatau/Bridone/bridone\ to\ Lletraferits/Bridone-Regular.otf)
+%(/Users/femfum/calaixDtipus/PepelPatau/Cinta\ Beta/Cinta-Heavy\ Italic.otf)
+%(/Users/femfum/calaixDtipus/PepelPatau/WerdetScript/Werdet_Script_regular/Werdet\ Script\ regular.otf)
+
+%%PostBrossa
+%(/Users/femfum/PliegOS/Brossa/tomaqueres/cockroach.ttf)
+%(/Users/femfum/PliegOS/Brossa/tomaqueres/win-bugs-font/WinBugs-9o6L.ttf)  %% no es deixa incrustar
+%(/Users/femfum/PliegOS/Brossa/tomaqueres/win-bugs-font/misc/Win\ Bugs-1c58.pfb)
+
+%(/Users/femfum/PliegOS/Brossa/tomaqueres/grissom-four-font/GrissomFour-3qnL.ttf)  %% Error: /invalidfont in --glyphshow--
+%%Operand stack:  _0   _0
+
+%(/var/www/html/www.pliegos.net/maker/UBESH_/UBESH/Hack-Bold.ttf)
+%(/var/www/html/www.pliegos.net/maker/UBESH_/UBESH/Hack-Regular.ttf)
+
+%%ATENCIÓ: aquestes tipografies tenen noms de glif tipus /uni019D o sigui el codepoint d'Unicode
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf)
+(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
+
+/aEspiar exch def
+
+%%GATELL per tal ens generi només el diccionari que desxifraUTF8strings.ps utilitzarà per l'anàlisi final dels glifs xifrats per a compondre
+/FEMpdf false def  %% false no fem el PDF amb el resultat gràfic
+
+FEMpdf
+{
+ <</PageSize [595 842]>> setpagedevice  %% format de pàgina A4
+}if
+
+%% crida a CharStrings, si existeix, de la tipografia a espiar
+aEspiar findfont dup /CharStrings known
+{
+ dup /iranoic exch def  %% aquest és el sencer
+ /CharStrings get dup length 16 string cvs /nGlifs exch def
+ /cionari exch def
+}
+{
+ pop
+ (\n\n >>> aquesta Font no treballa amb CharStrings i no la podem explorar ...pleguem!\n\n)print flush quit
+}ifelse
+
+FEMpdf
+{
+ aEspiar findfont 9 scalefont /glyPH exch def  %% tipus a espiar
+
+%%Evitem que NO treballi amb la font de substitució? (veure %%ATENCIÓ*)
+ (/Users/femfum/elageminada/Courier_Cat/COM_____.PFB)
+ findfont 9 scalefont setfont  %% tipografia descriptiva de treball (noms dels glifs)
+
+ /cap
+ {  %% situa al cap de cada pàgina el nom del tipus i el nombre de glifs (entrades Clau/Valor)
+  400 dalt moveto espiEM show
+  400 dalt il sub moveto (Glifs ) show currentpoint moveto
+  cionari length 16 string cvs show
+ } def
+
+ /valsINI
+ {  %% procediment de paràmetres inicials
+  /il 12 def  %% interliniat
+  /dalt 750 def  %% valor inicial de la posició vertical
+  /trades 60 def  %% nombre d'entrades Clau/Valor que caben impreses en una pàgina segons els valors de la tipografia i l'interliniat
+ } def
+
+ valsINI  %% inicialitzem
+}if
+
+cionari  %% el diccionari que volem espiar
+
+%{== ==} forall quit
+
+%% missatge pel nom de la Font que estem espiant, via prompt
+iranoic dup /FontName known
+{
+ /FontName get 128 string cvs dup /espiEM exch def
+ (\n\n >>> ...espiant la Font... )print flush print flush (\n\n)print flush
+ ( >>> ...nombre de Glifs... )print flush nGlifs print flush (\n\n)print flush
+}
+{
+ aEspiar dup type /stringtype eq
+ {
+  {  %% loop
+   (/) search  %% donem per fet que aquest és el separador del sistema
+   {pop pop}{exit}ifelse
+  }loop /espiEM exch def 
+ }
+ {
+  128 string cvs /espiEM exch def
+ }ifelse
+ pop (\n\n >>> ...espiant la Font... )print flush espiEM print flush (\n\n)print flush
+ ( >>> ...nombre de Glifs... )print flush nGlifs print flush (\n\n)print flush
+}ifelse
+
+FEMpdf
+{  %% fem el PDF amb el resultat gràfic
+ {  %% forall paginador de tot el diccionari CharStrings
+  dalt il sub dup /dalt exch def 200 exch moveto 
+  pop dup  %% només deixem el nom del caràcter
+  gsave
+  glyPH setfont
+  50 dalt moveto
+  glyphshow  %% pintem el glif del caràcter amb el tipus que espiem
+  grestore
+  100 dalt moveto 256 string cvs show  %% pintem el nom del caràcter amb el tipus de treball
+  trades 1 sub dup /trades exch def 0 eq  %% comptador i avaluador de paginació
+  {   %% si s'esgota (0) el nombre màxim de línies, imprimeix la pàgina amb la capçalera
+   valsINI cap showpage
+  } if
+ } forall  %% ho executem per tots els valors del diccionari
+
+ %% darrera pàgina
+ valsINI cap
+
+ [
+ %% camps publics DocInfo del PDF
+ /Title (espiaFont_CharStrings_dic.ps)
+ /Subject (explorem tots els glifs d'un tipus de lletra)
+ /Author (\(c\) Marcantoni Malagarriga-Picas <marcantoni@femfum.com>)
+ /Creator (FemFum PostScript Applet)
+ /DOCINFO pdfmark
+
+ showpage  %% imprimim la darrera pàgina
+
+ (\n ...FET! <<<\n\n\n)print flush
+}
+{  %% només desem el diccionari amb els noms PS dels glifs com a clau i un null com a valor
+ /CharStringsDtreball <<>> def
+
+ {  %% tenim el diccionari de la font a l'stack
+  pop
+  CharStringsDtreball exch null put
+ } forall  %% ho executem per tots els valors del diccionari
+
+ CharStringsDtreball dup /NomDelTipus espiEM put
+
+ (\n ...diccionari FET! <<<\n\n\n)print flush
+}ifelse
+
+%%EXTRA experimental per tal ens mostri quins noms PS de glifs NO es troben dins l'AGL
+/nNO 0 def
+CharStringsDtreball
+{
+ pop dup AdobeGlyphList exch known
+ {
+  pop
+ }
+ {
+  == nNO 1 add /nNO exch def
+ }ifelse
+}forall
+
+nNO ==  %% nombre de noms PS de glifs que no es troben dins l'AGL
+

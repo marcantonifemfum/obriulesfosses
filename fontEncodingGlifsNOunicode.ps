@@ -1,0 +1,59 @@
+%!
+%% explorem els 3 font Encoding més habituals d'aquest racó de món però podem afegir-ne d'altres
+%% de manera que localitzem les diferències que hi ha entre els Encoding habituals de les tipografies amb l'estàndard Unicode, llavors:
+%% traiem per la pantalleta quins noms de glif tenen un codi que no s'adiu amb el de Unicode (doncs tots els codis que hi ha a l'AGL són dins l'estàndard)
+%% traiem per la pantalleta quins noms de glif no existeixen dins l'AGL
+
+[  %% Encodings a explorar
+ %% WinAnsiEncoding
+ [ (\n\nsystemdict /EncodingDirectory get /WinAnsiEncoding\n) dup cvx exec get ]
+
+ %% ISOLatin1Encoding
+ [ (\n\nsystemdict /ISOLatin1Encoding\n) dup cvx exec get ]
+
+ %% StandardEncoding
+ [ (\n\nsystemdict /StandardEncoding\n) dup cvx exec get ]
+]
+
+{  %% forall per tots els Encoding
+ aload pop exch print flush  %% intitulem l'Encoding a la pantalleta
+
+ /nomsDeGlifsNOtrobats <<>> def  %% magatzem dels noms de glifs PS de l'Encoding i que  no hem trobat a l'AGL
+ /nomsDeGlifsDeCodiNOunicode <<>> def  %% magatzem de noms de glifs PS que el seu codi a l'Encoding no coincideix amb el codi Unicode a l'AGL
+ /nomsDeGlifsDeCodiNOagl <<>> def  %% magatzem de noms de glifs PS tobats dins l'AGL però que el seu codi a l'Encoding no existeix dins l'AGL
+
+ dup /araEncoding exch def
+ length 1 sub 0 exch 1 exch
+ {  %% for per tots els índex de l'Encoding
+  /esUnicode? exch def
+  araEncoding esUnicode? get dup /araNOMps exch def
+  AdobeGlyphList exch known
+  {  %% el nom hi és
+   %% si el nom hi és cal veure si el seu codi a l'Encoding coincideix amb el d'Unicode
+   ReverseAdobeGlyphList esUnicode? known
+   {  %% el codi hi és i ara cal veure si coincideix amb el d'Unicode
+    AdobeGlyphList araNOMps get esUnicode? ne
+    {
+     (\n/)print flush araNOMps 128 string cvs print flush ( )print flush  esUnicode? 128 string cvs print flush
+     ( ...EXISTEIX dins l'AGL pero el codi de l'Encoding NO es igual al d'Unicode\n)print flush
+     nomsDeGlifsDeCodiNOunicode araNOMps esUnicode? put
+    }if
+   }
+   {  %% el codi NO hi és dins l'AGL i n'informem i desem
+    (\n/)print flush araNOMps 128 string cvs print flush ( )print flush  esUnicode? 128 string cvs print flush
+     ( ...EXISTEIX dins l'AGL pero el codi de l'Encoding NO existeix dins l'AGL\n)print flush
+     nomsDeGlifsDeCodiNOagl araNOMps esUnicode? put
+   }ifelse
+  }
+  {  %% el nom NO hi és i n'informem i desem (exemple /.notdef)
+   nomsDeGlifsNOtrobats araNOMps known not
+   {  %% si no l'hem desat abans
+    nomsDeGlifsNOtrobats araNOMps esUnicode? put
+    esUnicode? (\n/)print flush araNOMps 128 string cvs print flush ( )print flush 128 string cvs print flush ( ...NO existeix dins l'AGL\n)print flush
+   }if
+	 %(EL NOM NO HI ES)pstack
+   %exit
+  }ifelse
+ }for  %% per tots els índex de l'Encoding
+}forall  %% per tots els Encoding
+

@@ -1,9 +1,11 @@
 %!
 %% conversor de decimal a UTF-8 per a caràcters de l'escriptura
+%% https://www.rfc-editor.org/rfc/rfc3629
+%% https://emnudge.dev/blog/utf-8/
 
 %% l'algorisme sempre podrà comprovar-se passant el decimal a hexa, consultant aquest valor a… https://util.unicode.org/UnicodeJsps/character.jsp?a=####
 %% i copiant/enganxant el glif resultant a dins una string (####) per tal de veure que un cop a l'stack del GS dóna el mateix resultat
-%% o executant el resultat amb… desxifraUTF8strings.ps
+%% o executant el resultat amb… desxifraUTF8strings.ps … enstraurà el codepoint en decimal i el seu nom PS (si el té)
 
 %% de l'actual versió d'Unicode en podem llistar l'anomenat dels blocs de glifs, fent una crida il·legal més enllà del darrer bloc normatiu de codificació…
 %% https://util.unicode.org/UnicodeJsps/list-unicodeset.jsp?a=[%3ABlock%3DSupplementary_Private_Use_Area_C%3A]
@@ -12,98 +14,113 @@
 
 %% per exemple l'Emoji de la cara somrient té un hexa… 1F600 …que a decimal dóna un codepoint de… 128512 …i dins una string a l'stack del GS fa… (\360\237\230\200)
 
+8230  %% el·lipsi …
+%12448  %% Katakana-Hiragana double hyphen
 % 1114111  %% el darrer codepoint possible a Unicode
 % 128512  %% :) codi decimal (codepoint) equivalent a l'hexa d'Unicode
-65
+%65  %% A
 /codePoint exch def
 
-/Autf8 5 array def  %% on desarem la sequència binària en 6 bits
-/iA 4 def
+codePoint 255 le
+{  %%filtrem els codis baixos i les excepcions?
+ /araUTF8 1 string def
 
-/radix8bits0 (2#00000000) def
-/32bits 32 string def
-/32bin0 (00000000000000000000000000000000) def
+ %% excepcions que mai no són octet de capçalera
+ %<C0>  %% 192 \300 /Agrave
+ %<C1>  %% 193 \301 /Aacute
+ %<F5>  %% 245 \365 /otilde
+ %<FF>  %% 255 \377 /ydieresis
 
-codePoint 2 32bits cvrs  %% convertimm el codepoint a cadena binària
-
-%%COM filtrem els codis baixos i les excepcions?
-pstack quit
-
-dup length 32 exch sub exch 32bin0 3 1 roll putinterval
-
-%% començant per la cua ens cal saber quantes cadenes de 6 bits podem fer i que no valguin zero
-32 6 sub -6 0
-{  %% for per trencar la cadena de 32 bits de 6 en 6 bits d'esquerra a dreta
- 32bin0 exch 6 getinterval radix8bits0 exch 4 exch putinterval  %% el passem a radix number
- Autf8 iA radix8bits0 10 string copy put iA 1 sub /iA exch def  %% el desem descontaminat
-}for  %% per trencar la cadena de 32 bits de 6 en 6 bits
-
-%% si hi cap posarem la capçalera de l'UTF-8 aquí (tants uns com blocs comptats i +1 zero de separador)
-%% si no hi cap posarem la capçalera de l'UTF-8 al bloc anterior que val zero segur (tants uns com blocs comptats+1 i +1 zero de separador)
-
-%% quin és el primer bloc de 8 bits que no val zero?
-0 1 4
-{
- dup /iradix8bits0 exch def
- Autf8 exch get cvx exec 0 ne
- {
-  exit 
- }if
-}for
-
-%% des d'aquest fins al final quants en comptem?
-5 iradix8bits0 sub /nUTF8 exch def
-
-%% en aquest primer bloc que no val zero, comptem el nombre de zeros d'esquerra a dreta fins el primer 1
-/nZeros 0 def
-Autf8 iradix8bits0 get /ARAcapUTF8 exch def
-2 1 9
-{
- ARAcapUTF8 exch get 48 ne
- {
-  exit
- }
- {
-  nZeros 1 add /nZeros exch def
- }ifelse
-}for
-
-%% /nZeros és igual o superior a nUTF8 més un zero de separador?
-nZeros nUTF8 1 add ge
-{  %% si ho és podem fer servir aquest bloc de capçalera
- /senseOCTETbuit true def
- ARAcapUTF8  %% i ja podem muntar la cadena amb els UTFs
- nUTF8 string /araUTF8 exch def
+ araUTF8 0 codePoint put  %% el podem desar directament perquè sempre tindrà només 1 UTF-8
 }
-{  %% si no ho és hem de fer servir el bloc anterior (que sempre serà completament buit)
- /senseOCTETbuit false def
- (2#00000000)  %% i ja podem muntar la cadena amb els UTFs
- nUTF8 1 add string /araUTF8 exch def
-}ifelse
+{
+ /Autf8 5 array def  %% on desarem la sequència binària en 6 bits
+ /iA 4 def
 
-/ARAcapUTF8 exch def
-2 1 araUTF8 length 1 add
-{  %% muntem l'octet de capçalera de la cadena UTF amb tants uns com octets
- ARAcapUTF8 exch 49 put
-}for
+ /radix8bits0 (2#00000000) def
+ /32bits 32 string def
+ /32bin0 (00000000000000000000000000000000) def
+
+ codePoint 2 32bits cvrs  %% convertimm el codepoint a cadena binària
+
+ dup length 32 exch sub exch 32bin0 3 1 roll putinterval
+
+ %% començant per la cua ens cal saber quantes cadenes de 6 bits podem fer i que no valguin zero
+ 32 6 sub -6 0
+ {  %% for per trencar la cadena de 32 bits de 6 en 6 bits d'esquerra a dreta
+  32bin0 exch 6 getinterval radix8bits0 exch 4 exch putinterval  %% el passem a radix number
+  Autf8 iA radix8bits0 10 string copy put iA 1 sub /iA exch def  %% el desem descontaminat
+ }for  %% per trencar la cadena de 32 bits de 6 en 6 bits
+
+ %% si hi cap posarem la capçalera de l'UTF-8 aquí (tants uns com blocs comptats i +1 zero de separador)
+ %% si no hi cap posarem la capçalera de l'UTF-8 al bloc anterior que val zero segur (tants uns com blocs comptats+1 i +1 zero de separador)
+
+ %% quin és el primer bloc de 8 bits que no val zero?
+ 0 1 4
+ {
+  dup /iradix8bits0 exch def
+  Autf8 exch get cvx exec 0 ne
+  {
+   exit 
+  }if
+ }for
+
+ %% des d'aquest fins al final quants en comptem?
+ 5 iradix8bits0 sub /nUTF8 exch def
+
+ %% en aquest primer bloc que no val zero, comptem el nombre de zeros d'esquerra a dreta fins el primer 1
+ /nZeros 0 def
+ Autf8 iradix8bits0 get /ARAcapUTF8 exch def
+ 2 1 9
+ {
+  ARAcapUTF8 exch get 48 ne
+  {
+   exit
+  }
+  {
+   nZeros 1 add /nZeros exch def
+  }ifelse
+ }for
+
+ %% /nZeros és igual o superior a nUTF8 més un zero de separador?
+ nZeros nUTF8 1 add ge
+ {  %% si ho és podem fer servir aquest bloc de capçalera
+  /senseOCTETbuit true def
+  ARAcapUTF8  %% i ja podem muntar la cadena amb els UTFs
+  nUTF8 string /araUTF8 exch def
+ }
+ {  %% si no ho és hem de fer servir el bloc anterior (que sempre serà completament buit)
+  /senseOCTETbuit false def
+  (2#00000000)  %% i ja podem muntar la cadena amb els UTFs
+  nUTF8 1 add string /araUTF8 exch def
+ }ifelse
+
+ /ARAcapUTF8 exch def
+ 2 1 araUTF8 length 1 add
+ {  %% muntem l'octet de capçalera de la cadena UTF amb tants uns com octets
+  ARAcapUTF8 exch 49 put
+ }for
 
 %%EP! no està bé pel cas… 1114111  %% el darrer codepoint possible a Unicode
 %ARAcapUTF8 === quit
-senseOCTETbuit
-{
- iradix8bits0 1 add /iradix8bits0 exch def
-}if
+ senseOCTETbuit
+ {
+  iradix8bits0 1 add /iradix8bits0 exch def
+ }if
 
-%% incrustem el primer octet que és el cap de la cadena UTF-8
-araUTF8 0 ARAcapUTF8 cvx exec put
+ %% incrustem el primer octet que és el cap de la cadena UTF-8
+ araUTF8 0 ARAcapUTF8 cvx exec put
 
-%% incrustem la resta d'octets per completar la cadena UTF-8
-1 1 araUTF8 length 1 sub
-{
- araUTF8 exch Autf8 iradix8bits0 get
- dup 2 49 put  %% l'1 al principi de l'octet
- cvx exec put  %% executem el binari i desem
- iradix8bits0 1 add /iradix8bits0 exch def
-}for
+ %% incrustem la resta d'octets per completar la cadena UTF-8
+ 1 1 araUTF8 length 1 sub
+ {
+  araUTF8 exch Autf8 iradix8bits0 get
+  dup 2 49 put  %% l'1 al principi de l'octet
+  cvx exec put  %% executem el binari i desem
+  iradix8bits0 1 add /iradix8bits0 exch def
+ }for
 
+}ifelse
+
+%% deixem la cadena amb la conversió UTF-8
 araUTF8 ===
