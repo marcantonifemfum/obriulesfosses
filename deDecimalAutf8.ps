@@ -14,10 +14,12 @@
 
 %% per exemple l'Emoji de la cara somrient té un hexa… 1F600 …que a decimal dóna un codepoint de… 128512 …i dins una string a l'stack del GS fa… (\360\237\230\200)
 
-8230  %% el·lipsi …
+56319  %% bloc High_Private_Use_Surrogates 
+%128640  %% codi decimal de l'emoji del coet, codepoint Unicode 1f680
+%8230  %% el·lipsi …
 %12448  %% Katakana-Hiragana double hyphen
 % 1114111  %% el darrer codepoint possible a Unicode
-% 128512  %% :) codi decimal (codepoint) equivalent a l'hexa d'Unicode
+% 128512  %% emoji :) codi decimal (codepoint) equivalent a l'hexa d'Unicode 1F600
 %65  %% A
 /codePoint exch def
 

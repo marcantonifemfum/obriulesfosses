@@ -31,21 +31,36 @@
 /maxAGL 65510 def  %% aquest és el codi decimal més gran codificat dins l'Adobe Glyph List (el més petit és 1)
 %% /MAX 0 def /MIN 100 def ReverseAdobeGlyphList {pop dup MAX gt{/MAX exch def}{dup MIN lt{/MIN exch def}{pop}ifelse}ifelse}forall
 
-%% la casuística i el modus operandi que contemplarem serà:
-%% si el xifrat és més enllà de l' /encodingDtreball a l'array 
-%% si el xifrat és més enllà de maxAGL no l'escriurem, avisarem, i li assignarem un /.notdef
-%% si el xifrat no es troba dins AGL no l'escriurem, avisarem, i li assignarem un /.notdef
-%% si el xifrat es troba dins AGL però el codi és dins el rang de la PUA d'Unicode, avisarem, i escriurem el nom del glif
-%% si el xifrat es troba dins AGL i és entre 0 i 255 (avisarem en mode debbug?) escriurem el codi
-%% si el xifrat es troba dins AGL i és més enllà de 255 (avisarem en mode debbug?) escriurem el nom del glif
-%% un cop localitzat(s) el(s) nom(s) del(s) glif(s) entre l' /encodingDtreball i l'AGL hauríem de comprovar si existeix dins CharString de la tipografia de treball
-%% avisant si no hi és doncs, llavors, la maquinària del tipus activaria un /.notdef
+%% el modus operandi que hauríem de replicar en cadascún dels punts on haguem deduït el /xifrat del glif llegit (d'UTF-8 a #codepoint decimal) seria:
+%00% el /xifrat és dins de l' /encodingDtreball ? >>> o %1% o %2% 
+%01% el /xifrat NO és DINS l' /encodingDtreball, posem un /.notdef a l'índex 0 de /PSglif i un NULL a l'índex 0 de l' /Aglif i passem a %3%
+%02% el /xifrat ÉS DINS l' /encodingDtreball, posem el seu /nompsE  a l'índex 0 de /PSglif i posem el /xifrat a l'índex 0 de l' /Aglif i passem a %3% %6%
+%03% el /xifrat és dins l'AGL? >>> o %4% o %5%
+%04% el /xifrat NO és DINS l'AGL, tant si ve de %1% com de %2%, posem un /.notdef a l'índex 1 de /PSglif, i passem a %10% si ve de %1% i a %3% si ve de %2%
+%05% el /xifrat ÉS DINS l'AGL, busquem l'array del seu(s) nom(s) PS i reorganitzem /PSglif com %09%, i posem el #codepoint a l'índex 2 de l'array del glif
+%06% el /nompsE és dins de l'AGL? >>> o %7% o %8%
+%07% si el /nompsE NO és DINS l'AGL, posem un /.notdef a l'índex 1 de l'array de noms
+%08% si el /nompsE ÉS DINS l'AGL, reorganitzem l'array del seu(s) nom(s) PS com %09%
+%09% organització de /PSglif: a l'índex 0 sempre hi ha d'haver el nom PS de l' /encodingDtreball i a partir de líndex 1 la resta de noms de l'AGL (si hi són)
+%10% si el /xifrat NO és DINS l'AGL, hem de mirar si el #codepoint és dins d'una de les àrees PUA, si ho és posarem un NULL a l'índex 2 del glif, i si no el seu #codepoint
+
+%12% comprovació final de si els literals de /PSglif existeixen dins CharString de la tipografia de treball, si NO anar a %12%
+%13% caldria tenir un sistema de substitució de glifs no trobats amb una gamma tipogràfica (p.e. la Noto Sans) per blocs Unicode (emojis, kanjis, etc)
+
+%%ON INFORMEM?
+%% si no hi ha #codepoint a l'AGL …veure #CAS02
+%% si el #codepoint existeix dins l' /encodingDtreball però a punta a un /.notdef  …veure #CAS02
+%% si el #codepoint és dins una àrea PUA?
+%% si no hi ha nom PS a l' /encodingDtreball?
+%% si no hi ha glif a ChasStrings?
 
 %%CASUÍSTICA A TENIR MOLT EN COMPTE
 %% l'Adobe Glyph List s'adiu a Unicode, però un mateix codepoint pot tenir diversos noms PS de glif (p.e. 1488 [/alefhebrew /afii57664 /alef])
 %% els codepoints decimals de l'AGL si els passem a hexa (p.e. 05D0 …pel glif alef… א) els podem consultar a… https://util.unicode.org/UnicodeJsps/character.jsp?a=05d0
 %% la WinAnsiEncoding NO s'adiu a Unicode en la codificació de certs glifs: ie. l'el·lipsi es codifica en decimal a 133 dins l'Encoding però a Unicode és a 8230
 %% tampoc en el nom PS important… /.notdef …no és dins l'AGL i n'hi poden haver d'altres que estiguin dins l' /encodingDtreball i no a l'AGL
+%% si explorem la codificació de l'encoding més habitual WinAnsiEncoding per veure quins glifs són /.notdef | veurem que són del 0 al 31
+% systemdict /EncodingDirectory get /WinAnsiEncoding get 0 1 255{2 copy get /.notdef eq {==}{pop}ifelse}for
 
 %% als Encondings predeterminats que hi ha dins l' /EncodingDirectory del GS hi ha tota una col·lecció de noms de glif que no existeixen dins l'AGL
 %% quan això passi, per indicar-ho (a banda d'avisar pel prompt), posarem un null a la posició 1 de l'array de noms PS
@@ -61,9 +76,15 @@
 %%Experiment: què passa si re-xifrem una tipografia amb un /Encoding d+d 256 elements?
 %%ATENCIÓ: dins un context de produccció, caldria treballar amb l' /Encoding de la tipografia en actiu… currentfont /Encoding get …doncs pot estar re-codificada!
 systemdict /EncodingDirectory get
-%/WinAnsiEncoding get
-/StandardEncoding get  %% il·lustra molt bé el CAS02
-%/ISOLatin1Encoding get
+/WinAnsiEncoding
+%/StandardEncoding  %% il·lustra molt bé el CAS02
+%/ISOLatin1Encoding
+dup /NOMencoding exch def
+get
+
+%%CAS04 simulem un Encoding més curt de 256 de nomes 128 elements
+0 128 getinterval
+
 /encodingDtreball exch def
 %% si treballem via nom del glif només ens caldra assegurar (havent pentinat abans els CharStrings del tipus, veure FuraFont) que el glif existeix dins la font activa
 
@@ -87,6 +108,9 @@ systemdict /EncodingDirectory get
 
 %%CASUÍSTICA de diferents comportament en el xifrat d'1 sol glif:
 
+%%CAS04
+1 string dup 0 129 put  %% en aquest cas el glif /bullet (amb 8 bits significatius i un 1 al bit 8) ja queda més enllà de l' /encodingDtreball que hem forçat
+
 %%CAS##
 %% testimoni de la Courier d'IBM que en certifica l'origen
 %<F6BF>  %% codepoint 63167 a la PUA d'Unicode, ela geminada en caixa alta de nom /LL dins l'AGL
@@ -103,13 +127,12 @@ systemdict /EncodingDirectory get
 %%CAS##
 %(\243)  %% 163 A3 símbol de la lliura esterlina /sterling
 
-%%CAS##
-%%FET
-%(A)  %% 65 41 \101 lletra A majúscula
+%%CAS03
+%( )  %% <20> hi mancaria el filtrat a l'AGL doncs hi és i ara apareix fora d'un array
+%(A)  %% 65 41 \101 lletra A majúscula | amb /StandardEncoding -es un CAS02
 %(AEIOUaeiou)
 
 %%CAS##
-%%FET
 %% excepcions,, segons la normativa rfc3629, que mai no són octet de capçalera
 %<C0>  %% 192 \300 /Agrave
 %<C1>  %% 193 \301 /Aacute
@@ -127,9 +150,6 @@ systemdict /EncodingDirectory get
 %% en canvi el 32 decimal (<20> hexa) dins l'AGL té 2 noms dins l'array i /space no o cupa l'índex 0 dins aquest array de l'AGL
 %% systemdict /EncodingDirectory get /WinAnsiEncoding get 0 1 255 { 2 copy get /space eq {==}{pop}ifelse }for
 %<A0>
-
-%%CAS##
-%( )  %% <20> hi mancaria el filtrat a l'AGL doncs hi és i ara apareix fora d'un array
 
 %%CAS##
 %<00>  %% Error: /undefined in --get--
@@ -163,11 +183,17 @@ systemdict /EncodingDirectory get
 %   16 string cvs print flush a+ print flush (\n)print flush
 %  }ifelse
 % }for
-1 string dup 0 159 put
+%%CAS01 amb /encodingDtreball /WinAnsiEncoding
+%(SI++-------------------)pstack quit
+%1 string dup 0 159 put
 
-%%CAS##
-%% si explorem la codificació de l'encoding més habitual WinAnsiEncoding per veure quins glifs són /.notdef | veurem que són del 0 al 31
-% systemdict /EncodingDirectory get /WinAnsiEncoding get 0 1 255{2 copy get /.notdef eq {==}{pop}ifelse}for
+%%CAS02 amb /encodingDtreball /StandardEncoding
+%(NO++-------------------)pstack quit
+%1 string dup 0 159 put
+
+%%CAS00 amb /encodingDtreball /WinAnsiEncoding
+%1 string dup 0 191 put
+%<BF>
 
 
 
@@ -180,82 +206,54 @@ systemdict /EncodingDirectory get
  {  %% hem de desar el glif? (el nom o el codi)
   /nOctts 0 def  %% nombre d'octets a interpretar
   dup 2 8bits cvrs dup /bin exch def length 8 eq
-  {  %% podria tractar-se d'un octet de capçalera?
+  {  %% podria tractar-se d'una excepció o d'un octet de capçalera?
    %% interroguem les excepcions que mai no són octet de capçalera
    dup 192 eq  %% C0 \300 192 /Agrave
-   {
+   {  %% una excepció
+%%CAS##
     dup 3 array dup 3 -1 roll 0 exch put dup dup  %% aquí hi desarem les 3 dades del glif, començant pel codi que ens ve de la cadena de text
     4 -1 roll encodingDtreball exch get 1 exch put  %% desem el nom que, per codi, li correspon a l'Encoding de treball (aquí no caldrà comprovar-ho)
     dup 1 get AdobeGlyphList exch get 2 exch put  %% desem el seu codi Unicode que, per nom, li correspon dins l'AGL (aquí no caldrà comprovar-ho)
     %% desem l'array de les 3 dades del glif dins l'array dels glifs a compondre
     araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
     dup 3 -1 roll araVa exch put /araGlifs exch def
-%    nomocodi
-%    {  %% via nom
-%		(192 excepcio? Agrave)pstack quit
-%    }
-%    {  %% via codi
-%     araLinia dup length dup /araVa exch def 1 add string dup 3 -1 roll 0 exch putinterval
-%     dup 3 -1 roll araVa exch put /araLinia exch def
-%%FET
-%    }ifelse
+(perFER1)pstack quit
    }
    {
     dup 193 eq  %% C1 \301 193 /Aacute
-    {
+    {  %% una excepció
+%%CAS##
      dup 3 array dup 3 -1 roll 0 exch put dup dup  %% aquí hi desarem les 3 dades del glif, començant pel codi que ens ve de la cadena de text
      4 -1 roll encodingDtreball exch get 1 exch put  %% desem el nom que, per codi, li correspon a l'Encoding de treball (aquí no caldrà comprovar-ho)
      dup 1 get AdobeGlyphList exch get 2 exch put  %% desem el seu codi Unicode que, per nom, li correspon dins l'AGL (aquí no caldrà comprovar-ho)
      %% desem l'array de les 3 dades del glif dins l'array dels glifs a compondre
      araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
      dup 3 -1 roll araVa exch put /araGlifs exch def
-%     nomocodi
-%     {  %% via nom
-%		(193 excepcio? Aacute)pstack quit
-%     }
-%     {  %% via codi
-%      araLinia dup length dup /araVa exch def 1 add string dup 3 -1 roll 0 exch putinterval
-%      dup 3 -1 roll araVa exch put /araLinia exch def
-%%FET
-%     }ifelse
+(perFER2)pstack quit
     }
     {
      dup 245 eq  %% F5 \365 245 /otilde
-     {
+     {  %% una excepció
+%%CAS##
       dup 3 array dup 3 -1 roll 0 exch put dup dup  %% aquí hi desarem les 3 dades del glif, començant pel codi que ens ve de la cadena de text
       4 -1 roll encodingDtreball exch get 1 exch put  %% desem el nom que, per codi, li correspon a l'Encoding de treball (aquí no caldrà comprovar-ho)
       dup 1 get AdobeGlyphList exch get 2 exch put  %% desem el seu codi Unicode que, per nom, li correspon dins l'AGL (aquí no caldrà comprovar-ho)
       %% desem l'array de les 3 dades del glif dins l'array dels glifs a compondre
       araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
       dup 3 -1 roll araVa exch put /araGlifs exch def
-%      nomocodi
-%      {  %% via nom
-%		(245 excepcio? otilde)pstack quit
-%      }
-%      {  %% via codi
-%       araLinia dup length dup /araVa exch def 1 add string dup 3 -1 roll 0 exch putinterval
-%       dup 3 -1 roll araVa exch put /araLinia exch def
-%%FET
-%      }ifelse
+(perFER3)pstack quit
      }
      {
       dup 255 eq  %% FF \377 255 /ydieresis
-      {
+      {  %% una excepció
+%%CAS##
        dup 3 array dup 3 -1 roll 0 exch put dup dup  %% aquí hi desarem les 3 dades del glif, començant pel codi que ens ve de la cadena de text
        4 -1 roll encodingDtreball exch get 1 exch put  %% desem el nom que, per codi, li correspon a l'Encoding de treball (aquí no caldrà comprovar-ho)
        dup 1 get AdobeGlyphList exch get 2 exch put  %% desem el seu codi Unicode que, per nom, li correspon dins l'AGL (aquí no caldrà comprovar-ho)
        %% desem l'array de les 3 dades del glif dins l'array dels glifs a compondre
        araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
        dup 3 -1 roll araVa exch put /araGlifs exch def
-%       nomocodi
-%       {  %% via nom
-%		(255 excepcio? ydieresis)pstack quit
-%       }
-%       {  %% via codi
-%        araLinia dup length dup /araVa exch def 1 add string dup 3 -1 roll 0 exch putinterval
-%        dup 3 -1 roll araVa exch put /araLinia exch def
-%%FET
-%       }ifelse
+(perFER4)pstack quit
       }
       {  %% no el desarem perquè és un octet de capçalera?
        /iOctts 0 def  %% comptador d'octets per codificar el glif
@@ -272,18 +270,41 @@ systemdict /EncodingDirectory get
        }forall
 
        iOctts 1 eq
-       {  %% si només n'hi ha 1 ja l'hem d'escriure!
-        %***% anàlisi a replicar un cop tenim el codi definitu del glif:
-        /xifrat exch def /Nxifrat /.notdef def
-        %%1er via /xifrat consultem quin és el seu nom PS a l' /encodingDtreball
-        encodingDtreball xifrat get /nompsE exch def
-        %%2n consultem si /xifrat és dins l'AGL
+       {  %% si només n'hi ha 1, és un UTF de només 8 bits/1 octet, i ja l'hem d'escriure!
+
+%***% anàlisi a replicar un cop tenim el codi definitu del glif:
+
+	/xifrat exch def  %% enter decimal del glif desxifrat
+	/Nxifrat /.notdef def  %% nom del glif si no el trobem
+	/Aglif 3 array def  %% array amb les 3 descripcions possibles del glif: índex a l' /encodingDtreball /PSglif #codepoint d'Unicode
+	/PSglif 1 array def  %% array amb els noms PS del glif
+
+%00% el /xifrat és dins de l' /encodingDtreball ? >>> o %1% o %2% 
+	xifrat encodingDtreball length 1 sub le
+	{
+%02% el /xifrat ÉS DINS l' /encodingDtreball, posem el seu /nompsE a l'índex 0 de /PSglif i posem  el /xifrat a l'índex 0 i /PSglif a l'1 de l' /Aglif i passem a %3% %6%
+         encodingDtreball xifrat get /nompsE exch def
+
+	 nompsE /.notdef eq  %% és un glif NO definit?
+	 {
+%%CAS02
+          (\n\n )print flush xifrat 128 string cvs print flush ( <<< el glif s'ha definit com a /.notdef dins l'Encoding de treball... )print flush
+	  NOMencoding 128 string cvs print flush
+         }if
+
+	 PSglif dup 0 nompsE put /PSglif exch def
+	 Aglif dup 0 xifrat put dup 1 PSglif put /Aglif exch def
+
+%03% el /xifrat és dins l'AGL? >>> o %4% o %5%
         ReverseAdobeGlyphList xifrat known
-        {  %%3er si /xifrat hi és, n'extraiem el(s) nom(s)
+        {  %% n'extraiem el /nompsAGL
+%%CAS00
+%05% el /xifrat ÉS DINS l'AGL, busquem l'array del seu /nompsAGL i reorganitzem /PSglif com %09%, i posem el #codepoint a l'índex 2 de l'array del glif
          ReverseAdobeGlyphList xifrat get /nompsAGL exch def
-         %%4rt comparem el /nompsE amb el /nompsAGL reorganitzant l'array, si convé, per asseguranr-nos que el /nompsE és el primer element de l'array
+         %% comparem el /nompsE amb el /nompsAGL reorganitzant l'array, si convé, per asseguranr-nos que el /nompsE és el primer element de l'array
          /nompsEhies false def  %% gatell per saber si és dins AGL o no
-         nompsAGL 0 1 2 index length 1 sub
+         
+	 nompsAGL 0 1 2 index length 1 sub
          {  %% for per saber si el literal /nompsE existeix dins l'array /nompsAGL
           %% doncs si no existeix, avisarem i haurem d'ampliar l'array /nompsAGL per ficar-li, sempre a la posició 0
           %% si existeix i no és a la posició 0 reorganitzarem l'array perquè hi sigui
@@ -296,13 +317,15 @@ systemdict /EncodingDirectory get
            pop
           }ifelse
          }for
+
+%09% organització de /PSglif: a l'índex 0 sempre hi ha d'haver el nom PS de l' /encodingDtreball i a partir de líndex 1 la resta de noms de l'AGL (si hi són)
          nompsEhies
          {  %% si hi és ens assegurem que és a la posició zero i si no reorganitzem l'array
           dup 0 eq
           {  %% és a la posició 0, o sigui al capdavant de l'array
            pop
           }
-          {  %% no és a la posició 0 reorganizem l'array perquè hi estigui
+          {  %% no és a la posició 0 reorganizem l'array (del què serà /PSglif) perquè hi estigui
            mark 3 1 roll  %% posem una marca per poder jugar qmab qualsevol nombre de noms de glifs
            /ai0 exch def  %% posició a l'stack que anirà a l'índex zero
            aload pop counttomark ai0 roll
@@ -310,51 +333,135 @@ systemdict /EncodingDirectory get
            exch pop  %% ens carreguem la mark
           }ifelse
          }
-         {  %% si no hi és, ampliem l'array i el posem a la posició 0
-          dup length 1 add array dup dup 4 -1 roll 1 exch putinterval 0 nompsE put
+         {  %% si no hi és, ampliem l'array (del què serà /PSglif) i el posem a la posició 0
+          pop dup length 1 add array dup dup 4 -1 roll 1 exch putinterval 0 nompsE put
          }ifelse
-         %% aquí muntem l'array del glif amb les 3 dades
-         3 array dup 3 -1 roll 1 exch put dup 0 xifrat put dup 2 xifrat put 
-         %% desem l'array de les 3 dades del glif dins l'array dels glifs a compondre
+         dup /PSglif exch def
+         %% al darrer índex de /PSglif sempre hi haurà el literal amb el que podrem consultar el #codepoint d'Unicode a l'AGL
+	 dup length 1 sub get AdobeGlyphList exch get
+         %% aquí acabem de muntar l'array /Aglif
+         Aglif exch 2 exch put  %% el #codepoint d'Unicode
+         Aglif dup 1 PSglif put  %% el(s) nom(s) PS del glif
+         %% desem l'array /Aglif del glif dins l'array /araGlifs dels glifs a compondre
          araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
          dup 3 -1 roll araVa exch put /araGlifs exch def
         }
-        {  %%6è si /xifrat de l' /encodingDtreball NO hi és a l'AGL | exemple 159 <9f>
+        {
+%04% el /xifrat NO és DINS l'AGL, tant si ve de %1% com de %2%, intentem cercar si el /nompsE hi és
          %% primer buscarem si el seu nompsE és dins l'AGL
          AdobeGlyphList nompsE known
-         {  %% SI hi és posarem el codi Unicode de l'aGL que li correspon
+         {  %% si a l'AGL HI ÉS, posarem el seu codi Unicode de l'AGL a l'índex 2 d' /Aglif
 %%CAS01
-(SI++-------------------)pstack quit
+          AdobeGlyphList nompsE get Aglif exch 2 exch put
+%(SI++-------------------)
          } 
-         {  %% si NO hi és posarem un null a l'índex 2 de l'array del glif
+         {  %% si a l'AGL NO HI ÉS, mirarem les àrees PUA i n'informarem pel prompt si és normatiu Unicode o no, deixant el #codepoint o un NULL a l'índex 2 d' /Aglif
 %%CAS02
-(NO++-------------------)pstack quit
+          (\n\n )print flush xifrat 128 string cvs print flush ( <<< el #codepoint d'Unicode no existeix dins l'Adobe Glyph List)print flush
+%(NO++-------------------)
+%10% si el /xifrat NO és DINS l'AGL, hem de mirar si el #codepoint és dins d'una àrea PUA, si ho és, posarem un NULL a l'índex 2 d' /Aglif, i si no el seu #codepoint
          }ifelse
-
-         %% aquí muntem l'array del glif amb les 3 dades
-         3 array dup 3 -1 roll 1 exch put dup 0 xifrat put dup 2 null put 
-         %% desem l'array de les 3 dades del glif dins l'array dels glifs a compondre
-         araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
-         dup 3 -1 roll araVa exch put %/araGlifs exch def
+	 
+         %% desem l'array /Aglif del glif dins l'array /araGlifs dels glifs a compondre
+         Aglif araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
+         dup 3 -1 roll araVa exch put /araGlifs exch def
         }ifelse
-        %***% fi d'anàlisi a replicar
+       }
+       {  %% només si es fes servir un /encodingDtreball curt, de menys de 256, i llegint glifs amb 8 bits significatius amb un 1 al bit 8, passariem per aquí
+%% doncs som dins el rang de /xifrat que es descriu amb 1 sol octet
+%%CAS04 exemple forçant un Encoding més curt de 255, de nomes 129 elements
+
+%01% el /xifrat NO és DINS l' /encodingDtreball, posem un /.notdef a l'índex 0 de l'array /PSglif i deixem el NULL a l'índex 0 de l'array /Aglif i passem a %3%
+        PSglif dup 0 /.notdef put
+	Aglif dup 3 -1 roll 1 exch put
+	ReverseAdobeGlyphList xifrat known
+	{  %% tot i ser dins l'AGL podria
+
+	}
+        {  %% NO és dins l'AGL, però potser normatiu d'Unicode o estar en alguna de les dues àrees d'ús privat sense glif assignat
+%%CAS04
+%10% si el /xifrat NO és DINS l'AGL, hem de mirar si el #codepoint és dins d'una àrea PUA, si ho és, posarem un NULL a l'índex 2 d' /Aglif, i si no el seu #codepoint
+%% si NO és normatiu d'Unicode n'informarem pel prompt de quina de les àrees de les anomenades «Unassigned, Private use, or Surrogates» pertany:
+         %% extret de… blocsUnicode.ps
+         %% un bloc que va del decimal… 55296 …al decimal… 63743
+            %% High_Surrogates [\uD800-\uDB7F] …del decimal… 55296 …fins… 56191
+            %% High_Private_Use_Surrogates | High_PU_Surrogates [\uDB80-\uDBFF] …del decimal… 56192 …fins… 56319
+            %% Low_Surrogates [\uDC00-\uDFFF] …del decimal… 56320 …fins… 57343
+            %% PUA | Private_Use_Area | Private_Use [\uE000-\uF8FF] …del decimal… 57344 …fins… 63743
+         %% un bloc que va del decimal… 983040 …al decimal… 1114111
+            %% Sup_PUA_A | Supplementary_Private_Use_Area_A [U+F0000-U+FFFFF] …del decimal… 983040 …fins… 1048575
+            %% Sup_PUA_B | Supplementary_Private_Use_Area_B [U+100000-U+10FFFF] …del decimal… 1048576 …fins… 1114111
+
+         xifrat 55296 ge xifrat 63743 le and xifrat 983040 ge xifrat 1114111 le and or
+	 { %% filtra en quin dels 2 grans blocs «Unassigned, Private use, or Surrogates» podria pertànyer
+          xifrat 55296 ge xifrat 63743 le and
+	  {
+           xifrat 56191 le
+	   {  %% High_Surrogates [\uD800-\uDB7F] …del decimal… 55296 …fins… 56191
+            (\n\n )print flush xifrat 128 string cvs print flush
+            ( <<< Unicode privat del bloc: High_Surrogates [\\uD800-\\uDB7F] del decimal 55296 fins 56191)print flush
+	   }
+           {
+            xifrat 56319 le
+	    {  %% High_Private_Use_Surrogates | High_PU_Surrogates [\uDB80-\uDBFF] …del decimal… 56192 …fins… 56319
+             (\n\n )print flush xifrat 128 string cvs print flush
+             ( <<< Unicode privat del bloc: High_Private_Use_Surrogates | High_PU_Surrogates [\\uDB80-\\uDBFF] …del decimal… 56192 …fins… 56319)print flush
+	    }
+            {
+             xifrat 57343 le
+             {  %% Low_Surrogates [\uDC00-\uDFFF] …del decimal… 56320 …fins… 57343
+              (\n\n )print flush xifrat 128 string cvs print flush
+              ( <<< Unicode privat del bloc: Low_Surrogates [\\uDC00-\\uDFFF] …del decimal… 56320 …fins… 57343)print flush
+	     }
+             {
+              xifrat 63743 le
+	      {  %% PUA | Private_Use_Area | Private_Use [\uE000-\uF8FF] …del decimal… 57344 …fins… 63743
+               (\n\n )print flush xifrat 128 string cvs print flush
+               ( <<< Unicode privat del bloc: PUA | Private_Use_Area | Private_Use [\\uE000-\\uF8FF] …del decimal… 57344 …fins… 63743)print flush
+	      }
+              {  %% és entre 983040 i 1114111
+               xifrat 1048575 le
+               {  %% Sup_PUA_A | Supplementary_Private_Use_Area_A [U+F0000-U+FFFFF] …del decimal… 983040 …fins… 1048575
+                (\n\n )print flush xifrat 128 string cvs print flush
+                ( <<< Unicode privat del bloc: Sup_PUA_A | Supplementary_Private_Use_Area_A [U+F0000-U+FFFFF] …del decimal… 983040 …fins… 1048575)print flush
+               }
+	       {  %% Sup_PUA_B | Supplementary_Private_Use_Area_B [U+100000-U+10FFFF] …del decimal… 1048576 …fins… 1114111
+                (\n\n )print flush xifrat 128 string cvs print flush
+                ( <<< Unicode privat del bloc: Sup_PUA_B | Supplementary_Private_Use_Area_B [U+100000-U+10FFFF] …del decimal… 1048576 …fins… 1114111)print flush
+               }ifelse
+	      }ifelse
+             }ifelse
+            }ifelse
+           }ifelse
+	  }if
+	 }
+	 {  %% és un codi Unicode normatiu però al NO ser dins l'AGL pot tractar-se d'un codi de control (i.e. 129 sense glif) o d'altres que no podem consultar
+%%CAS04
+          (\n\n )print flush xifrat 128 string cvs print flush ( <<< Unicode normatiu d'un glif que se'ns escapa o d'un codi de control sense glif)print flush
+          dup 2 xifrat put /Aglif exch def  %% posem el codi Unicode a l'índex 2
+	  (\n >>> podeu consultar a Unicode de quin glif i sistema d'escriptura o d'alfabet es tracta... https://util.unicode.org/UnicodeJsps/character.jsp?a=)print flush
+          /sHexa 16 string def xifrat 16 sHexa cvrs print flush (\n\n)print flush
+	 }ifelse
+        }ifelse
+        %% desem l'array /Aglif del glif dins l'array /araGlifs dels glifs a compondre
+        Aglif araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
+        dup 3 -1 roll araVa exch put /araGlifs exch def
+(ARAsomAQUI)pstack quit
+       }ifelse
+
+%***% fi d'anàlisi a replicar
 
 (nomeshiha1u)pstack quit
 
-        %% tant si el trobem com si no, hem de descartar que el seu codi decimal sigui dins el rang PUA <E000> <f8ff> i/o els altres blocs sense normalitzar
-        %% com el… Supplementary_Private_Use_Area_A i Supplementary_Private_Use_Area_B …en cas de ser un caràcter no acceptat encara, però inclos a la font,
-        %% o sigui dins el CharStrings, doncs també pot ser que no es trobi dins l' Encoding de la font (/encodingDtreball) o que no estigui en cap del dos llocs
-
-        araPla {xifrat eq{/Nxifrat exch def exit}{pop}ifelse}forall
-
-        Nxifrat /.notdef eq
-        {
-         (\n\n !!! el codi decimal... )print flush xifrat 32 string cvs print flush ( ...no es troba dins el xifrat de l'AGL ...PLEGUEM!\n)print flush
-         ( >>> podeu consultar a Unicode de quin glif i sistema d'escriptura o d'alfabet es tracta... https://util.unicode.org/UnicodeJsps/character.jsp?a=)print flush
-         /sHexa 16 string def xifrat 16 sHexa cvrs print flush (\n\n)print flush quit
-        }if
-        Nxifrat araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
-        dup 3 -1 roll araVa exch put /araGlifs exch def
+%        Nxifrat /.notdef eq
+%        {
+%         (\n\n !!! el codi decimal... )print flush xifrat 32 string cvs print flush ( ...no es troba dins el xifrat de l'AGL ...PLEGUEM!\n)print flush
+%         ( >>> podeu consultar a Unicode de quin glif i sistema d'escriptura o d'alfabet es tracta... https://util.unicode.org/UnicodeJsps/character.jsp?a=)print flush
+%         /sHexa 16 string def xifrat 16 sHexa cvrs print flush (\n\n)print flush quit
+%        }if
+%        Nxifrat araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
+%        dup 3 -1 roll araVa exch put /araGlifs exch def
+%
        }
        {  %% si n'hi a 2 o més hem d'iniciar l'embutit del xifrat
         pop  %% ens carreguem el decimal
@@ -367,7 +474,9 @@ systemdict /EncodingDirectory get
     }ifelse  %% és una excepció o és un octet de capçalera
    }ifelse  %% és una excepció o és un octet de capçalera
   }
-  {  %% té 7 o menys bits significatius i l'escrivim directament
+  {  %% té 7 o menys bits significatius i el podríem escriure directament però, com que treballarem amb tota mena d' /encodingDtreball, activem més filtres
+%%CAS03
+(te7omenysbitssignificatius)pstack quit
    dup 3 array dup 3 -1 roll 0 exch put dup dup  %% aquí hi desarem les 3 dades del glif, començant pel codi que ens ve de la cadena de text
    4 -1 roll encodingDtreball exch get 1 exch put  %% desem el nom que, per codi, li correspon a l'Encoding de treball (aquí no caldrà comprovar-ho)
 UUUUUUUI  %%EEEP abans hem de demanar si existeix! ens cal implementar-hi %***% ???
@@ -375,15 +484,6 @@ UUUUUUUI  %%EEEP abans hem de demanar si existeix! ens cal implementar-hi %***% 
    %% desem l'array de les 3 dades del glif dins l'array dels glifs a compondre
    araGlifs dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
    dup 3 -1 roll araVa exch put /araGlifs exch def
-%   nomocodi
-%   {  %% via nom
-%   }
-%   {  %% via codi
-%    araLinia dup length dup /araVa exch def 1 add string dup 3 -1 roll 0 exch putinterval
-%    dup 3 -1 roll araVa exch put /araLinia exch def
-%%FET
-%   }ifelse
-%(te7omenysbitssignificatius)pstack quit
   }ifelse  %% té menys de 7 bits significatius, és una excepció o és un octet de capçalera
  }
  {  %% no el desem perquè estem embutint el xifrat UTF-8 del glif?
