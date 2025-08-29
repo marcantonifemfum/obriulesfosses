@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8"> <!--   -->
+<title>OBRIU @s	LES FOSSES!</title>
+<link rel="icon" type="image/x-icon" href="Fvermella.png">
+<script language="JavaScript">
+// el dia i l'hora del client (oju perquè el servidor de bTactic va a l'hora del sol, o sigui 2h enrera!)
+var _quinHoraEs = new Date().toLocaleTimeString();
+const options = {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
+var _quinDiaSom = new Date().toLocaleDateString("ca-ES", options); 
+//	setCookie('quinHoraEs', _quinHoraEs, 1);
+
+//
+alert("O B R I U   L E S   F O S S E S   és una acció de #DDHH promoguda per familiars de víctimes en Desaparició Forçada o Involuntària de la Guerra d\'Espanya i el Franquisme, molts d\'ells donants d\'ADN del Programa d\'Identificació Genètica dels departaments de Salut i Justícia de la Generalitat.\n\nCap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!");
+
+//var ample = screen.width;
+var ample = window.innerWidth;
+//var alt = screen.height;
+var alt = window.innerHeight;
+
+window.location = 'prototip02.php?laX=' + ample + '&laY=' + alt + '&laH=' + _quinHoraEs + '&elD=' + _quinDiaSom + '&UA=false';
+
+</script>
+</head>
+<body></body>
+</html>

@@ -24,7 +24,7 @@
 %% podríem d'escriure en paral·lel a JS/Canvas per tal s'adapti dinàmicament a qualsevol tipus de finestra/pantalla?
 %% tooltips en canvas i altres formats: https://stackoverflow.com/questions/17064913/display-tooltip-in-canvas-graph
 
-%% capturem les variables d'entorn provinents de prototip00.php
+%% capturem les variables d'entorn provinents de prototip02.php
 
 (MRCT_width) getenv  %% la variable d'entorn existeix?
 {  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
@@ -701,49 +701,155 @@ femHTML
 
  43c (<!DOCTYPE html>
 <html>
- <head>
-<!-- <meta charset="UTF-8"> -->
-<meta name="robots" content="noindex" />
-<title>OBRIU LES FOSSES!</title>
-<link rel="icon" type="image/x-icon" href="https://www.obriulesfosses.cat/Fvermella.png">
+<head>
 <style>
-
-img {
-// caixa perfectament a l'ample de la pantalla (que no de la finestra)
-    max-width: 100%;
- //   max-height: 100%;
-             margin: 0;
-            padding: 0;
+html, body
+{  // caixa perfectament a l'ample de la pantalla (que no de la finestra)
+ height: 100%;
+ margin: 0;
+ padding: 0;
 }
-
-html, body {
-// caixa perfectament a l'ample de la pantalla (que no de la finestra)
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-// tooltips a experimentar
-
 </style>
- </head><body>
+</head>
+<body>
 
-<!--
-<canvas width=) writestring
+<canvas id="canvas" width=") writestring
+
 43c AMPLEtalla round cvi 128 string cvs writestring  %% píxels d'ample que quaden amb els de l'UserAgent
-43c ( height=)writestring
+
+43c (" height=") writestring
 %% ens cal fer una regla de 3 entre ample/alt de cols&fils i AMPLEtalla (que serà el width) per tal de deduir l'height
 43c cols&fils aload pop AMPLEtalla mul exch div round cvi 128 string cvs writestring  %% píxels d'alt que quaden amb els de l'UserAgent)
-43c (> -->
 
- <img src=") writestring
- 43c IDunica writestring
- 43c (_obriulesfosses.png" alt="obriulesfosses.cat" usemap="#obriulesfosses" width=") writestring
+43c (">
+Sorry, your browser does not support canvas.
+</canvas>
+<script>
+) writestring
+
+43c (// aquí la imatge
+var canvas = document.querySelector("canvas");
+ctx = canvas.getContext("2d");
+
+const image = new Image\() writestring
+
  43c AMPLEtalla round cvi 128 string cvs writestring  %% píxels d'ample que quaden amb els de l'UserAgent
- 43c (" height=")writestring
+
+43c (, ) writestring
+
  %% ens cal fer una regla de 3 entre ample/alt de cols&fils i AMPLEtalla (que serà el width) per tal de deduir l'height
  43c cols&fils aload pop AMPLEtalla mul exch div round cvi 128 string cvs writestring  %% píxels d'alt que quaden amb els de l'UserAgent)
- 43c ("><map name="obriulesfosses">)writestring
+
+43c (\); // Using optional size for image
+image.onload = drawImageActualSize; // Draw when image has loaded
+// URL Load an image of intrinsic size in CSS pixels
+image.src = "http://localhost/www.obriulesfosses.cat/exhumeu/htmls/) writestring
+
+ 43c IDunica writestring
+
+43c (_obriulesfosses.png";
+) writestring
+
+43c (function drawImageActualSize() {
+  // Use the intrinsic size of image in CSS pixels for the canvas element
+  canvas.width = ) writestring
+
+43c AMPLEtalla round cvi 128 string cvs writestring  %% píxels d'ample que quaden amb els de l'UserAgent
+
+ 43c (;
+  canvas.height = ) writestring
+
+%% ens cal fer una regla de 3 entre ample/alt de cols&fils i AMPLEtalla (que serà el width) per tal de deduir l'height
+43c cols&fils aload pop AMPLEtalla mul exch div round cvi 128 string cvs writestring  %% píxels d'alt que quaden amb els de l'UserAgent
+
+ 43c (;
+
+  // Will draw the image as 300x227, ignoring the custom size of 60x45
+  // given in the constructor
+  ctx.drawImage(this, 0, 0);
+
+  // To use the custom size we'll have to specify the scale parameters
+  // using the element's width and height properties - lets draw one
+  // on top in the corner:
+  ctx.drawImage(this, 0, 0, this.width, this.height);
+}
+) writestring
+
+43c (// The Tool-Tip instance:
+function ToolTip(canvas, region, text, width, timeout)
+{
+ var me = this,                                // self-reference for event handlers
+     div = document.createElement("div"),      // the tool-tip div
+     parent = canvas.parentNode,               // parent node for canvas
+     visible = false;                          // current status
+
+ // set some initial styles, can be replaced by class-name etc.
+ div.style.cssText = "position:fixed;padding:7px;background:white;pointer-events:none;width:" + width + "px";
+ div.innerHTML = text;
+
+ // show the tool-tip
+ this.show = function(pos)
+ {
+  if (!visible) 
+  {                             // ignore if already shown (or reset time)
+   visible = true;                           // lock so it's only shown once
+   setDivPos(pos);                           // set position
+   parent.appendChild(div);                  // add to parent of canvas
+   setTimeout(hide, timeout);                // timeout for hide
+  }
+ }
+
+ // hide the tool-tip
+ function hide()
+ {
+  visible = false;                            // hide it after timeout
+  parent.removeChild(div);                    // remove from DOM
+ }
+
+ // check mouse position, add limits as wanted... just for example:
+ function check(e)
+ {
+  var pos = getPos(e),
+  posAbs = {x: e.clientX, y: e.clientY};  // div is fixed, so use clientX/Y
+  if
+  (
+   !visible &&
+   pos.x >= region.x && pos.x < region.x + region.w &&
+   pos.y >= region.y && pos.y < region.y + region.h
+  )
+  {
+   me.show(posAbs);                          // show tool-tip at this pos
+  }
+  else setDivPos(posAbs);                     // otherwise, update position
+ }
+
+ // get mouse position relative to canvas
+ function getPos(e)
+ {
+  var r = canvas.getBoundingClientRect();
+  return {x: e.clientX - r.left, y: e.clientY - r.top}
+ }
+
+ // update and adjust div position if needed (anchor to a different corner etc.)
+ function setDivPos(pos)
+ {
+  if (visible)
+  {
+   if (pos.x < 0) pos.x = 0;
+   if (pos.y < 0) pos.y = 0;
+   // other bound checks here
+   div.style.left = pos.x + "px";
+   div.style.top = pos.y + "px";
+  }
+ }
+
+ // we need to use shared event handlers:
+ canvas.addEventListener("mousemove", check);
+ canvas.addEventListener("click", check);
+
+}
+) writestring
+
 }
 {
  pop
@@ -758,6 +864,62 @@ html, body {
 /araY yPagina cQ sub def 
 
 %%URL
+%% font dels crèdits
+(UbuntuMono-R.ttf)
+%(Hack-Regular.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+%dup length array copy dup 0
+%/Fhook put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0191 put
+%/uni0493 put
+%/uni0492 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /WApMono exch definefont pop
+/WApMono findfont
+/creditsMono exch def
+
+%% font del titular dels crèdits
+(UbuntuMono-B.ttf)
+%(Hack-Regular.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+%dup length array copy dup 0
+%/Fhook put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0191 put
+%/uni0493 put
+%/uni0492 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /WApMono exch definefont pop
+/WApMono findfont
+/creditsMonoB exch def
+
 %% font del glif que assenyala fosses
 %(/var/www/html/www.pliegos.net/maker/UBESH_/UBESH/Hack-Bold.ttf)  %% si el path és massa llarg (com aquest, el talla? i hi posa un font de sunstitució Helvetica?)
 %(Hack-Bold.ttf)
@@ -787,7 +949,7 @@ dup length array copy dup 0
 def  %% xifrat WinAnsi
 currentdict end /dUbuntu_WApMono exch definefont pop
 /dUbuntu_WApMono findfont
-/dHack exch def
+/UbuntuMonoB exch def
 
 %%URL
 %% tipus que podem cridar
@@ -858,33 +1020,11 @@ currentdict end /dUbuntu_WAp exch definefont pop
 %% pintem el ponent en groc?
 true
 {
- false
- {
-  DINa4
-  {  %% just al format A4
-   gsave
-   0 yPagina cQ 9 mul sub gruixF add moveto cQ gruixF sub yPagina cQ 9 mul sub gruixF add lineto
-   cQ gruixF sub yPagina cQ 7 mul sub gruixF add lineto cQ 2 mul gruixF sub yPagina cQ 7 mul sub gruixF add lineto
-   cQ 2 mul gruixF sub dup yPagina cQ 4 mul sub gruixF add lineto yPagina cQ 3 mul sub gruixF add lineto
-   cQ 3 mul gruixF sub yPagina cQ 3 mul sub gruixF add lineto cQ 3 mul gruixF sub yPagina lineto
-   0 yPagina lineto closepath
-   closepath 1 1 0 setrgbcolor fill
-   grestore
-  }
-  {  %% just al format de les 43 comarques
-   gsave
-   1 1 0 setrgbcolor
-   0 0 margeALvoltant cQ 2 mul add margeALvoltant 2 mul cQ 11 mul add rectfill
-   grestore
-  }ifelse
- }
- {
-  gsave
-  1 1 0 setrgbcolor
-  0 0 margeALvoltant cQ 3 mul add margeALvoltant 2 mul yPagina add
-  rectfill
-  grestore
- }ifelse
+ gsave
+ 1 1 0 setrgbcolor
+ 0 0 margeALvoltant cQ 3 mul add margeALvoltant 2 mul yPagina add
+ rectfill
+ grestore
 }if
 
 %% pintem el mar al sud?
@@ -1017,8 +1157,13 @@ translate
 %    pelRect /mefecit exch def  %% per situar la data i l'hora
 %   }if
 
+   araC (VN) eq
+   {  %% desem la coordenada x,y UL de l'Aran per poder situar el cap dels crèdits
+    pelRect dup 0 get exch 3 get 2 array astore /capcredits exch def
+   }if
+
    araC (BR) eq
-   {  %% desem la coordenada x,y LR del Barcelonès per poder situar el rellotge de fosses
+   {  %% desem la coordenada x,y LR del Barcelonès per poder situar el rellotge de fosses i el garigot
     pelRect dup 2 get exch 1 get 2 array astore /illademaians exch def
    }if
 
@@ -1061,34 +1206,46 @@ translate
 
     femHTML
     {  %% per cada comarca
-     43c (<area shape="rect" coords=") writestring
-     43c pelRect 0 get xmapaHTML add xHint mul round cvi
-%.818
-mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
-     128 string cvs writestring  %% la posició xLL ha de dur el multiplicador perquè quadri amb la resolució
-     43c (,)writestring
-     43c pelRect 1 get cols&fils 1 get ymapaHTML sub exch sub cQ sub xHint mul round cvi
-%.818
-mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
-     128 string cvs writestring  %% la posició yLL ha de dur el multiplicador perquè quadri amb la resolució
-     43c (,)writestring
-     43c pelRect 2 get xmapaHTML add xHint mul round cvi
-%.818
-mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
-     128 string cvs writestring  %% la posició xUR ha de dur el multiplicador perquè quadri amb la resolució
-     43c (,)writestring
-     43c pelRect 3 get cols&fils 1 get ymapaHTML sub exch sub cQ add xHint mul round cvi
-%.818
-mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
-     128 string cvs writestring  %% la posició yUR ha de dur el multiplicador perquè quadri amb la resolució
-     43c (" alt=")writestring
-     43c araT writestring
-     43c (" href=")writestring
-     43c %AliniesD1solOctet 0 get
-     araC 6 string cvs writestring
-     43c (.htm" title=")writestring
+
+     43c (
+     // el tooltip de la comarca
+     var ) writestring
+     43c araC 6 string cvs writestring
+     43c (= new ToolTip\(canvas, {x: ) writestring
+     43c pelRect 0 get
+     xmapaHTML add xHint mul round cvi
+     mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+     16 string cvs writestring
+     43c (, y: ) writestring
+     43c pelRect 3 get
+     cols&fils 1 get ymapaHTML sub exch sub
+     %cQ sub
+     xHint mul round cvi
+     mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+     16 string cvs writestring
+     43c (, w: ) writestring
+     43c %pelRect 2 get pelRect 0 get sub
+     cQ
+     mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+     xHint mul round cvi
+     16 string cvs writestring
+     43c (, h: ) writestring
+     43c %pelRect 3 get pelRect 1 get sub
+     cQ
+     mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+     xHint mul round cvi
+     16 string cvs writestring
+     43c (}, ") writestring
+     43c (<span style='font-family:mono;color:#000000;font-weight:Bold'>) writestring
      43c AliniesD1solOctet 0 get writestring
-     43c (">)writestring
+     43c (</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: ) writestring
+     43c araFosses 4 string cvs writestring
+     43c (<br><br>&nbsp;&nbsp;Fosses exhumades: ) writestring
+     43c araE 4 string cvs writestring
+     43c (</span><br>&nbsp;<br>) writestring
+     43c (", 225, 3000\);
+) writestring
+
     }if
 
     /femF true def  %% gatell per saber si hem exhaurit el nombre de fosses i hem de pintar o no el glif
@@ -1126,7 +1283,7 @@ mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcci�
        }ifelse
 
        gsave  %% hi centrem un glif tipogràfic acolorit segons categoria
-       dHack tssll scalefont setfont 0 0 moveto glifF true charpath pathbbox
+       UbuntuMonoB tssll scalefont setfont 0 0 moveto glifF true charpath pathbbox
        3 index 2 div /ajustX exch def  %% per ajustar la posició x del moveto
        3 -1 roll sub 3 1 roll exch sub  %% ample i alt del glif inscrit
        tssll exch sub 2 div  %% x moveto
@@ -1193,7 +1350,7 @@ grestore
 femHTML
 {
  %% cua i tancament
- 43c dup dup (</map></body></html>)writestring flushfile closefile
+ 43c dup dup (</script></body></html>)writestring flushfile closefile
 }if
 
 %% clams als tacs vermell i blau
@@ -1256,8 +1413,8 @@ true
 %% datem
  gsave
  1 1 1 setrgbcolor
- dUbuntuB cQ 2 div scalefont setfont
- d19361977 2 2 getinterval aload pop cQ 1.6 div add exch cQ add exch moveto (1936)show
+ dUbuntu cQ 2.3 div scalefont setfont
+ d19361977 2 2 getinterval aload pop cQ 1.5 div add exch cQ add exch moveto (1936)show
  d19361977 2 2 getinterval aload pop cQ 6 div add exch cQ add exch moveto (1977)show
  grestore
 
@@ -1339,19 +1496,35 @@ true
  grestore
 
  gsave
- dUbuntuB cQ .2 mul dup /yLB exch def scalefont setfont
+ dUbuntuB cQ .2 mul dup /yLB exch def 1.3 div scalefont setfont
  1 1 1 setrgbcolor
  useragentV
  {  %% pantalla
-  margeALvoltant yLB moveto hora show ( | )show
+  margeALvoltant 2 div yLB moveto (Heu generat el mapa a les ) show hora show ( del )show
   dia (decodificaWinAnsiEncoding_a1i2i3octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
-  show
+  show currentpoint 2 array astore /eTcaP exch def  %% per compondre el TEMPS com a PENA més endavant
+
+%% el temps com a pena
+  gsave
+  currentpoint exch cQ 4 div add exch moveto
+  1 0 0 setrgbcolor dUbuntuB cQ .7 mul scalefont setfont
+  (el TEMPS com a PENA) show
+  grestore
  }
  {  %% A4
+
+%% el temps com a pena
+  gsave
+  %currentpoint exch cQ 2 div add exch moveto
+  margeALvoltant yLB moveto
+  1 0 0 setrgbcolor dUbuntuB cQ .7 mul scalefont setfont
+  (el TEMPS com a PENA) show
+  grestore
+
   mefecit aload pop exch atan rotate
-  margeALvoltant yLB neg moveto hora show ( | )show
+  margeALvoltant yLB neg moveto (Heu generat el mapa a les ) show hora show ( del )show
   dia (decodificaWinAnsiEncoding_a1i2i3octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
@@ -1507,7 +1680,7 @@ grestore
 dup 360 div  %% valor perimetral d'1 grau
 aTFxComarca 1 get mul  %% multiplicat per l'angle nozero del mínim comarcal és el cos
 /cosR exch def
-dHack cosR scalefont setfont
+UbuntuMonoB cosR scalefont setfont
 
 gsave
 0.3 setlinewidth
@@ -1544,6 +1717,144 @@ grestore
 grestore
 
 }ifelse
+
+%%TEXT
+ %% qui som
+ gsave
+ creditsMonoB cQ .6 mul dup /araCos exch def scalefont setfont
+ 1 1 1 setrgbcolor
+ cQ 4 div yPagina margeALvoltant 2 mul add araCos sub moveto
+ (SOM) show
+
+ cQ 4 div yPagina margeALvoltant 2 mul add araCos sub cQ 7 mul sub moveto
+ (FONTS) show
+ grestore
+ %% crèdits
+ gsave
+ creditsMono cQ .12 mul dup /araCos exch def scalefont setfont
+ 0 0 0 setrgbcolor
+ capcredits aload pop exch cQ sub dup /araXlb exch def exch margeALvoltant add moveto
+ ( Com a activistes i mecenes) show
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( des del Col·lectiu Republicà)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( del Baix Llobregat \(Cornellà\))
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( impulsem aquesta acció:)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
+ gsave
+ creditsMonoB cQ .12 mul scalefont setfont
+ (     ObriuLesFosses.cat)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ grestore
+ currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
+ ( Com a activistes i familiars de víctimes per)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( Desaparició Forçada o Involuntària, donants)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( d'ADN del Programa d'Identificació Genètica)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( de la Generalitat, ens fem responsables dels)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( registres de petició d'exhumació, fossa a)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( fossa, que fem al departament de Justícia del)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( Govern, informant-ne als ajuntaments i als Consells Comarcals.)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
+ ( En formem part:)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( Eva Bosch Gibert <eva_bosch_gibert@hotmail.com>)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( Marcantoni Malagarriga-Picas <OnEtsOncleGuillem@gmail.com>)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ grestore
+
+ %% fonts de dades
+ gsave
+ creditsMono cQ .12 mul dup /araCos exch def scalefont setfont
+ 0 0 0 setrgbcolor
+ capcredits aload pop exch cQ sub dup /araXlb exch def exch margeALvoltant add cQ 7 mul sub araCos 1.4 mul add moveto
+ ( Dades de la Direcció General)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( de Memòria Democràtica tretes)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( del Portal de Dades Obertes)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( de Catalunya, del dataset)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( «Fosses Comunes a Catalunya»)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( actualitzat el 28.08.2025)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ grestore
+
+ %% garigot
+ gsave
+ 1 1 1 setrgbcolor
+ illademaians aload pop exch cQ 3 mul sub margeALvoltant add exch cQ 2.3 div sub margeALvoltant add 2 copy 2 array astore /ULgarigot exch def moveto
+ dUbuntu cQ 2.3 div scalefont setfont
+ (1977) show
+ illademaians aload pop exch margeALvoltant add exch cQ 2.3 div sub cQ 3 mul sub margeALvoltant add cQ .5 mul add moveto
+ (2025) show
+ currentpoint 2 array astore /LRgarigot exch def
+ 
+ gsave
+ %% maple x i alt y màxims per les coordenades del garigot
+ LRgarigot 0 get ULgarigot 0 get sub /maX exch def
+ ULgarigot 1 get LRgarigot 1 get sub /maY exch def
+ ULgarigot 0 get LRgarigot 1 get 2 copy 2 array astore /aCorregir exch def
+ translate
+ cQ 60 div setlinewidth  %% fem que el gruix del garigot sigui el màxim d'igual que el gruix del ductus dels anys
+ ULgarigot aload pop cQ 4.4 div add aCorregir 1 get sub
+ exch cQ 2.7 div add aCorregir 0 get sub
+ exch moveto  %% fem que comenci al centre de l'ull del 9
+
+ LRgarigot aload pop cQ 7.8 div add aCorregir 1 get sub
+ exch cQ 1.65 div sub aCorregir 0 get sub  
+ exch lineto  %% fem que comenci al centre de l'ull del 0
+ stroke
+ grestore
+ 
+ grestore
+
 
 mark
 %% camps públics del Docinfo
