@@ -31,7 +31,7 @@
   dup length 0 eq
  {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
     %% ara cal gestionar aquest primer nivell d'error de sintaxi
-  pop /AMPLEtalla 595 def  %% A4 per defecte
+  pop /AMPLEtalla 595 def  %% PDF A4 per defecte
  }
  {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
   cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
@@ -41,7 +41,7 @@
  }ifelse
 }
 {  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
- /AMPLEtalla 595 def  %% A4 per defecte
+ /AMPLEtalla 595 def  %% PDF A4 per defecte
 }ifelse
 
 (MRCT_height) getenv  %% la variable d'entorn existeix?
@@ -49,7 +49,7 @@
   dup length 0 eq
  {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
     %% ara cal gestionar aquest primer nivell d'error de sintaxi
-  pop /ALTtalla 842 def  %% A4 per defecte
+  pop /ALTtalla 842 def  %% PDF A4 per defecte
  }
  {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
   cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
@@ -59,7 +59,7 @@
  }ifelse
 }
 {  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
- /ALTtalla 842 def  %% A4 per defecte
+ /ALTtalla 842 def  %% PDF A4 per defecte
 }ifelse
 
 (MRCT_qhe) getenv  %% la variable d'entorn existeix?
@@ -67,15 +67,15 @@
   dup length 0 eq
  {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
     %% ara cal gestionar aquest primer nivell d'error de sintaxi
-  pop /hora (a deshora) def  %% A4 per defecte
+  pop /hora (a deshora) def  %% PDF A4 per defecte
  }
  {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
   %cvx exec  %% és una string que hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
-  /hora exch def  %% A4 per defecte
+  /hora exch def  %% PDF A4 per defecte
  }ifelse
 }
 {  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
- /hora (a deshora) def  %% A4 per defecte
+ /hora (a deshora) def  %% PDF A4 per defecte
 }ifelse
 
 (MRCT_qde) getenv  %% la variable d'entorn existeix?
@@ -83,15 +83,15 @@
   dup length 0 eq
  {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
     %% ara cal gestionar aquest primer nivell d'error de sintaxi
-  pop /dia (sine die) def  %% A4 per defecte
+  pop /dia (sine die) def  %% PDF A4 per defecte
  }
  {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
   %cvx exec  %% és una string que hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
-  /dia exch def  %% A4 per defecte
+  /dia exch def  %% PDF A4 per defecte
  }ifelse
 }
 {  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
- /dia (sine die) def  %% A4 per defecte
+ /dia (sine die) def  %% PDF A4 per defecte
 }ifelse
 
 (MRCT_uaV) getenv  %% la variable d'entorn existeix?
@@ -99,15 +99,15 @@
   dup length 0 eq
  {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
     %% ara cal gestionar aquest primer nivell d'error de sintaxi
-  pop /useragentV false def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem A4 (false)
+  pop /useragentV false def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem PDF A4 (false)
  }
  {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
   cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
-  /useragentV exch def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem A4 (false)
+  /useragentV exch def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem PDF A4 (false)
  }ifelse
 }
 {  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
- /useragentV false def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem A4 (false)
+ /useragentV false def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem PDF A4 (false)
 }ifelse
 
 (MRCT_PDFunic) getenv  %% la variable d'entorn existeix?
@@ -119,7 +119,7 @@
  }
  {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
   %cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
-  /IDunica exch def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem A4 (false)
+  /IDunica exch def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem PDF A4 (false)
  }ifelse
 }
 {  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
@@ -128,7 +128,7 @@
 
 
 %% decidim si ho adaptem a un format qualsevol (pantalles) o a un DINa4 vertical
-%false  %% si l'User Agent no treballa automàticament anem a una sortida A4
+%false  %% si l'User Agent no treballa automàticament anem a una sortida PDF A4
 %/useragentV exch def
 
 %%TAULA DE LA VERITAT PELS FORMATS DE PANTALLA/PÀGINA
@@ -138,7 +138,7 @@
 %% però si és més ample que alt, llavors rectifica el valor de Y al quadrat amb marges de les 43 comarques
    %% true  > useragentV / false > DINa4
    %% false > MESaltQUEample
-%% per fer A4 desactivem l'User Agent
+%% per fer el PDF A4 desactivem l'User Agent
    %% %% false > useragentV / true > DINa4
 
 useragentV
@@ -153,7 +153,7 @@ useragentV
 
 }
 {  %% false: si l'User Agent detecta un dispositiu més ample que alt, llavors treballarem amb un quadrat per l'ample
- true /DINa4 exch def  %% la sortida a A4 vertical serà bona quan la gent es vulguin tibar l'estat de l'acció en PDF
+ true /DINa4 exch def  %% la sortida a PDF A4 vertical serà bona quan la gent es vulguin tibar l'estat de l'acció en PDF
 }ifelse
 
 DINa4
@@ -1242,6 +1242,8 @@ translate
      43c araFosses 4 string cvs writestring
      43c (<br><br>&nbsp;&nbsp;Fosses exhumades: ) writestring
      43c araE 4 string cvs writestring
+     43c (<br><br>&nbsp;&nbsp;Fosses reclamades: ) writestring
+     43c araR 4 string cvs writestring
      43c (</span><br>&nbsp;<br>) writestring
      43c (", 225, 3000\);
 ) writestring
@@ -1486,6 +1488,7 @@ true
     }ifelse
 
     margeALvoltant dup .3 mul sub
+    dup /peuA42025 exch def
     translate 90 rotate 0 0 moveto
     show exit
    }
@@ -1498,31 +1501,16 @@ true
  gsave
  dUbuntuB cQ .2 mul dup /yLB exch def 1.3 div scalefont setfont
  1 1 1 setrgbcolor
+%%ATENCIÓ: aquest applet s'executa 2 vegades a prototip##.php de manera que el 1er cop /useragentV és a false perquè la URL s'inicia amb &UA=false
  useragentV
  {  %% pantalla
   margeALvoltant 2 div yLB moveto (Heu generat el mapa a les ) show hora show ( del )show
   dia (decodificaWinAnsiEncoding_a1i2i3octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
-  show currentpoint 2 array astore /eTcaP exch def  %% per compondre el TEMPS com a PENA més endavant
-
-%% el temps com a pena
-  gsave
-  currentpoint exch cQ 4 div add exch moveto
-  1 0 0 setrgbcolor dUbuntuB cQ .7 mul scalefont setfont
-  (el TEMPS com a PENA) show
-  grestore
+  show currentpoint 2 array astore /XYeTcaP exch def  %% per compondre el TEMPS com a PENA més endavant
  }
- {  %% A4
-
-%% el temps com a pena
-  gsave
-  %currentpoint exch cQ 2 div add exch moveto
-  margeALvoltant yLB moveto
-  1 0 0 setrgbcolor dUbuntuB cQ .7 mul scalefont setfont
-  (el TEMPS com a PENA) show
-  grestore
-
+ {  %% PDF A4
   mefecit aload pop exch atan rotate
   margeALvoltant yLB neg moveto (Heu generat el mapa a les ) show hora show ( del )show
   dia (decodificaWinAnsiEncoding_a1i2i3octets.ps)
@@ -1533,6 +1521,8 @@ true
  grestore
 }if
 grestore
+
+false{  %% ignorem el rellotge que cal polir-lo i generar-lo coom una infografia a part
 
 %% anàlisi per construir el rellotge de les fosses
 comarquesVSfosses
@@ -1718,6 +1708,8 @@ grestore
 
 }ifelse
 
+}if  %% ignorem el rellotge que cal polir-lo i generar-lo coom una infografia a part
+
 %%TEXT
  %% qui som
  gsave
@@ -1800,7 +1792,8 @@ grestore
  gsave
  creditsMono cQ .12 mul dup /araCos exch def scalefont setfont
  0 0 0 setrgbcolor
- capcredits aload pop exch cQ sub dup /araXlb exch def exch margeALvoltant add cQ 7 mul sub araCos 1.4 mul add moveto
+ capcredits aload pop exch cQ sub dup /araXlb exch def exch margeALvoltant add cQ 7 mul sub %araCos 1.4 mul add
+ moveto
  ( Dades de la Direcció General)
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
@@ -1828,33 +1821,112 @@ grestore
 
  %% garigot
  gsave
+
  1 1 1 setrgbcolor
  illademaians aload pop exch cQ 3 mul sub margeALvoltant add exch cQ 2.3 div sub margeALvoltant add 2 copy 2 array astore /ULgarigot exch def moveto
  dUbuntu cQ 2.3 div scalefont setfont
  (1977) show
- illademaians aload pop exch margeALvoltant add exch cQ 2.3 div sub cQ 3 mul sub margeALvoltant add cQ .5 mul add moveto
+ femHTML
+ {
+  illademaians aload pop exch margeALvoltant add exch cQ 2.3 div sub cQ 3 mul sub margeALvoltant add cQ .5 mul add moveto
+ }
+ {
+  illademaians aload pop pop margeALvoltant add
+  peuA42025  %margeALvoltant
+  moveto
+ }ifelse
  (2025) show
  currentpoint 2 array astore /LRgarigot exch def
  
+%%HEM DE PENSAR A: pujar les noves fonts al servidor +fer dinàmica la frase de l'Ana Messuti que acabi just com el 2025 tant a pantalla com al PDF A4
+ %% el temps com a pena
+ femHTML
+ {
+  gsave
+  XYeTcaP aload pop exch cQ 4 div add exch moveto
+  1 0 0 setrgbcolor /aracos 1 def
+  {  %% loop
+   dUbuntuB cQ aracos mul scalefont setfont
+   (el TEMPS com a PENA) stringwidth pop currentpoint pop add LRgarigot aload pop pop gt
+   {
+    aracos .1 sub /aracos exch def
+   }
+   {
+    exit
+   }ifelse
+  }loop
+  (el TEMPS com a PENA) show  %% petit homenatge a l'Ana Messuti
+  grestore
+ }
+ {  %% PDF A4
+  gsave
+  %currentpoint exch cQ 2 div add exch moveto
+  margeALvoltant yLB moveto
+  1 0 0 setrgbcolor dUbuntuB cQ .7 mul scalefont setfont
+  (el TEMPS com a PENA) show  %% petit homenatge a l'Ana Messuti
+  grestore
+ }ifelse
+
+ %% garigot
+ realtime srand  % posem la llavor de l'aleatori amb usertime 
  gsave
- %% maple x i alt y màxims per les coordenades del garigot
- LRgarigot 0 get ULgarigot 0 get sub /maX exch def
- ULgarigot 1 get LRgarigot 1 get sub /maY exch def
+
+ %% ample x i alt y màxims per les coordenades del garigot
+ LRgarigot 0 get ULgarigot 0 get sub cvi /maX exch def
+ ULgarigot 1 get LRgarigot 1 get sub cQ 2.3 div sub cvi /maY exch def
  ULgarigot 0 get LRgarigot 1 get 2 copy 2 array astore /aCorregir exch def
+ %cQ 4.6 div add  %% li sumem mig cos perquè les béziers no trepitgin el 2025
  translate
- cQ 60 div setlinewidth  %% fem que el gruix del garigot sigui el màxim d'igual que el gruix del ductus dels anys
+ 
+ %% trigarà
+ gsave
+ 1 0 0 setrgbcolor
+ dUbuntuB cQ 2.5 div scalefont setfont
+ 0 maY moveto
+ (el Govern trigarà) dup stringwidth pop maX exch sub 2 div maY
+ cQ 2.5 div 2 mul cQ 2.5 div 1.2 mul 2 mul add sub 2 div maY exch sub  %% centrat vertical?
+ moveto
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint exch pop cQ 2.5 div 1.2 mul sub
+ 1 1 1 setrgbcolor
+ (875 anys) dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto
+ show currentpoint exch pop cQ 2.5 div 1.2 mul sub
+ 1 0 0 setrgbcolor
+ (a exhumar-les totes) dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto
+ show
+ grestore
+
+ cQ
+ %60  %% fem que el gruix del garigot sigui el màxim d'igual que el gruix del ductus dels anys
+ 130
+ div setlinewidth
  ULgarigot aload pop cQ 4.4 div add aCorregir 1 get sub
  exch cQ 2.7 div add aCorregir 0 get sub
  exch moveto  %% fem que comenci al centre de l'ull del 9
+ 10  %% nonre de béziers
+ {
+  2 {rand maX mod rand maY mod} repeat
+  rand maX mod rand maY mod curveto
+ }repeat
+ 2 {rand maX mod rand maY mod} repeat
 
  LRgarigot aload pop cQ 7.8 div add aCorregir 1 get sub
  exch cQ 1.65 div sub aCorregir 0 get sub  
- exch lineto  %% fem que comenci al centre de l'ull del 0
+ exch curveto  %% fem que acabii al centre de l'ull del 0
  stroke
- grestore
- 
+
  grestore
 
+ grestore  %% fi de garigot
+
+ %% termòmetre de fosses
+ gsave
+ 1 1 1 setrgbcolor
+ illademaians aload pop cQ .9 mul sub exch cQ 4 mul sub exch moveto
+ dUbuntuB cQ scalefont setfont
+ (1005) show
+ grestore
 
 mark
 %% camps públics del Docinfo
