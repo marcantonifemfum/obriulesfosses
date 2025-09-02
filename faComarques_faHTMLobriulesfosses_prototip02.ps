@@ -675,6 +675,7 @@ DINa4
    margeALvoltant 2 mul yPagina add
   ]
 dup 4 1 roll
+  /HWResolution [4000 4000]
 >>setpagedevice
 
 %% fem l'HTML?
@@ -1017,6 +1018,34 @@ currentdict end /dUbuntu_WAp exch definefont pop
 /dUbuntu_WAp findfont
 /dUbuntuB exch def
 
+(Ubuntu-B.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
+%(Ubuntu-C.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+dup length array copy dup 0
+%/Fhook put
+/uni0191 put
+%/uni0492 put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0493 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /dUbuntu_WAp exch definefont pop
+/dUbuntu_WAp findfont
+/dUbuntuBB exch def
+
 %% pintem el ponent en groc?
 true
 {
@@ -1108,6 +1137,10 @@ margeALvoltant gruixF 2 mul xReticula 1 sub mul 2 div sub dup /xmapaHTML exch de
 margeALvoltant gruixF 2 mul yReticula 1 sub mul 2 div add dup /ymapaHTML exch def
 translate
 
+%%TEST
+/laFEM 29 def  %% l'indicador ara és un índex però haurà de ser un clau de json
+/ilaFEM 0 def
+
 0 1 yReticula 1 sub
 {  %% for de les Y per generar les 43 comarques (de dalt a baix i d'esquerra a dreta)
  dup /yCairo exch def  %% tècniques per perfilar els cairons de manera que no calvalquin
@@ -1142,7 +1175,18 @@ translate
     }
     {  %% el centre
      gsave 4 copy
-     1 1 1 setrgbcolor gruixF 2 mul setlinewidth rectstroke grestore  %% perfilem en blanc el quadrat
+
+%%TEST per assenyalar la comarca on estem treballant
+ilaFEM laFEM eq
+{
+ 1 0 0 setrgbcolor
+}
+{
+     1 1 1 setrgbcolor
+}ifelse
+ilaFEM 1 add /ilaFEM exch def
+
+     gruixF 2 mul setlinewidth rectstroke grestore  %% perfilem en blanc el quadrat
     }ifelse
    }ifelse
    2 index add exch 3 index add exch 4 array astore /pelRect exch def  %% /ANN
@@ -1181,14 +1225,16 @@ translate
     /Rect pelRect
     /Subtype /Widget
     /Ff 65536
+    /T araC 
+    
     %% generem un nom únic amb la posicio X Y de la comarca
-    /T 
-    LLc 0 get 64 string cvs dup length
-    LLc 1 get 64 string cvs
-    dup length 3 -1 roll add 1 add string dup /araT exch def
-    /NullEncode filter /fT exch def
-    fT exch writestring fT (_) writestring fT exch writestring
-    fT dup flushfile closefile araT
+    %LLc 0 get 64 string cvs dup length
+    %LLc 1 get 64 string cvs
+    %dup length 3 -1 roll add 1 add string dup /araT exch def
+    %/NullEncode filter /fT exch def
+    %fT exch writestring fT (_) writestring fT exch writestring
+    %fT dup flushfile closefile araT
+    
     %% aquest tooltip ha d'ensenyar per pantalla les dades comarcals de l'acció
     /TU  %% aquesta cadena s'ha de desxifrar a 1 sol octet WinAnsi
     araN
@@ -1197,10 +1243,15 @@ translate
     (decodificaWinAnsiEncoding_a1i2i3octets.ps)
     (r) file cvx exec
     AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+
+(PRIMERA\n                                ) dup 3 -1 roll 8 exch putinterval
+
+    %% per alguns viewers com l'Okular aquesta és l'unica manera de mostrar el contingut de /TU activant l'opció dels formularis
+     dup /MK mark /CA 4 -1 roll >>
+%/Border [0 0 2]
+%/Color [.7 0 0]
     /FT /Btn
-    /H /N  %% a Viewer de Firefox li és indiferent i sempre mostra el text en negatiu, a l'Okular 24.08 activa l'area però no ensenya el text!
-    %% en cas que vinculessim a una pàgina informativa de la web sobre l'estat de l'acció a la comarca
-    %% /AA <</D << /S /Launch /F << /Type /Filespec /F pdfNEXT >> >> >>
+    /H /I  %% a Viewer de Firefox li és indiferent i sempre mostra el text en negatiu, a l'Okular 24.08 activa l'area però no ensenya el text!
     /ANN
     pdfmark
 
@@ -1275,6 +1326,7 @@ translate
        YxT tssll mul add gruixF add exch 3 -1 roll tssll mul add exch 2 copy 2 array astore /xyT exch def tssll
 
        dup
+
        false  %% pintem el perfil quadrat de la comarca i el cercle?
        {
         gsave 0 setlinewidth 1 0 0 setrgbcolor rectstroke grestore  %% perfilem en vermell la tessel·la
@@ -1488,7 +1540,7 @@ true
     }ifelse
 
     margeALvoltant dup .3 mul sub
-    dup /peuA42025 exch def
+    dup /peu2025 exch def
     translate 90 rotate 0 0 moveto
     show exit
    }
@@ -1499,7 +1551,7 @@ true
  grestore
 
  gsave
- dUbuntuB cQ .2 mul dup /yLB exch def 1.3 div scalefont setfont
+ dUbuntuB cQ .2 mul dup /yLB exch def 1.2 div scalefont setfont
  1 1 1 setrgbcolor
 %%ATENCIÓ: aquest applet s'executa 2 vegades a prototip##.php de manera que el 1er cop /useragentV és a false perquè la URL s'inicia amb &UA=false
  useragentV
@@ -1828,33 +1880,50 @@ grestore
  (1977) show
  femHTML
  {
-  illademaians aload pop exch margeALvoltant add exch cQ 2.3 div sub cQ 3 mul sub margeALvoltant add cQ .5 mul add moveto
+  illademaians aload pop exch margeALvoltant add exch
+  MESaltQUEample
+  {
+   pop  %margeALvoltant dup .3 mul sub
+   peu2025
+  }
+  {
+   %cQ 2.3 div sub cQ 3 mul sub margeALvoltant add cQ .5 mul add
+   pop peu2025
+  }ifelse
+  moveto
  }
  {
   illademaians aload pop pop margeALvoltant add
-  peuA42025  %margeALvoltant
+  peu2025  %margeALvoltant
   moveto
  }ifelse
  (2025) show
  currentpoint 2 array astore /LRgarigot exch def
- 
-%%HEM DE PENSAR A: pujar les noves fonts al servidor +fer dinàmica la frase de l'Ana Messuti que acabi just com el 2025 tant a pantalla com al PDF A4
+
  %% el temps com a pena
  femHTML
  {
   gsave
-  XYeTcaP aload pop exch cQ 4 div add exch moveto
-  1 0 0 setrgbcolor /aracos 1 def
-  {  %% loop
-   dUbuntuB cQ aracos mul scalefont setfont
-   (el TEMPS com a PENA) stringwidth pop currentpoint pop add LRgarigot aload pop pop gt
-   {
-    aracos .1 sub /aracos exch def
-   }
-   {
-    exit
-   }ifelse
-  }loop
+  LRgarigot aload pop exch /aCaixaD exch def
+  XYeTcaP aload pop exch pop dup /yPEUStxt exch def
+  sub dUbuntuB exch scalefont setfont
+  %% fem que faci caixa per la dreta on acaba el 2025
+  0 0 moveto (el TEMPS com a PENA) stringwidth pop
+  aCaixaD exch sub yPEUStxt moveto
+
+%  exch cQ 4 div add exch moveto
+  1 0 0 setrgbcolor
+%  /aracos 1 def
+%  {  %% loop
+%   dUbuntuB cQ aracos mul scalefont setfont
+%   (el TEMPS com a PENA) stringwidth pop currentpoint pop add LRgarigot aload pop pop gt
+%   {
+%    aracos .1 sub /aracos exch def
+%   }
+%   {
+%    exit
+%   }ifelse
+%  }loop
   (el TEMPS com a PENA) show  %% petit homenatge a l'Ana Messuti
   grestore
  }
@@ -1878,25 +1947,6 @@ grestore
  %cQ 4.6 div add  %% li sumem mig cos perquè les béziers no trepitgin el 2025
  translate
  
- %% trigarà
- gsave
- 1 0 0 setrgbcolor
- dUbuntuB cQ 2.5 div scalefont setfont
- 0 maY moveto
- (el Govern trigarà) dup stringwidth pop maX exch sub 2 div maY
- cQ 2.5 div 2 mul cQ 2.5 div 1.2 mul 2 mul add sub 2 div maY exch sub  %% centrat vertical?
- moveto
- (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
- AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
- currentpoint exch pop cQ 2.5 div 1.2 mul sub
- 1 1 1 setrgbcolor
- (875 anys) dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto
- show currentpoint exch pop cQ 2.5 div 1.2 mul sub
- 1 0 0 setrgbcolor
- (a exhumar-les totes) dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto
- show
- grestore
-
  cQ
  %60  %% fem que el gruix del garigot sigui el màxim d'igual que el gruix del ductus dels anys
  130
@@ -1916,16 +1966,142 @@ grestore
  exch curveto  %% fem que acabii al centre de l'ull del 0
  stroke
 
+ %% trigarà
+ gsave
+ 0 1 0 setrgbcolor
+ dUbuntuB cQ 2.5 div scalefont setfont
+ 0 maY moveto
+ (el Govern trigarà) dup stringwidth pop maX exch sub 2 div maY
+ cQ 2.5 div 2 mul cQ 2.5 div 1.2 mul 2 mul add sub 2 div maY exch sub  %% centrat vertical?
+
+% 2 copy 2 array astore /xyOUT exch def
+ moveto
+
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get
+ %dup
+ show  %% aquí només decodifica 1 sola string dins d'una array
+
+%gsave
+%2.5 setlinewidth 1 1 1 setrgbcolor xyOUT aload pop moveto true charpath stroke
+%grestore
+
+ currentpoint exch pop cQ 2.5 div 1.2 mul sub
+ 1 1 1 setrgbcolor
+ dUbuntuBB cQ 2.5 div scalefont setfont
+ (8888 anys) dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto
+ show currentpoint exch pop cQ 2.5 div 1.2 mul sub
+ 0 1 0 setrgbcolor
+ dUbuntuB cQ 2.5 div scalefont setfont
+ (a exhumar-les totes) dup stringwidth pop maX exch sub 2 div 3 -1 roll
+
+% 2 copy 2 array astore /xyOUT exch def
+ moveto
+
+ %dup
+ show
+
+%gsave
+%2.5 setlinewidth 1 1 1 setrgbcolor xyOUT aload pop moveto true charpath stroke
+%grestore
+
+ grestore
+
  grestore
 
  grestore  %% fi de garigot
 
  %% termòmetre de fosses
  gsave
+
+ %% totals
  1 1 1 setrgbcolor
- illademaians aload pop cQ .9 mul sub exch cQ 4 mul sub exch moveto
- dUbuntuB cQ scalefont setfont
- (1005) show
+ illademaians aload pop cQ 2 mul .83 mul sub exch cQ 6.1 mul sub exch dup /xEx exch def moveto
+ dUbuntuBB cQ .8 mul scalefont setfont
+ (8888) show
+ %% retallador pel % de fosses exhumades en verd
+ gsave
+ illademaians aload pop cQ 2 mul .83 mul sub exch cQ 6.1 mul sub exch moveto
+ (8888) true charpath clip
+ %% hauríem de fer el rectangle ple de verd segons el % Y de fosses exhumades
+ (8888) false charpath pathbbox 2 index sub
+ .1 mul  %% això seria el 10%
+ 0 1 0 setrgbcolor
+ exch 3 index sub exch rectfill
+ grestore
+ gsave
+ 1 0 0 setrgbcolor
+ currentpoint cQ .3 mul sub exch pop illademaians aload pop pop cQ 6.1 mul sub exch moveto
+ dUbuntuB cQ .33 mul scalefont setfont
+ (fosses al mapa) show
+ 1 1 1 setrgbcolor (  vs  ) show
+ %% exhumades
+ 0 1 0 setrgbcolor
+ ( exhumades) show
+ illademaians aload pop pop cQ 4 mul sub xEx 2 copy 2 array astore /llgnd exch def moveto
+ dUbuntuBB cQ .8 mul scalefont setfont
+ (0097) show
+
+ %% llegenda
+ currentpoint pop /xDreta exch def
+ dUbuntuB cQ .17 mul scalefont setfont
+ 1 0 0 setrgbcolor
+ femHTML
+ {
+  4 setlinewidth
+ }
+ {
+  1 setlinewidth
+ }ifelse
+ xDreta cQ .15 mul sub llgnd aload pop exch pop cQ dup .5 mul add add cQ .15 mul dup rectstroke
+ 1 1 1 setrgbcolor
+ (Comarca on treballem) dup stringwidth pop
+ xDreta exch sub cQ .15 mul 2 mul sub llgnd aload pop exch pop cQ dup .5 mul add add moveto
+ show
+ currentpoint exch pop xDreta
+ (Fosses pendents d'exhumar  ) stringwidth pop sub
+ gsave
+ UbuntuMonoB cQ .2 mul scalefont setfont 0 0 moveto glifF stringwidth pop sub
+ grestore
+ exch
+ cQ .25 mul
+ sub moveto
+ (Fosses pendents d'exhumar  ) show
+ gsave
+ UbuntuMonoB cQ .2 mul scalefont setfont glifF show
+ grestore
+
+ currentpoint exch pop xDreta
+ (Fosses exhumades  ) stringwidth pop sub
+ gsave
+ UbuntuMonoB cQ .2 mul scalefont setfont 0 0 moveto glifF stringwidth pop sub
+ grestore
+ exch
+ cQ .25 mul
+ sub moveto
+ (Fosses exhumades  ) show
+ gsave
+ 0 1 0 setrgbcolor
+ UbuntuMonoB cQ .2 mul scalefont setfont glifF show
+ grestore
+
+ currentpoint exch pop xDreta
+ (Fosses reclamades  ) stringwidth pop sub
+ gsave
+ UbuntuMonoB cQ .2 mul scalefont setfont 0 0 moveto glifF stringwidth pop sub
+ grestore
+ exch
+ cQ .25 mul
+ sub moveto
+ (Fosses reclamades  ) show
+ gsave
+ 1 0 0 setrgbcolor
+ UbuntuMonoB cQ .2 mul scalefont setfont glifF show
+ grestore
+
+
+ grestore
+
  grestore
 
 mark
