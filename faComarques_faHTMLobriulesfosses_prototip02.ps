@@ -701,8 +701,10 @@ femHTML
  (w) file /43c exch def
 
  43c (<!DOCTYPE html>
-<html>
+<html lang="ca">
 <head>
+<title>&hellip;obriu les fosses d'una vegada!</title>
+<link rel="icon" type="image/x-icon" href="Fvermella.png">
 <style>
 html, body
 {  // caixa perfectament a l'ample de la pantalla (que no de la finestra)
@@ -765,7 +767,7 @@ image.src = "http://localhost/www.obriulesfosses.cat/exhumeu/htmls/) writestring
 
  43c (;
 
-  // Will draw the image as 300x227, ignoring the custom size of 60x45
+  // Will draw the image as X0 Y0, ignoring the custom size of X1 Y1
   // given in the constructor
   ctx.drawImage(this, 0, 0);
 
@@ -805,6 +807,9 @@ function ToolTip(canvas, region, text, width, timeout)
  {
   visible = false;                            // hide it after timeout
   parent.removeChild(div);                    // remove from DOM
+
+  //EP! aquí quan s'amaga el tooltip ens fa cas
+  //  onclick = window.location.href='http://enlloc.cat';
  }
 
  // check mouse position, add limits as wanted... just for example:
@@ -847,7 +852,6 @@ function ToolTip(canvas, region, text, width, timeout)
  // we need to use shared event handlers:
  canvas.addEventListener("mousemove", check);
  canvas.addEventListener("click", check);
-
 }
 ) writestring
 
@@ -1528,12 +1532,6 @@ translate
 }for  %% de les Y per generar les 43 comarques (de dalt a baix i d'esquerra a dreta)
 grestore
 
-femHTML
-{
- %% cua i tancament
- 43c dup dup (</script></body></html>)writestring flushfile closefile
-}if
-
 %% clams als tacs vermell i blau
 gsave
 true
@@ -1899,7 +1897,7 @@ grestore
  %1 1 1
  74 255 div 28 255 div 74 255 div  %% lila vell
  setrgbcolor
- cQ 4 div yPagina margeALvoltant 2 mul add araCos sub moveto
+ cQ 4 div yPagina margeALvoltant 2 mul add araCos 1.1 mul sub moveto
  gsave
  (SOM) show
  grestore
@@ -1956,9 +1954,9 @@ false{
  currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
  gsave
  creditsMonoB cQ .12 mul scalefont setfont
- (     ObriuLesFosses.cat)
- (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
- AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ (     ObriuLesFosses.cat) dup
+ gsave false charpath pathbbox 4 array astore /OLFcat exch def grestore
+ show
  grestore
  currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
  ( Com a activistes i familiars de víctimes per)
@@ -1973,9 +1971,7 @@ false{
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
- ( de la Generalitat, ens fem responsables dels)
- (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
- AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ ( de la Generalitat, ens fem responsables dels) show
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
  ( registres de petició d'exhumació, fossa a)
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
@@ -1985,22 +1981,15 @@ false{
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
- ( Govern, informant-ne als ajuntaments i als Consells Comarcals.)
- (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
- AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
- currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
- ( En formem part:)
- (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
- AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ ( Govern, informant-ne als ajuntaments i als Consells Comarcals.) show
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
- ( Eva Bosch Gibert <eva_bosch_gibert@hotmail.com>)
- (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
- AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ (     En formem part:) show
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
- ( Marcantoni Malagarriga-Picas <OnEtsOncleGuillem@gmail.com>)
- (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
- AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ ( Eva Bosch Gibert <eva_bosch_gibert@hotmail.com>) show
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( Marcantoni Malagarriga-Picas <OnEtsOncleGuillem@gmail.com>) show
  grestore
+
 
  %% fonts de dades
  gsave
@@ -2008,7 +1997,7 @@ false{
  %0 0 0
  1 1 1
  setrgbcolor
- capcredits aload pop exch cQ sub dup /araXlb exch def exch margeALvoltant add cQ 7 mul sub %araCos 1.4 mul add
+ capcredits aload pop exch cQ sub dup /araXlb exch def exch margeALvoltant add cQ 6.9 mul sub %araCos 1.4 mul add
  moveto
  ( Dades de la Direcció General)
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
@@ -2030,6 +2019,7 @@ false{
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+%%CAPTURA
  ( actualitzat el 28.08.2025)
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
@@ -2155,6 +2145,12 @@ false{
  currentpoint exch pop cQ 2.5 div 1.2 mul sub
  1 1 1 setrgbcolor
  dUbuntuBB cQ 2.5 div scalefont setfont
+
+ %% càlcul dels dies passats entre el 15.10.1977 fins avui mateix
+ (MRCT_A77) getenv pop cvx exec /etcp exch def  %% el temps com a pena
+ %% regla de 3 amb la captura de les fosses exhumades i les que queden per exhumar
+%%CAPTURA
+
  (8888 anys) dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto
  show currentpoint exch pop cQ 2.5 div 1.2 mul sub
  0 1 0 setrgbcolor
@@ -2197,7 +2193,7 @@ false{
      /P {ThisPage}  %% la referència indirecta a /Page
      /Type /Annot
      /Contents  %% text per raonar la regla de 3 des del 15 d'octubre de 1977 fins a data d'avui
-(\nAquesta xifra és el cru resultat d'una senzilla regla de 3 entre els anys passats des del 15 d'octubre de 1977 i el nombre de fosses exhumades fins avui.\n\nEl 15 d'octubre de 1977 es promulgà la Llei estatal 46/1977 d'Amnistia. Aquesta llei de punt i final ens ha expulsat de l'àmbit penal i també de l'àmbit forense, tant a víctimes com a familiars. Certificant la impunitat dels botxins franquistes pels crims comesos de lesa humanitat.\n\nD'aleshores ençà, exhumar els centenars de fosses comunes que tenim a Catalunya és una obligació que pel Govern de la Generalitat té una prioritat baixíssima, extraordinàriament per sota de qualsevol altra excavació arqueològica. El patrimoni abans que els DDHH.\n\nLa condició NO forense de les exhumacions aboca al Govern a violar la Llei de Recerca Biomèdica, amagant els ADNs de víctimes i familiars en falses col·leccions de malalties.\n)
+(\nAquesta xifra és el cru resultat d'una senzilla regla de 3 entre els anys passats des del 15 d'octubre de 1977, el nombre de fosses exhumades i les localitzades fins avui.\n\nEl 15 d'octubre de 1977 es promulgà la Llei estatal 46/1977 d'Amnistia. Aquesta llei de punt i final ens ha expulsat de l'àmbit penal i també de l'àmbit forense, tant a víctimes com a familiars. Certificant la impunitat dels botxins franquistes pels crims comesos de lesa humanitat.\n\nD'aleshores ençà, exhumar els centenars de fosses comunes que tenim a Catalunya és una obligació que pel Govern de la Generalitat té una prioritat baixíssima, extraordinàriament per sota de qualsevol altra excavació arqueològica. El patrimoni abans que els #DDHH.\n\nLa condició NO forense de les exhumacions aboca al Govern a violar la Llei de Recerca Biomèdica, amagant els ADNs de víctimes i familiars en falses col·leccions de malalties.\n)
 (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
 AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
      /M araCDstring  %% cal formatar les dades del nostre rellotge com es necessita aquí
@@ -2236,6 +2232,59 @@ AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una arr
    mark {clauAnnots} nomPopup cvx exec /APPEND pdfmark
    %% fi d'anotacions de PDF
 
+   femHTML
+   {  %% per l'àrea del tooltip de quan trigarà
+    43c (
+    // el tooltip de què trigarà
+    var queTrigara = new ToolTip\(canvas, {x: ) writestring
+    43c idemPopup 0 get
+    %xmapaHTML add
+    xHint mul round cvi
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    16 string cvs writestring
+    43c (, y: ) writestring  %% l'origen de les coordenades en canvas és al UL
+    43c idemPopup 3 get
+    cols&fils 1 get
+    %ymapaHTML sub
+    exch sub
+    xHint mul round cvi
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    16 string cvs writestring
+    43c (, w: ) writestring
+    43c idemPopup dup 2 get exch 0 get sub  %% ample del tooltip
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    xHint mul round cvi
+    16 string cvs writestring
+    43c (, h: ) writestring
+    43c idemPopup dup 3 get exch 1 get sub  %% alt del tooltip
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    xHint mul round cvi
+    16 string cvs writestring
+    43c (}, ") writestring
+    43c (<span style='font-family:mono;color:#000000;font-weight:Regular'>)  writestring
+    AliniesD1solOctet 0 get /ReusableStreamDecode filter dup 1024 string readline
+    {  %% qualsevol canvi de línia atura el JS i tot el text ha d'anar seguit amb el codi html
+     {
+      43c exch writestring
+      43c (<br>) writestring
+     }
+     {
+      43c exch writestring
+      43c (<br>) writestring
+      pop exit
+     }ifelse
+     dup 1024 string readline
+    }loop
+    43c (</span>) writestring
+    43c (", 600, 30000\);
+) writestring
+
+   }if
+
+   femHTML
+   {  %% cua i tancament
+    43c dup dup (</script></body></html>)writestring flushfile closefile
+   }if
 
  %% termòmetre de fosses
  gsave
@@ -2244,6 +2293,7 @@ AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una arr
  1 1 1 setrgbcolor
  illademaians aload pop cQ 2 mul .83 mul sub exch cQ 6.1 mul sub exch dup /xEx exch def moveto
  dUbuntuBB cQ .8 mul scalefont setfont
+%%CAPTURA
  (8888) show
  %% retallador pel % de fosses exhumades en verd
  gsave
@@ -2266,6 +2316,7 @@ AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una arr
  ( exhumades) show
  illademaians aload pop pop cQ 4 mul sub xEx 2 copy 2 array astore /llgnd exch def moveto
  dUbuntuBB cQ .8 mul scalefont setfont
+%%CAPTURA
  (0097) show
 
  %% llegenda

@@ -37,6 +37,16 @@ else
 
 //echo(" >>>> ".$width . " x " . $height . " <br> " . $qhe);
 
+// calculem el nombre de dies passats entre la Llei d'Amnistia 15.10.1977 i avui mateix
+$Amnistia77 = date_create('1977-10-15');
+$araMateix = new DateTime("now");
+//$araMateix = date_create('2025-09-09');
+$interval = $Amnistia77->diff($araMateix);
+//echo = "N'han passat: ", $interval->format("%a"), "\n";
+$etcp = $interval->format("%a");
+//exit($SON/365);
+putenv("MRCT_A77=$etcp");  // el temps com a pena (nombre de dies passats)
+
 //amb l'hora del servidor en tenim prou com a nom únic?
 $PDFunic = date("d"."B"."H"."i"."s");
 
