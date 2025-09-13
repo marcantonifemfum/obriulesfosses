@@ -166,7 +166,7 @@ echo "</body></html>";
 // això és com un alert però més controlat per tal de redirigir un resultat cap a on es vulgui
 	  //$pr0mpt = rtrim($prompt);
 	  //text pel 2n prompt
-          $pr0mpt = "A Catalunya hi ha més d\\'un miler de fosses comunes de les quals no se n\\'ha exhumat ni un 10%.\\n\\nO B R I U   L E S   F O S S E S  emprèn la reclamació d\\'exhumació sistemàtica, comarca a comarca, de cadascuna de les fosses comunes del nostre país al departament de Justícia de la Generalitat i als ajuntaments.\\n\\nLa Desaparició Forçada o Involuntària dels nostres parents ens empeny a denunciar aquesta vergonya 87 anys després de la Guerra d\\'Espanya i de 50 anys de polítiques de memòria d\\'aparador.\\n\\nSi prems…  [ Cancel·la ]  …podràs veure l\\'HTML de l\\'estat de l\\'actuació que ara mateix es centra a la comarca de les Garrigues\\n\\nSi prems…  [ D\\'acord ]  …s\\'obrirà un PDF amb la mateixa informació\\n\\n";
+          $pr0mpt = "A Catalunya hi ha més d\\'un miler de fosses comunes de les quals se n\\'ha exhumat només un 10%.\\n\\nO B R I U   L E S   F O S S E S  emprèn la reclamació d\\'exhumació sistemàtica, comarca a comarca, de cadascuna de les fosses comunes del nostre país al departament de Justícia de la Generalitat i als ajuntaments.\\n\\nLa Desaparició Forçada o Involuntària dels nostres parents ens empeny a denunciar aquesta vergonya 87 anys després de la Guerra d\\'Espanya i de 50 anys de polítiques de memòria d\\'aparador.\\n\\nSi prems…  [ Cancel·la ]  …podràs veure l\\'HTML de l\\'estat de l\\'actuació que ara mateix es centra a la comarca de les Garrigues\\n\\nSi prems…  [ D\\'acord ]  …s\\'obrirà un PDF amb la mateixa informació\\n\\n";
 
 // què caracu es desa quan llistem l'stack del ps?
 //var_dump($pr0mpt);

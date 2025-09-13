@@ -1,34 +1,62 @@
 %!
 %% explorador de dades del dataset de Fosses Comunes a Catalunya 1936-77
-%% un cop passat el geojson a geojson.ps via llegeixJson.ps
+%% un cop passat el geojson a geojson.ps via llegeixJson_prototip00.ps
 
 %% l'estructura del dataset oficial de fosses és un diccionari (que cal executar) on de la clau /features hi penja una array amb un diccionari per fossa
 %%+URL
 %% localhost del Tuxedo
 %%(/var/www/html/www.obriulesfosses.cat/exhumeu/datasets/Fosses_comunes_a_Catalunya_20250723.geojsonps)
-(datasets/Fosses_comunes_a_Catalunya_20250725.geojsonps)  %% adreça relativa
+(datasets/Fosses_comunes_a_Catalunya_20250909.geojsonps)  %% adreça relativa
 %% servidor bTactic
 %% ?
+
+%% extraiem la data de publicació del nom del fitxer (doncs no hi ha cap camp intern on hi sigui) en format invers al que s'escriu
+(##.##.####) /ddp exch def  %% data de publicació
+dup
+(.) search
+{
+ exch pop exch pop
+ {
+  (_) search
+  {
+   pop pop
+  }
+  {
+   exit
+  }ifelse
+ }loop
+ dup 6 2 getinterval ddp exch 0 exch putinterval  %% el dia
+ dup 4 2 getinterval ddp exch 3 exch putinterval  %% el mes
+ 0 4 getinterval ddp exch 6 exch putinterval  %% l'any
+}
+{
+ pop
+}ifelse
+
 (r) file cvx exec
 
 %% la mida de l'array és el nombre oficial de fosses comunes
-/features get dup length 4 string cvs (\n\n)print flush (NOMBRE TOTAL DE FOSSES COMUNES SEGONS EL DATASET OFICIAL... ) print flush print flush (\n\n)print flush
+/features get dup length 4 string cvs dup /totalFossesFeatures exch def
+(\n\n)print flush (NOMBRE TOTAL DE FOSSES COMUNES SEGONS EL DATASET OFICIAL... ) print flush print flush (\n\n)print flush
 
 /arrayFosses exch def  %% desem l'array del dataset oficial amb totes les fosses
 
 %% aquest és el desori comarcal de Justícia del dataset del 16.03.2025, que normalitzem via codi alfabètic comarcal (comarques repetides tindran el mateix codi)
 %% https://ca.wikipedia.org/wiki/Comarques_de_Catalunya
-%% aquests dos caràcters per comarca els hem implementat dins faComarques.ps al diccionari /comarquesVSfosses
+
+%% aquests dos caràcters per comarca, que aquí actuen com a valor, els hem implementat com a clau dins faComarques_faHTMLobriulesfosses_prototip02.ps
+%% al diccionari /comarquesVSfosses i aquí, via comentari, ressaltem les incongruències que ens fan pensar que haurem de revisar en cada actualització del dataset
+%% si aquesta estructura canvia, doncs és molt provable que així sigui en algun moment:
 <<
   (Priorat) /PR
   (Val d'Aran) /VN
   (Osona) /OS
   (Noguera) /NG
   (Ribera d'Ebre) /RE
-  (Cerdanya \(Girona\)) /CD
+  (Cerdanya \(Girona\)) /CD  %% comarca repetida doncs fan distinció del límit provincial
   (Alt Penedès) /AP
   (Vallès Occidental) /VC
-  (Pallars Jussà - Pallars Jussà) /PJ
+  (Pallars Jussà - Pallars Jussà) /PJ  %% comarca repetida sense entendre'n el motiu
   (Solsonès) /SL
   (Bages) /BG
   (Terra Alta) /TT
@@ -36,8 +64,8 @@
   (Alt Empordà) /AE
   (Pallars Sobirà) /PS
   (Garrigues) /GG
-  (Baix Camp - Baix Camp) /BC
-  (Pallars Jussà) /PJ
+  (Baix Camp - Baix Camp) /BC  %% comarca repetida sense entendre'n el motiu
+  (Pallars Jussà) /PJ  %% comarca repetida sense entendre'n el motiu
   (Alt Camp) /AC
   (Barcelonès) /BR
   (Conca de Barberà) /CB
@@ -57,18 +85,22 @@
   (Gironès) /GN
   (Selva) /SV
   (Ripollès) /RI
-  (Baix Camp) /BC
+  (Baix Camp) /BC  %% comarca repetida sense entendre'n el motiu
   (Segarra) /SR
   (Baix Llobregat) /BT
-  (Cerdanya \(Lleida\)) /CD
+  (Cerdanya \(Lleida\)) /CD  %% comarca repetida doncs fan distinció del límit provincial
   (Alt Urgell) /AU
   (Urgell) /UR
   (Vallès Oriental) /VR
   (Garrotxa) /GX
 >> /desoriComarcal exch def  %% diccionari normalitzador: nom comarcal del dataset oficial / codi alfabètic comarcal
 
+%% les incongruències comarcals podrien semblar, algunes, a la supeditació provincial que el marc mental de Justícia encara té (cas de la Cerdanya)
+%% però ni el cals del Baix Camp ni el cas del Pallars Jussà ho confirmen… https://upload.wikimedia.org/wikipedia/commons/1/12/Prov%C3%ADncies.svg
+
 %% fem un buidat de les comarques cap a /datasetComarques per poder comptar quantes fosses hi ha a cadascuna i quines s'han exhumat (les 2 dades en una array [# #])
 /datasetComarques <<>> def
+
 %% posem els numeradors a zero
 desoriComarcal
 {
@@ -117,8 +149,9 @@ arrayFosses
 }forall
 
 datasetComarques length 3 string cvs (NOBRE SUIGENERIS DE COMARQUES SEGONS EL DATASET OFICIAL... ) print flush print flush (\n\n)print flush
-(BUIDAT DEL DICCIONARI /datasetComarques ...\n\n)print flush
-datasetComarques{== ==}forall
+
+%(BUIDAT DEL DICCIONARI /datasetComarques ...\n\n)print flush
+%datasetComarques{== ==}forall
 
 %% cal sumar les fosses de les comarques duplicades (ara 3) via el seu valor ídem de codi alfabètic
 %% llavors, muntem un nou diccionari /2glifsAfosses on hi desarem els parells: codi alfabètic de 2 caràcters i array de dades de fosses
@@ -134,13 +167,34 @@ desoriComarcal
   2glifsAfosses araCODIalfabetic get  %% capturem les dades de la que ja hi és
   aload pop 3 -1 roll aload pop exch 4 -1 roll add 3 1 roll add 2 array astore  %% hi sumem les dades de la repetida
   2glifsAfosses exch araCODIalfabetic exch put  %% desem
-  (comarcaREPE)==
+  (comarcaREPE)==  %% tantes com comarques repetides
  }
  {  %% és nova
   2glifsAfosses exch araCODIalfabetic exch put  %% desem
  }ifelse
 }forall
 
-%% aquest diccionari és el que treballarà a faComarques.ps
-2glifsAfosses{== ==}forall
+%% aquest diccionari és el que treballarà a faComarques_faHTMLobriulesfosses_prototip02.ps
+2glifsAfosses
+%{== ==}forall
+
+%% tornem a comptar el nombre de fosses per comarca i comprovem si, sumades a /tfxc, coincideix amb /totalFossesFeatures
+/tfxc 0 def
+%% comptem el nombre de fossses exhumades /exhmds
+/exhmds 0 def
+{
+ aload pop
+ exhmds add /exhmds exch def
+ tfxc add /tfxc exch def
+ pop
+}forall
+
+tfxc totalFossesFeatures cvx exec ne
+{
+ (\n\nEP! /tfxc i /totalFossesFeatures NO QUADREN!\n\n)print flush
+}if
+
+%tfxc ==
+%exhmds ==
+
 

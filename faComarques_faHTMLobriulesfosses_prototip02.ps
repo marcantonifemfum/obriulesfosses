@@ -23,6 +23,7 @@
 
 %% podríem d'escriure en paral·lel a JS/Canvas per tal s'adapti dinàmicament a qualsevol tipus de finestra/pantalla?
 %% tooltips en canvas i altres formats: https://stackoverflow.com/questions/17064913/display-tooltip-in-canvas-graph
+%% l'exemple real que hem implementat el tenim aquí… ~/Downloads/4_5888481694180186571.pdf_pla.pdf
 
 %% capturem les variables d'entorn provinents de prototip02.php
 
@@ -219,12 +220,12 @@ def
 %% com que a /datasetComarques s'hi haurà desat el nom suigeneris, com a clau, i l'array [total de fosses i les exhumades], com a valor
 %% llavors, hi podrem pentinar el nom suigeneris de la comarca amb l'array de fosses, veure a /desoriComarcal a quin codi alfabètic correspon i, a partir d'aquí,
 %% muntem un tercer diccionari /2glifsAfosses on hi haurà normalitzada la comarca (a través del codi de 2 caràcters) i el total de fosses (array amb 2 dades)
-%% a l'executar faComarques.ps:
+%% a l'executar faComarques_faHTMLobriulesfosses_prototip02.ps:
 %% a través d'aquests dos caràcters alfabètics comarcals, com a clau, anem a cercar la comarca dins /comarquesVSfosses per afegir-hi les dades de l'array a /f i /e
 %% CAPTURA DE DADES DEL DATASET PRIVAT DE FOSSES DOCUMENTADES NO INCLOSES A L'OFICIAL
 %% pendent encara
 %% CAPTURA DE DADES DEL DATASET PRIVAT DE TRÀMITS DE RECLAMACIÓ I RESPOSTES
-%% pendent encara
+%% pendent encara, doncs ara les fosses reclamades les hem posat en manual en la definició prèvia del diccionari /comarquesVSfosses
 
 %% lògica de les fosses:
 %% /o + /p = /f sempre
@@ -703,7 +704,7 @@ femHTML
  43c (<!DOCTYPE html>
 <html lang="ca">
 <head>
-<title>&hellip;obriu les fosses d'una vegada!</title>
+<title>obriu les fosses d'una vegada!</title>
 <link rel="icon" type="image/x-icon" href="Fvermella.png">
 <style>
 html, body
@@ -1689,7 +1690,7 @@ true
  }
  {  %% PDF A4
   mefecit aload pop exch atan rotate
-  margeALvoltant yLB neg moveto (Heu generat el mapa a les ) show hora show ( del )show
+  margeALvoltant 1.2 div yLB neg moveto (Heu generat el mapa a les ) show hora show ( del )show
   dia (decodificaWinAnsiEncoding_a1i2i3octets.ps)
   (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
@@ -1954,7 +1955,8 @@ false{
  currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
  gsave
  creditsMonoB cQ .12 mul scalefont setfont
- (     ObriuLesFosses.cat) dup
+ ( www.ObriuLesFosses.cat) dup
+%%PODEM fer servir l'estructura Annots que ja tenim creada
  gsave false charpath pathbbox 4 array astore /OLFcat exch def grestore
  show
  grestore
@@ -2019,10 +2021,8 @@ false{
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
-%%CAPTURA
- ( actualitzat el 28.08.2025)
- (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
- AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+%%CAPTURA de la variable /ddp de publicació del dataset
+ ( publicat el ) show ddp show
  grestore
 
  %% garigot
@@ -2051,6 +2051,7 @@ false{
   peu2025  %margeALvoltant
   moveto
  }ifelse
+%%CAPTURA!
  (2025) show
  currentpoint 2 array astore /LRgarigot exch def
 
@@ -2146,16 +2147,24 @@ false{
  1 1 1 setrgbcolor
  dUbuntuBB cQ 2.5 div scalefont setfont
 
- %% càlcul dels dies passats entre el 15.10.1977 fins avui mateix
- (MRCT_A77) getenv pop cvx exec /etcp exch def  %% el temps com a pena
- %% regla de 3 amb la captura de les fosses exhumades i les que queden per exhumar
 %%CAPTURA
+ %% càlcul dels dies passats entre el 15.10.1977 fins avui mateix
+ (MRCT_A77) getenv pop cvx exec /etcp exch def  %% el temps (en dies) com a pena
+ %% regla de 3 amb la captura de les fosses exhumades i les que queden per exhumar que fem més avall
+ tfxc exhmds sub /fpd exch def  %% fosses pendents d'exhumar
+ %% si s'han exhumat /exhmds fosses en /etcp dies 
+ %% per exhumar totes les fosses que falten /fpd necessitarem? (dies passats a anys i dies)
+ etcp fpd mul exhmds div 365 div 1000 mul cvi  %% juguem amb nombres de 3 xifres pels anys (enters) i els dies (decimals) i apreciar millor com anirà canviant
+ 16 string cvs dup 0 3 getinterval /elsAnys exch def 3 3 getinterval /elsDies exch def
+ elsDies cvx exec 100 div 365 mul 10 div round cvi 3 string cvs /elsDies exch def
+ ( 000 anys i 000 dies) dup 12 elsDies putinterval
+ dup 1 elsAnys putinterval  %% ho planxem a la màscara final
 
- (8888 anys) dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto
+ dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto
  show currentpoint exch pop cQ 2.5 div 1.2 mul sub
  0 1 0 setrgbcolor
  dUbuntuB cQ 2.5 div scalefont setfont
- (a exhumar-les totes) dup stringwidth pop maX exch sub 2 div 3 -1 roll
+ (   en exhumar-les totes   ) dup stringwidth pop maX exch sub 2 div 3 -1 roll
 
  2 copy 2 array astore /xyOUT exch def
  moveto
@@ -2193,9 +2202,43 @@ false{
      /P {ThisPage}  %% la referència indirecta a /Page
      /Type /Annot
      /Contents  %% text per raonar la regla de 3 des del 15 d'octubre de 1977 fins a data d'avui
-(\nAquesta xifra és el cru resultat d'una senzilla regla de 3 entre els anys passats des del 15 d'octubre de 1977, el nombre de fosses exhumades i les localitzades fins avui.\n\nEl 15 d'octubre de 1977 es promulgà la Llei estatal 46/1977 d'Amnistia. Aquesta llei de punt i final ens ha expulsat de l'àmbit penal i també de l'àmbit forense, tant a víctimes com a familiars. Certificant la impunitat dels botxins franquistes pels crims comesos de lesa humanitat.\n\nD'aleshores ençà, exhumar els centenars de fosses comunes que tenim a Catalunya és una obligació que pel Govern de la Generalitat té una prioritat baixíssima, extraordinàriament per sota de qualsevol altra excavació arqueològica. El patrimoni abans que els #DDHH.\n\nLa condició NO forense de les exhumacions aboca al Govern a violar la Llei de Recerca Biomèdica, amagant els ADNs de víctimes i familiars en falses col·leccions de malalties.\n)
-(decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
-AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+     (\nAquesta vergonyosa xifra és el resultat d'una senzilla regla de 3 entre els )
+%%CAPTURA de la variable /etcp dels dies passat des del 15 d'octubre de 1977 fins avui
+     dup length dup /araVa exch def etcp cvi 6 string cvs dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( dies passats \()
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+%%CAPTURA de la variable dels dies passats transformats en anys
+     etcp 365 div round cvi 4 string cvs
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( anys\) des del 15 d'octubre de 1977, les )
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+%%CAPTURA de la variable /exhmds
+     exhmds 4 string cvs
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( fosses exhumades i les )
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+%%CAPTURA de la variable /tfxc del total de fosses localitzades
+     tfxc cvi 6 string cvs
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( fosses localitzades fins avui.\n\nEl 15 d'octubre de 1977 es promulgà la Llei estatal 46/1977 d'Amnistia. Aquesta llei de punt i final ens ha expulsat de l'àmbit penal i també de l'àmbit forense, tant a víctimes com a familiars. Certificant la impunitat dels botxins franquistes pels crims comesos de lesa humanitat.\n\nD'aleshores ençà, exhumar les )
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+%%CAPTURA del total de fosses amb la variable /tfxc
+     tfxc cvi 6 string cvs
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( fosses comunes que tenim a Catalunya és una obligació que pel Govern de la Generalitat té una prioritat baixíssima, extraordinàriament per sota de qualsevol altra excavació arqueològica. El patrimoni abans que els #DDHH.\n\nLa condició NO forense de les exhumacions aboca al Govern a violar la Llei de Recerca Biomèdica, amagant els ADNs dels familiars en una falsa col·lecció de malalties. Ignorant també la condició forense de l'ADN de les víctimes.\n)
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+
+     (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+     AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
      /M araCDstring  %% cal formatar les dades del nostre rellotge com es necessita aquí
      /T (ObriuLesFosses.cat)  %% autor de l'anotació
      /NM araC  %% string única
@@ -2281,6 +2324,23 @@ AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una arr
 
    }if
 
+%%PENDENT d'activar-ho amb codi i a lloc
+%var MTurl = document.getElementById('canvas')
+%MTurl.addEventListener(  // un guaita per comarca
+%                       'click', function(event)
+%                       { 
+%                        var x = event.pageX, y = event.pageY;
+%                        if ( x > 160 && x < 160+175 && y > 1585 && y < 1585+175 )
+%                        {
+%                         //alert('EP NANO AIXO JA RUTLLA!');
+%                         //onclick=location.href='pageurl.html';
+%                         //onclick=location.href='https://femfum.com';
+%                         onclick=window.open('https://femfum.com');
+%                        }
+%                       },
+%                       false
+%                      );
+
    femHTML
    {  %% cua i tancament
     43c dup dup (</script></body></html>)writestring flushfile closefile
@@ -2293,15 +2353,21 @@ AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una arr
  1 1 1 setrgbcolor
  illademaians aload pop cQ 2 mul .83 mul sub exch cQ 6.1 mul sub exch dup /xEx exch def moveto
  dUbuntuBB cQ .8 mul scalefont setfont
-%%CAPTURA
- (8888) show
+
+%%CAPTURA de la variable /tfxc amb el total de fosses comunes del mapa oficial
+ tfxc cvi 6 string cvs dup /Stfxc exch def
+
+ show  %% aquí no fa falta planxar-ho amb cap màscara numèrica
  %% retallador pel % de fosses exhumades en verd
  gsave
  illademaians aload pop cQ 2 mul .83 mul sub exch cQ 6.1 mul sub exch moveto
- (8888) true charpath clip
+ Stfxc true charpath clip
  %% hauríem de fer el rectangle ple de verd segons el % Y de fosses exhumades
- (8888) false charpath pathbbox 2 index sub
- .1 mul  %% això seria el 10%
+ Stfxc false charpath pathbbox 2 index sub
+
+%%CAPTURA del % de l'exhumat en relació al total i el temps com a pena des de 1977
+exhmds 100 mul tfxc div 100 div mul  %% això és el % que omple en verd la xifra del total
+
  0 1 0 setrgbcolor
  exch 3 index sub exch rectfill
  grestore
@@ -2316,8 +2382,12 @@ AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una arr
  ( exhumades) show
  illademaians aload pop pop cQ 4 mul sub xEx 2 copy 2 array astore /llgnd exch def moveto
  dUbuntuBB cQ .8 mul scalefont setfont
-%%CAPTURA
- (0097) show
+
+%%CAPTURA de la variable /exhmds amb el total de fosses exhumades del mapa oficial
+ (0000) dup  %% ho planxem en una màscara numèrica
+ exhmds cvi 6 string cvs dup /Sexhmds exch def
+ dup length 4 exch sub exch putinterval
+ show
 
  %% llegenda
  currentpoint pop /xDreta exch def

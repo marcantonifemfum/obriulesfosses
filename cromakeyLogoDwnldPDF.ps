@@ -1,0 +1,30 @@
+%!
+
+<<
+  /PageSize [ 449.3 271.8 ]
+>> setpagedevice
+
+%% fons per detectar el croma
+1 0 0 setrgbcolor
+0 0 449.3 271.8 rectfill
+
+%% JPEG que duu un croma
+gsave
+/DeviceRGB setcolorspace
+0 0 translate
+449.3 271.8 scale
+<<
+/ImageType 4
+/Width 4493
+/Height 2718
+/BitsPerComponent 8
+/Decode [0 1 0 1 0 1]
+/ImageMatrix [ 4493 0 0 -2718 0 2718]  %% de baix a dalt
+/DataSource (/home/femfum/Documents/OnEtsOncleGuillem/obriulesfosses/PDFDownload_arran.jpg) (r) file <</ColorTransform 1>>/DCTDecode filter
+/MaskColor %[235 255 235 255 235 255]  % definim un rang pels blancs (entre 0 i 255)
+[66 82 177 193 232 248]  %% definim un rang RGB pel blau que fa servir GIMP per transformar una àrea transparent en opaca al passar de PNG a JPEG
+>> image
+grestore
+
+showpage
+

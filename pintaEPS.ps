@@ -1,0 +1,51 @@
+%!
+
+%% l'EPS
+/BeginEPSF {
+/b4_Inc_state save def
+/dict_count countdictstack def
+/op_count count 1 sub def
+userdict begin
+/showpage {} def
+/setpagedevice {pop} def  % NOU ! servira per .ps amb pagina configurada ?
+/erasepage {} def  % NOU! (06.98) test de .PS de Quark
+%/statusdict {5 dict} def  % NOU! PageMaker 5.0 (hem de trobar una altra solucio)
+0 setgray 0 setlinecap
+1 setlinewidth 0 setlinejoin
+10 setmiterlimit [] 0 setdash newpath
+/languagelevel where
+{pop languagelevel
+1 ne
+{false setstrokeadjust false setoverprint} if
+} if
+} bind def
+/EndEPSF {
+count op_count sub {pop} repeat
+countdictstack dict_count sub {end} repeat
+b4_Inc_state restore
+} bind def
+
+
+false
+{
+ <<
+   /PageSize [ 525 75 sub 564 38 sub]
+ >>setpagedevice
+ BeginEPSF
+ -75 -38 translate
+ %%PageBoundingBox: 75 38 525 564
+ (/home/femfum/Downloads/generate-pdf-svgrepo-com.eps) (r) file cvx exec
+ EndEPSF
+}
+{
+ <<
+   /PageSize [ 519 81 sub 601 1 sub]
+ >>setpagedevice
+ BeginEPSF
+ -81 -1 translate
+ %%PageBoundingBox: 81 1 519 601
+ (/home/femfum/Downloads/pdf-file-symbol-svgrepo-com.eps) (r) file cvx exec
+ EndEPSF
+}ifelse
+
+showpage
