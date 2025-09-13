@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<title>obriu les fosses d'una vegada!</title>
+<link rel="icon" type="image/x-icon" href="Fvermella.png">
+<style>
+html, body
+{  // caixa perfectament a l'ample de la pantalla (que no de la finestra)
+ height: 100%;
+ margin: 0;
+ padding: 0;
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas" width="1920" height="1920">
+Sorry, your browser does not support canvas.
+</canvas>
+<script>
+// aquÃ­ la imatge
+var canvas = document.querySelector("canvas");
+ctx = canvas.getContext("2d");
+
+const image = new Image(1920, 1920); // Using optional size for image
+image.onload = drawImageActualSize; // Draw when image has loaded
+// URL Load an image of intrinsic size in CSS pixels
+image.src = "http://localhost/www.obriulesfosses.cat/exhumeu/htmls/13303081620_obriulesfosses.png";
+function drawImageActualSize() {
+  // Use the intrinsic size of image in CSS pixels for the canvas element
+  canvas.width = 1920;
+  canvas.height = 1920;
+
+  // Will draw the image as X0 Y0, ignoring the custom size of X1 Y1
+  // given in the constructor
+  ctx.drawImage(this, 0, 0);
+
+  // To use the custom size we'll have to specify the scale parameters
+  // using the element's width and height properties - lets draw one
+  // on top in the corner:
+  ctx.drawImage(this, 0, 0, this.width, this.height);
+}
+// The Tool-Tip instance:
+function ToolTip(canvas, region, text, width, timeout)
+{
+ var me = this,                                // self-reference for event handlers
+     div = document.createElement("div"),      // the tool-tip div
+     parent = canvas.parentNode,               // parent node for canvas
+     visible = false;                          // current status
+
+ // set some initial styles, can be replaced by class-name etc.
+ div.style.cssText = "position:fixed;padding:7px;background:white;pointer-events:none;width:" + width + "px";
+ div.innerHTML = text;
+
+ // show the tool-tip
+ this.show = function(pos)
+ {
+  if (!visible) 
+  {                             // ignore if already shown (or reset time)
+   visible = true;                           // lock so it's only shown once
+   setDivPos(pos);                           // set position
+   parent.appendChild(div);                  // add to parent of canvas
+   setTimeout(hide, timeout);                // timeout for hide
+  }
+ }
+
+ // hide the tool-tip
+ function hide()
+ {
+  visible = false;                            // hide it after timeout
+  parent.removeChild(div);                    // remove from DOM
+
+  //EP! aquÃ­ quan s'amaga el tooltip ens fa cas
+  //  onclick = window.location.href='http://enlloc.cat';
+ }
+
+ // check mouse position, add limits as wanted... just for example:
+ function check(e)
+ {
+  var pos = getPos(e),
+  posAbs = {x: e.clientX, y: e.clientY};  // div is fixed, so use clientX/Y
+  if
+  (
+   !visible &&
+   pos.x >= region.x && pos.x < region.x + region.w &&
+   pos.y >= region.y && pos.y < region.y + region.h
+  )
+  {
+   me.show(posAbs);                          // show tool-tip at this pos
+  }
+  else setDivPos(posAbs);                     // otherwise, update position
+ }
+
+ // get mouse position relative to canvas
+ function getPos(e)
+ {
+  var r = canvas.getBoundingClientRect();
+  return {x: e.clientX - r.left, y: e.clientY - r.top}
+ }
+
+ // update and adjust div position if needed (anchor to a different corner etc.)
+ function setDivPos(pos)
+ {
+  if (visible)
+  {
+   if (pos.x < 0) pos.x = 0;
+   if (pos.y < 0) pos.y = 0;
+   // other bound checks here
+   div.style.left = pos.x + "px";
+   div.style.top = pos.y + "px";
+  }
+ }
+
+ // we need to use shared event handlers:
+ canvas.addEventListener("mousemove", check);
+ canvas.addEventListener("click", check);
+}
+
+    // el tooltip de la comarca
+    var VN= new ToolTip(canvas, {x: 339, y: 160, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___l'Aran</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 4<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var AG= new ToolTip(canvas, {x: 516, y: 339, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___l'Alta Ribagorça</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 0<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var PS= new ToolTip(canvas, {x: 695, y: 339, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Pallars Sobirà</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 66<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var AU= new ToolTip(canvas, {x: 873, y: 339, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___l'Alt Urgell</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 28<br><br>&nbsp;&nbsp;Fosses exhumades: 3<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var CD= new ToolTip(canvas, {x: 1051, y: 339, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___la Cerdanya</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 9<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var RI= new ToolTip(canvas, {x: 1229, y: 339, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Ripollès</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 6<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var GX= new ToolTip(canvas, {x: 1406, y: 339, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___la Garrotxa</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 6<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var AE= new ToolTip(canvas, {x: 1585, y: 339, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___l'Alt Empordà</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 16<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var PJ= new ToolTip(canvas, {x: 695, y: 516, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Pallars Jussà</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 25<br><br>&nbsp;&nbsp;Fosses exhumades: 4<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var BD= new ToolTip(canvas, {x: 873, y: 516, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Berguedà</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 27<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var LL= new ToolTip(canvas, {x: 1051, y: 516, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Lluçanès</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 6<br><br>&nbsp;&nbsp;Fosses exhumades: 3<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var PE= new ToolTip(canvas, {x: 1229, y: 516, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___Pla de l'Estany</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 5<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var BM= new ToolTip(canvas, {x: 1406, y: 516, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Baix Empordà</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 7<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var NG= new ToolTip(canvas, {x: 516, y: 695, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___la Noguera</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 49<br><br>&nbsp;&nbsp;Fosses exhumades: 7<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var SL= new ToolTip(canvas, {x: 695, y: 695, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Solsonès</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 22<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var BG= new ToolTip(canvas, {x: 873, y: 695, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Bages</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 15<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var MO= new ToolTip(canvas, {x: 1051, y: 695, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Moianès</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 4<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var OS= new ToolTip(canvas, {x: 1229, y: 695, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___Osona</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 14<br><br>&nbsp;&nbsp;Fosses exhumades: 3<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var GN= new ToolTip(canvas, {x: 1406, y: 695, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Gironès</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 15<br><br>&nbsp;&nbsp;Fosses exhumades: 2<br><br>&nbsp;&nbsp;Fosses reclamades: 1</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var SV= new ToolTip(canvas, {x: 1585, y: 695, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___la Selva</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 11<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var SI= new ToolTip(canvas, {x: 160, y: 873, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Segrià</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 43<br><br>&nbsp;&nbsp;Fosses exhumades: 3<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var PU= new ToolTip(canvas, {x: 339, y: 873, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Pla d'Urgell</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 20<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var UR= new ToolTip(canvas, {x: 516, y: 873, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___l'Urgell</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 27<br><br>&nbsp;&nbsp;Fosses exhumades: 3<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var SR= new ToolTip(canvas, {x: 695, y: 873, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___la Segarra</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 53<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var AI= new ToolTip(canvas, {x: 873, y: 873, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___l'Anoia</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 17<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var VC= new ToolTip(canvas, {x: 1051, y: 873, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Vallès Occidental</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 18<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var VR= new ToolTip(canvas, {x: 1229, y: 873, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Vallès Oriental</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 4<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var MM= new ToolTip(canvas, {x: 1406, y: 873, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Maresme</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 17<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var RE= new ToolTip(canvas, {x: 160, y: 1051, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___la Ribera d'Ebre</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 60<br><br>&nbsp;&nbsp;Fosses exhumades: 11<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var GG= new ToolTip(canvas, {x: 339, y: 1051, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___les Garrigues</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 93<br><br>&nbsp;&nbsp;Fosses exhumades: 13<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var CB= new ToolTip(canvas, {x: 516, y: 1051, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___la Conca de Barberà</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 14<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var AC= new ToolTip(canvas, {x: 695, y: 1051, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___l'Alt Camp</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 15<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var AP= new ToolTip(canvas, {x: 873, y: 1051, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___l'Alt Penedès</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 50<br><br>&nbsp;&nbsp;Fosses exhumades: 4<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var GF= new ToolTip(canvas, {x: 1051, y: 1051, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Garraf</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 5<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var BT= new ToolTip(canvas, {x: 1229, y: 1051, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Baix Llobregat</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 13<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var BR= new ToolTip(canvas, {x: 1406, y: 1051, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Barcelonès</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 7<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var TT= new ToolTip(canvas, {x: 339, y: 1229, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___la Terra Alta</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 70<br><br>&nbsp;&nbsp;Fosses exhumades: 30<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var PR= new ToolTip(canvas, {x: 516, y: 1229, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Priorat</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 62<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 1</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var TR= new ToolTip(canvas, {x: 695, y: 1229, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Tarragonès</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 17<br><br>&nbsp;&nbsp;Fosses exhumades: 4<br><br>&nbsp;&nbsp;Fosses reclamades: 1</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var BP= new ToolTip(canvas, {x: 873, y: 1229, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Baix Penedès</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 23<br><br>&nbsp;&nbsp;Fosses exhumades: 0<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var BB= new ToolTip(canvas, {x: 339, y: 1406, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Baix Ebre</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 14<br><br>&nbsp;&nbsp;Fosses exhumades: 2<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var BC= new ToolTip(canvas, {x: 516, y: 1406, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Baix Camp</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 22<br><br>&nbsp;&nbsp;Fosses exhumades: 3<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de la comarca
+    var MT= new ToolTip(canvas, {x: 160, y: 1585, w: 175, h: 175}, "<span style='font-family:mono;color:#000000;font-weight:Bold'>___el Montsià</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: 7<br><br>&nbsp;&nbsp;Fosses exhumades: 1<br><br>&nbsp;&nbsp;Fosses reclamades: 0</span><br>&nbsp;<br>", 225, 3000);
+
+    // el tooltip de quÃ¨ trigarÃ 
+    var queTrigara = new ToolTip(canvas, {x: 1109, y: 1371, w: 619, h: 237}, "<span style='font-family:mono;color:#000000;font-weight:Regular'><br>Aquesta vergonyosa xifra és el resultat d'una senzilla regla de 3 entre els 17500 dies passats (48 anys) des del 15 d'octubre de 1977, les 105 fosses exhumades i les 1006 fosses localitzades fins avui.<br><br>El 15 d'octubre de 1977 es promulgà la Llei estatal 46/1977 d'Amnistia. Aquesta llei de punt i final ens ha expulsat de l'àmbit penal i també de l'àmbit forense, tant a víctimes com a familiars. Certificant la impunitat dels botxins franquistes pels crims comesos de lesa humanitat.<br><br>D'aleshores ençà, exhumar les 1006 fosses comunes que tenim a Catalunya és una obligació que pel Govern de la Generalitat té una prioritat baixíssima, extraordinàriament per sota de qualsevol altra excavació arqueològica. El patrimoni abans que els #DDHH.<br><br>La condició NO forense de les exhumacions aboca al Govern a violar la Llei de Recerca Biomèdica, amagant els ADNs dels familiars en una falsa col·lecció de malalties. Ignorant també la condició forense de l'ADN de les víctimes.<br><br></span>", 600, 30000);
+
+var MTurl = document.getElementById('canvas')
+MTurl.addEventListener(  // un guaita per comarca
+		       'click', function(event)
+		       { 
+                        var x = event.pageX, y = event.pageY;
+                        if ( x > 160 && x < 160+175 && y > 1585 && y < 1585+175 )
+                        {
+                         //alert('EP NANO AIXO JA RUTLLA!');
+                         //onclick=location.href='pageurl.html';
+                         //onclick=location.href='https://femfum.com';
+			 onclick=window.open('https://femfum.com');
+                        }
+                       },
+		       false
+                      );
+var BCurl = document.getElementById('canvas')
+BCurl.addEventListener(  // un guaita per comarca
+		       'click', function(event)
+		       { 
+                        var x = event.pageX, y = event.pageY;
+                        if ( x > 516 && x < 516+175 && y > 1406 && y < 1406+175 )
+                        {
+                         //alert('EP NANO AIXO JA RUTLLA!');
+                         //onclick=location.href='pageurl.html';
+                         //onclick=location.href='https://femfum.com';
+			 onclick=window.open('https://obriulesfosses.cat');
+                        }
+                       },
+		       false
+                      );
+
+</script></body></html>
