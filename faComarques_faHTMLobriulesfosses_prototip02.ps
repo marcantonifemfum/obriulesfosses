@@ -704,7 +704,7 @@ femHTML
  43c (<!DOCTYPE html>
 <html lang="ca">
 <head>
-<title>obriu les fosses d'una vegada!</title>
+<title>Obriu les fosses d'una vegada!</title>
 <link rel="icon" type="image/x-icon" href="Fvermella.png">
 <style>
 html, body
@@ -722,7 +722,7 @@ html, body
 43c AMPLEtalla round cvi 128 string cvs writestring  %% píxels d'ample que quaden amb els de l'UserAgent
 
 43c (" height=") writestring
-%% ens cal fer una regla de 3 entre ample/alt de cols&fils i AMPLEtalla (que serà el width) per tal de deduir l'height
+%% ens cal fer una regla de 3, entre ample/alt de cols&fils i AMPLEtalla (que serà el width) per tal de deduir l'height
 43c cols&fils aload pop AMPLEtalla mul exch div round cvi 128 string cvs writestring  %% píxels d'alt que quaden amb els de l'UserAgent)
 
 43c (">
@@ -1145,7 +1145,7 @@ margeALvoltant gruixF 2 mul xReticula 1 sub mul 2 div sub dup /xmapaHTML exch de
 margeALvoltant gruixF 2 mul yReticula 1 sub mul 2 div add dup /ymapaHTML exch def
 translate
 
-%%TEST
+%%TEST DE LA COMARCA ON TREBALLEM
 /laFEM 29 def  %% l'indicador ara és un índex però haurà de ser un clau de json
 /ilaFEM 0 def
 
@@ -1184,6 +1184,7 @@ translate
     {  %% el centre
      gsave 4 copy
 
+%%CAl activar el tooltip i el vincle a la pàgina de la comarca de treball amb els tràmits i dades de les fosses
 %%TEST per assenyalar la comarca on estem treballant
      ilaFEM laFEM eq
      {
@@ -1204,10 +1205,10 @@ translate
     pelRect /d19361977 exch def  %% per situar el període a la part blava
    }if
 
-%   araC (MT)eq
-%   {  %% si som al Montsià
-%    pelRect /mefecit exch def  %% per situar la data i l'hora
-%   }if
+   araC (MT)eq
+   {  %% si som al Montsià
+    pelRect /tibaPDF exch def  %% per situar el logo de descàrrega del PDF quan fem l'HTML
+   }if
 
    araC (VN) eq
    {  %% desem la coordenada x,y UL de l'Aran per poder situar el cap dels crèdits
@@ -1683,17 +1684,17 @@ true
  useragentV
  {  %% pantalla
   margeALvoltant 2 div yLB moveto (Heu generat el mapa a les ) show hora show ( del )show
-  dia (decodificaWinAnsiEncoding_a1i2i3octets.ps)
-  (r) file cvx exec
+  dia (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup dup length 4 sub 4 getinterval /anyDpena exch def  %% extraiem l'any per evitar posar-lo en manual sota el garigot
   show currentpoint 2 array astore /XYeTcaP exch def  %% per compondre el TEMPS com a PENA més endavant
  }
  {  %% PDF A4
   mefecit aload pop exch atan rotate
   margeALvoltant 1.2 div yLB neg moveto (Heu generat el mapa a les ) show hora show ( del )show
-  dia (decodificaWinAnsiEncoding_a1i2i3octets.ps)
-  (r) file cvx exec
+  dia (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec
   AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup dup length 4 sub 4 getinterval /anyDpena exch def  %% extraiem l'any per evitar posar-lo en manual sota el garigot
   show
  }ifelse
  grestore
@@ -1955,6 +1956,7 @@ false{
  currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
  gsave
  creditsMonoB cQ .12 mul scalefont setfont
+%%CAL posar un vincle a la web només pel PDF i en negretes?
  ( www.ObriuLesFosses.cat) dup
 %%PODEM fer servir l'estructura Annots que ja tenim creada
  gsave false charpath pathbbox 4 array astore /OLFcat exch def grestore
@@ -2022,7 +2024,9 @@ false{
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
 %%CAPTURA de la variable /ddp de publicació del dataset
- ( publicat el ) show ddp show
+ ( publicat el ) show
+%%CAL posar aquesta data en negreta i fer un vincle tant al PDF com a l'HTML cap al dataset
+ ddp show
  grestore
 
  %% garigot
@@ -2051,15 +2055,19 @@ false{
   peu2025  %margeALvoltant
   moveto
  }ifelse
-%%CAPTURA!
- (2025) show
- currentpoint 2 array astore /LRgarigot exch def
+%%CAPTUREM l'any de la galeta de l'hora del client
+ anyDpena show
+ currentpoint
+ cQ 2.3 div add  %% corregim perquè el garigot no trepitgi l'any?
+ 2 array astore /LRgarigot exch def
 
  %% el temps com a pena
  femHTML
  {
   gsave
-  LRgarigot aload pop exch /aCaixaD exch def
+  LRgarigot aload pop
+  cQ 2.3 div sub  %% corregim perquè el garigot no trepitgi l'any?
+  exch /aCaixaD exch def
   XYeTcaP aload pop exch pop dup /yPEUStxt exch def
   sub dUbuntuB exch scalefont setfont
   %% fem que faci caixa per la dreta on acaba el 2025
@@ -2081,6 +2089,175 @@ false{
 %  }loop
   (el TEMPS com a PENA) show  %% petit homenatge a l'Ana Messuti
   grestore
+
+  %% afegim l'EPS del logo de descàrrega del PDF
+  %% l'EPS
+  /BeginEPSF
+  {
+   /b4_Inc_state save def
+   /dict_count countdictstack def
+   /op_count count 1 sub def
+   userdict begin
+   /showpage {} def
+   /setpagedevice {pop} def  % NOU ! servira per .ps amb pagina configurada ?
+   /erasepage {} def  % NOU! (06.98) test de .PS de Quark
+   %/statusdict {5 dict} def  % NOU! PageMaker 5.0 (hem de trobar una altra solucio)
+   0 setgray 0 setlinecap
+   1 setlinewidth 0 setlinejoin
+   10 setmiterlimit [] 0 setdash newpath
+   /languagelevel where
+   {
+    pop languagelevel
+    1 ne
+    {
+     false setstrokeadjust false setoverprint
+    }if
+   }if
+  }bind def
+  /EndEPSF
+  {
+   count op_count sub
+   {
+    pop
+   }repeat
+   countdictstack dict_count sub {end} repeat
+   b4_Inc_state restore
+  }bind def
+%%CAL capturar el Bbox final del logo per generar el Tooltip i el link al fitxer PDF
+  BeginEPSF
+  ULgarigot aload pop cQ 3 mul sub exch cQ 6 mul sub exch
+  translate
+  %% calculem l'escala perquè el logo ens encaixi amb marges dins /margeALvoltant
+  cQ 3 div 525 75 sub div dup scale
+  %%PageBoundingBox: 75 38 525 564
+  (tibaPDF.eps) (r) file cvx exec
+  EndEPSF
+  %% fi del logo de descàrrega del PDF
+  
+%  gsave
+%  1 1 1 setrgbcolor
+  ULgarigot aload pop cQ 3 mul sub exch cQ 6 mul sub exch
+  cQ 3 div 525 75 sub div 564 mul dup
+  4 array astore /xyAAtibaPDF exch def
+%  rectstroke
+%  grestore
+  %% codi JS del tooltip html
+  43c (
+  // el tooltip de què trigarà
+  var tibaPDF = new ToolTip\(canvas, {x: ) writestring
+  43c xyAAtibaPDF 0 get
+  %xmapaHTML add
+  xHint mul round cvi
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  16 string cvs writestring
+  43c (, y: ) writestring  %% l'origen de les coordenades en canvas és al UL
+  43c xyAAtibaPDF dup 3 get exch 1 get add
+  cols&fils 1 get
+  %ymapaHTML sub
+  exch sub
+  xHint mul round cvi
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html 
+  16 string cvs writestring
+  43c (, w: ) writestring
+  43c xyAAtibaPDF 2 get  %% ample del tooltip
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+  16 string cvs writestring
+  43c (, h: ) writestring
+  43c xyAAtibaPDF 3 get  %% alt del tooltip
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+  16 string cvs writestring
+  43c (}, ") writestring
+  43c (<span style='font-family:mono;color:#000000;font-weight:Regular'>)  writestring
+
+%%URL al PDF únic
+  (http://localhost/www.obriulesfosses.cat/exhumeu/pdfs/) dup length dup /araVa exch def IDunica length add
+  (_obriulesfosses_prototip02.pdf) dup length exch 4 1 roll
+  add
+  string dup 3 -1 roll 0 exch putinterval
+  dup araVa dup IDunica length add /araVa2 exch def IDunica putinterval dup araVa2
+  4 -1 roll putinterval dup /URLaPDF exch def
+
+%  (Us podeu descarregar un fitxer PDF idèntic amb totes les referències vinculades)
+%  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+%  AliniesD1solOctet 0 get
+
+%  {  %% qualsevol canvi de línia atura el JS i tot el text ha d'anar seguit amb el codi html
+%   {
+%    43c exch writestring
+%    43c (<br>) writestring
+%   }
+%   {
+    43c exch writestring
+    43c (<br>) writestring
+%    pop exit
+%   }ifelse
+%   dup 1024 string readline
+%  }loop
+  43c (</span>) writestring
+  43c (", 500, 3000\);
+) writestring
+
+%%CAL capturar el nom únic d'aquest HTML/PDF 
+  43c (
+// permet clicar en una àrea del canvas
+var PDFurl = document.getElementById\('canvas'\);
+PDFurl.addEventListener\(
+                       'click', function\(event\)
+                       { 
+                        var x = event.pageX, y = event.pageY;
+) writestring
+
+43c (                        if \( x > ) writestring
+
+%% 160 x UL
+43c xyAAtibaPDF 0 get
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+6 string cvs writestring
+
+43c ( && x < ) writestring
+
+%% 160+175  x + ample logo
+43c xyAAtibaPDF dup 0 get exch 2 get add
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+6 string cvs writestring
+
+43c ( && y > ) writestring
+
+%% 1585 y UL
+43c xyAAtibaPDF dup 1 get exch 3 get add  cols&fils 1 get exch sub
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+  dup /araYul exch def
+6 string cvs writestring
+
+43c ( && y < ) writestring
+
+%% 1585+175 y + alt logo
+43c xyAAtibaPDF 3 get araYul add
+  round cvi
+6 string cvs writestring
+
+43c ( \)
+                        {
+                         //alert\('EP NANO AIXO JA RUTLLA!'\);
+                         //onclick=location.href='pageurl.html';
+                         //onclick=location.href='https://femfum.com';
+                         onclick=window.open\(') writestring
+
+%% aquí la URL única al PDF
+43c URLaPDF writestring
+
+43c ('\);
+                        }
+                       },
+                       false
+                      \);
+) writestring
+
  }
  {  %% PDF A4
   gsave
@@ -2118,7 +2295,9 @@ false{
 
  LRgarigot aload pop cQ 7.8 div add aCorregir 1 get sub
  exch cQ 1.65 div sub aCorregir 0 get sub  
- exch curveto  %% fem que acabii al centre de l'ull del 0
+ exch
+ cQ 2.3 div sub
+ curveto  %% fem que acabii al centre de l'ull del 0
  stroke
 
  %% trigarà
@@ -2202,7 +2381,7 @@ false{
      /P {ThisPage}  %% la referència indirecta a /Page
      /Type /Annot
      /Contents  %% text per raonar la regla de 3 des del 15 d'octubre de 1977 fins a data d'avui
-     (\nAquesta vergonyosa xifra és el resultat d'una senzilla regla de 3 entre els )
+     (\nAquesta vergonyosa xifra és el resultat d'una senzilla regla de 3, entre els )
 %%CAPTURA de la variable /etcp dels dies passat des del 15 d'octubre de 1977 fins avui
      dup length dup /araVa exch def etcp cvi 6 string cvs dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
      dup length dup /araVa exch def
@@ -2394,8 +2573,8 @@ exhmds 100 mul tfxc div 100 div mul  %% això és el % que omple en verd la xifr
  dUbuntuB cQ .17 mul scalefont setfont
  1 0 0 setrgbcolor
  femHTML
- {
-  4 setlinewidth
+ {  %% al fer l'HTML per pantalla el gruix de línia queda condicionat per l'ample en píxels
+  gruixF 2 mul setlinewidth
  }
  {
   1 setlinewidth
@@ -2454,7 +2633,7 @@ exhmds 100 mul tfxc div 100 div mul  %% això és el % que omple en verd la xifr
 mark
 %% camps públics del Docinfo
 /Subject (Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!)
-/Title (OBRIU LES FOSSES! obriulesfosses.cat)
+/Title (Obriu les fosses d'una vegada!)
 /Author (copyleft 2025: marcantoni.malagarriga.picas@ub.edu | Eva Bosch Gibert <eva_bosch_gibert@hotmail.com>)
 /Keywords (DDHH, Spanish Civil War, forensic, fosses comunes, mass graves, ADN, DNA, Guerra d'Espanya, 1936-1977, Desaparició Forçada o Involuntària, Missing Persons, Enforced or Involuntary Disappearances)
 (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
