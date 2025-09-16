@@ -2,6 +2,7 @@
 %% donat un ample determinat, generem una reticula de quadrats x,y per tal de representar esquemàticament les 43 comarques de Catalunya
 %% https://ca.wikipedia.org/wiki/Comarques_de_Catalunya
 %% http://srv.icgc.cat/vissir3/
+%% https://upload.wikimedia.org/wikipedia/commons/1/12/Prov%C3%ADncies.svg
 
 %% sortida a JPEG controlant la resolució per permetre zooms a pantalla fins a?
 %% gs -q -dNOSAFER -o re.jpg -sDEVICE=jpeg -r72 -dJPEGQ=100 faComarques_faHTML.ps
@@ -673,6 +674,7 @@ DINa4
   /PageSize
   [
    margeALvoltant 2 mul xComarques add
+%%CAL corregir el valor del format de pàgina en vertical, proporcionalment al marge d'ample que, al deixar-lo fix en pantalles més altes que amples deixa un blanc a sota?
    margeALvoltant 2 mul yPagina add
   ]
 dup 4 1 roll
@@ -686,7 +688,7 @@ dup 4 1 roll
 
 femHTML
 {
- /cols&fils exch def
+ /cols&fils exch def  %% és el format de pantalla [ample alt]
  %% establim el càlcul pel multiplicador del factor de correcció per les posicions del mapa d'imatge HTML de manera que, treballant sempre a la resolució fixa de 72ppp,
  %% els píxels d'ample de la imatge (a 72ppp sempre superaran als de la pantalla) s'adaptaran als de la pantalla (pensant en els zooms que pugui fer l'usuari)
  AMPLEtalla 100 mul cols&fils 0 get div 100 div
@@ -1184,7 +1186,7 @@ translate
     {  %% el centre
      gsave 4 copy
 
-%%CAl activar el tooltip i el vincle a la pàgina de la comarca de treball amb els tràmits i dades de les fosses
+%%CAL activar el tooltip i el vincle a la pàgina de la comarca de treball amb els tràmits i dades de les fosses
 %%TEST per assenyalar la comarca on estem treballant
      ilaFEM laFEM eq
      {
@@ -2023,10 +2025,21 @@ false{
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
-%%CAPTURA de la variable /ddp de publicació del dataset
  ( publicat el ) show
-%%CAL posar aquesta data en negreta i fer un vincle tant al PDF com a l'HTML cap al dataset
+ gsave
+ currentpoint 2 array astore /LLfonts exch def
+ creditsMonoB cQ .12 mul scalefont setfont
  ddp show
+ currentpoint cQ .12 mul add 2 array astore /URfonts exch def
+ grestore
+
+%%CAL fer un vincle tant al PDF com a l'HTML cap al dataset
+%% per veure el rectangle on serà actiu el link
+%gsave
+%1 1 1 setrgbcolor
+%LLfonts aload pop 2 copy URfonts 1 get exch sub exch URfonts 0 get exch sub exch rectstroke
+%grestore
+
  grestore
 
  %% garigot
@@ -2123,7 +2136,6 @@ false{
    countdictstack dict_count sub {end} repeat
    b4_Inc_state restore
   }bind def
-%%CAL capturar el Bbox final del logo per generar el Tooltip i el link al fitxer PDF
   BeginEPSF
   ULgarigot aload pop cQ 3 mul sub exch cQ 6 mul sub exch
   translate
@@ -2199,7 +2211,6 @@ false{
   43c (", 500, 3000\);
 ) writestring
 
-%%CAL capturar el nom únic d'aquest HTML/PDF 
   43c (
 // permet clicar en una àrea del canvas
 var PDFurl = document.getElementById\('canvas'\);
@@ -2257,6 +2268,8 @@ PDFurl.addEventListener\(
                        false
                       \);
 ) writestring
+
+  %% tooltip per l'àrea de la data de publicació del dataset text+link
 
  }
  {  %% PDF A4
@@ -2449,15 +2462,37 @@ PDFurl.addEventListener\(
      /F 28
    >> /PUT pdfmark
 
-   %% fiquem les dues referències indirectes /Type /Annot de cada anotació a l'array {clauAnnots}
+   %% generem els objectes per vincular el dataset oficial de fosses
+   %% crear 1 objecte diccionari que s'inscriu a la data de publicació del darrer dataset i que s'afegirà a {clauAnnots}
+   ({URLalDataset}) /araAnnot2 exch def  %% el nom únic
+   mark /_objdef araAnnot2 cvx exec /type /dict /OBJ pdfmark
+%   cols&fils
+   %% incrustar els valors de l'aparença gràfica de l'anotació de la comarca al diccionari
+   mark araAnnot2 cvx exec
+   <<
+     /Rect [
+            LLfonts aload pop URfonts aload pop
+           ]  %% té format Bbox amb origen a LL
+     /Subtype /Link
+     /A <<
+          /URI (https://analisi.transparenciacatalunya.cat/Legislaci-just-cia/Fosses-comunes-a-Catalunya/6js6-vud6/about_data)
+          /S /URI
+        >>
+      /Border [0 0 0]
+      /Type/Annot
+   >> /PUT pdfmark
+
+   %% fiquem les 3 referències indirectes /Type /Annot de cada anotació a l'array {clauAnnots}
    mark {clauAnnots} araAnnot cvx exec /APPEND pdfmark
+   mark {clauAnnots} araAnnot2 cvx exec /APPEND pdfmark
    mark {clauAnnots} nomPopup cvx exec /APPEND pdfmark
    %% fi d'anotacions de PDF
 
    femHTML
-   {  %% per l'àrea del tooltip de quan trigarà
+   {
+    %% per l'àrea del tooltip de quan trigarà
     43c (
-    // el tooltip de què trigarà
+    // el tooltip del text el Govern trigara
     var queTrigara = new ToolTip\(canvas, {x: ) writestring
     43c idemPopup 0 get
     %xmapaHTML add
@@ -2498,9 +2533,8 @@ PDFurl.addEventListener\(
      dup 1024 string readline
     }loop
     43c (</span>) writestring
-    43c (", 600, 30000\);
+    43c (", 600, 10000\);
 ) writestring
-
    }if
 
 %%PENDENT d'activar-ho amb codi i a lloc
