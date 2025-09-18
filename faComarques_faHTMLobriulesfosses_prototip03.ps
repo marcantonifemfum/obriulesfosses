@@ -1,0 +1,2812 @@
+%!
+%% donat un ample determinat, generem una reticula de quadrats x,y per tal de representar esquemàticament les 43 comarques de Catalunya
+%% https://ca.wikipedia.org/wiki/Comarques_de_Catalunya
+%% http://srv.icgc.cat/vissir3/
+%% https://upload.wikimedia.org/wikipedia/commons/1/12/Prov%C3%ADncies.svg
+
+%% sortida a JPEG controlant la resolució per permetre zooms a pantalla fins a?
+%% gs -q -dNOSAFER -o re.jpg -sDEVICE=jpeg -r72 -dJPEGQ=100 faComarques_faHTML.ps
+%% control de la resolució
+%% -r72 ídem variables ps
+%% -r300 1.528 × 1.528
+%% la sortida a PNG dóna més qualitat, nitidesa i compressió que el JPEG a una mateixa resolució
+%% gs -q -dNOSAFER -r300 -sDEVICE=png16m -o re.png -dTextAlphaBits=4 -dGraphicsAlphaBits=4 -dMinFeatureSize=2 faComarques_faHTML.ps
+
+%% cada comarca és un quadrat i a dins hi podem veure el nombre de fosses (f), destriant per color quines han estat exhumades, quines no i quines hem exigit d'exhumar
+
+%% treballarem amb 3 datasets:
+%% el dataset oficial de Fosses Comunes a Catalunya https://analisi.transparenciacatalunya.cat/Legislaci-just-cia/Fosses-comunes-a-Catalunya/6js6-vud6/about_data
+	%% aquest dataset ha de contrastar-se sempre amb dues altres fonts de dades que dóna la Generalitat i que mai coincideixen:
+	%% Mapa de fosses del Banc de la Memòria Democràtica https://t.co/wJuec5l2um
+	%% Informatiu sobre el Cens de persones desaparegudes https://t.co/25N0Va0Uqf
+%% el dataset privat de fosses documentades que no estan incloses al dataset oficial (per crear encara)
+%% el dataset privat de tràmits de reclamació i tràmits d'exhumació fossa a fossa (per crear encara)
+
+%% podríem d'escriure en paral·lel a JS/Canvas per tal s'adapti dinàmicament a qualsevol tipus de finestra/pantalla?
+%% tooltips en canvas i altres formats: https://stackoverflow.com/questions/17064913/display-tooltip-in-canvas-graph
+%% l'exemple real que hem implementat el tenim aquí… ~/Downloads/4_5888481694180186571.pdf_pla.pdf
+
+%% capturem les variables d'entorn provinents de prototip03.php
+
+(MRCT_width) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /AMPLEtalla 595 def  %% PDF A4 per defecte
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+%%TRUQUEM LA RATIO?
+%pop 1000
+  /AMPLEtalla exch def
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /AMPLEtalla 595 def  %% PDF A4 per defecte
+}ifelse
+
+(MRCT_height) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /ALTtalla 842 def  %% PDF A4 per defecte
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+%%TRUQUEM LA RATIO?
+%pop 1000  %% FALLA el text en vertical?
+  /ALTtalla exch def
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /ALTtalla 842 def  %% PDF A4 per defecte
+}ifelse
+
+(MRCT_qhe) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /hora (a deshora) def  %% PDF A4 per defecte
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  %cvx exec  %% és una string que hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+  /hora exch def  %% PDF A4 per defecte
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /hora (a deshora) def  %% PDF A4 per defecte
+}ifelse
+
+(MRCT_qde) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /dia (sine die) def  %% PDF A4 per defecte
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  %cvx exec  %% és una string que hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+  /dia exch def  %% PDF A4 per defecte
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /dia (sine die) def  %% PDF A4 per defecte
+}ifelse
+
+(MRCT_uaV) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /useragentV false def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem PDF A4 (false)
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+  /useragentV exch def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem PDF A4 (false)
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /useragentV false def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem PDF A4 (false)
+}ifelse
+
+(MRCT_PDFunic) getenv  %% la variable d'entorn existeix?
+{  %% existeix perquè l'hem inicialitzat via php i hauria de dur una string amb valors
+  dup length 0 eq
+ {  %% arriba buida perquè l'executem amb el php sense paràmetres, o no l'hem escrit, o no l'hem escrit bé, o no hem escrit el =, o no hem escrit el = enganxat a cos=
+    %% ara cal gestionar aquest primer nivell d'error de sintaxi
+  pop /IDunica (0123456789) def  %% seria fix
+ }
+ {  %% té dades perquè l'executem via php mètode $_POST o via URL php amb paràmetres mètode $_GET
+  %cvx exec  %% és una string que de moment NO hem d'avaluar si el que duu és correcte per un segon nivell d'error de sintaxi
+  /IDunica exch def  %% fem cas de l'User Agent, o sigui: fem el format de pantalla (true MRCT_width x MRCT_height) o fem PDF A4 (false)
+ }ifelse
+}
+{  %% NO existeix perquè estem executant l'applet en local via Terminal per línia de comanda
+ /IDunica (0123456789) def  %% seria fix
+}ifelse
+
+
+%% decidim si ho adaptem a un format qualsevol (pantalles) o a un DINa4 vertical
+%false  %% si l'User Agent no treballa automàticament anem a una sortida PDF A4
+%/useragentV exch def
+
+%%TAULA DE LA VERITAT PELS FORMATS DE PANTALLA/PÀGINA
+%% mentre sigui més alt que ample conserva el valor de la Y
+   %% true > useragentV / false > DINa4
+   %% true > MESaltQUEample
+%% però si és més ample que alt, llavors rectifica el valor de Y al quadrat amb marges de les 43 comarques
+   %% true  > useragentV / false > DINa4
+   %% false > MESaltQUEample
+%% per fer el PDF A4 desactivem l'User Agent
+   %% %% false > useragentV / true > DINa4
+
+useragentV
+{
+ false /DINa4 exch def
+%%ATENCIÓ: a 72 ppp 1 punt = 1 píxel 
+ %% pantalla del Tuxedo (16:9) 1920x1080
+% 800 /AMPLEtalla exch def  %% valors de pantalla del dispositiu
+% 1600 /ALTtalla exch def
+ %% fruit de comparar el valor X,Y de pantalla de la variable de l'useragent
+ ALTtalla AMPLEtalla gt /MESaltQUEample exch def
+
+}
+{  %% false: si l'User Agent detecta un dispositiu més ample que alt, llavors treballarem amb un quadrat per l'ample
+ true /DINa4 exch def  %% la sortida a PDF A4 vertical serà bona quan la gent es vulguin tibar l'estat de l'acció en PDF
+}ifelse
+
+DINa4
+{  %% ample A4 vertical
+ 595
+ %% cal restar-li aquest marge perquè faci A4 exacte!
+ 54.1 2 mul sub
+}
+{  %% un ample qualsevol manat per la captura de la variable de l'usaragent de pantalla
+ AMPLEtalla
+}ifelse
+/xComarques exch def  %% ample donat
+
+/nComarques  %% retícula estrictament comarcal de Catalunya (sense marges) en base al codi alfabètic oficial (Lluçanès?) de les 43 comarques
+false
+{  %% aquest tancament perimetral NO és coherent per les Garrigues (GG)
+ [  %0   %1   %2   %3   %4   %5   %6   %7  
+  [ (VN) null null null null null null null ]  %% 0
+  [ (AG) (PS) null (CD) null (GX) (AE) null ]  %% 1
+  [ null (PJ) (AU) (BD) (RI) (PE) (GN) (BM) ]  %% 2
+  [ null (NG) (SL) (BG) (LL) (MO) (SV) null ]  %% 3
+  [ null (PU) (SR) (AI) (OS) (VR) (MM) null ]  %% 4
+  [ null (SI) (UR) (CB) (VC) (BR) null null ]  %% 5
+  [ null null (GG) (AP) (BT) null null null ]  %% 6
+  [ (RE) (PR) (AC) (BP) (GF) null null null ]  %% 7
+  [ (TT) (BC) (TR) null null null null null ]  %% 8
+  [ null (BB) null null null null null null ]  %% 9
+  [ null (MT) null null null null null null ]  %% 10
+ ]
+}
+{  %% aquest tancament perimetral N.O.S.E. és coherent
+ [  %0   %1   %2   %3   %4   %5   %6   %7   %8
+  [ null (VN) null null null null null null null ]  %% 0
+  [ null null (AG) (PS) (AU) (CD) (RI) (GX) (AE) ]  %% 1
+  [ null null null (PJ) (BD) (LL) (PE) (BM) null ]  %% 2
+  [ null null (NG) (SL) (BG) (MO) (OS) (GN) (SV) ]  %% 3
+  [ (SI) (PU) (UR) (SR) (AI) (VC) (VR) (MM) null ]  %% 4
+  [ (RE) (GG) (CB) (AC) (AP) (GF) (BT) (BR) null ]  %% 5
+  [ null (TT) (PR) (TR) (BP) null null null null ]  %% 6
+  [ null (BB) (BC) null null null null null null ]  %% 7
+  [ (MT) null null null null null null null null ]  %% 8
+ ]
+}ifelse
+
+dup length
+/yReticula exch def  %% nombre de comarques d'alt
+dup 0 get length
+/xReticula exch def  %% nombre de comarques d'ample
+
+[  %% les posem seguides
+ exch
+ {
+  aload pop
+ }forall
+]
+def
+
+%% protocol de desat de dades a /comarquesVSfosses
+%% el diccionari /comarquesVSfosses classifica les comarques pel seu codi alfabètic de 2 caràcters en caixa alta
+%% CAPTURA DE DADES DEL DATASET OFICIAL
+%% a l'executar exhumaDataset.ps:
+%% el diccionari /desoriComarcal classifica les comarques tal i com les denomina el dataset oficial (hi ha repeticions, etc) i en dóna els 2 caràcters del codi
+%% com que a /datasetComarques s'hi haurà desat el nom suigeneris, com a clau, i l'array [total de fosses i les exhumades], com a valor
+%% llavors, hi podrem pentinar el nom suigeneris de la comarca amb l'array de fosses, veure a /desoriComarcal a quin codi alfabètic correspon i, a partir d'aquí,
+%% muntem un tercer diccionari /2glifsAfosses on hi haurà normalitzada la comarca (a través del codi de 2 caràcters) i el total de fosses (array amb 2 dades)
+%% a l'executar faComarques_faHTMLobriulesfosses_prototip03.ps:
+%% a través d'aquests dos caràcters alfabètics comarcals, com a clau, anem a cercar la comarca dins /comarquesVSfosses per afegir-hi les dades de l'array a /f i /e
+%% CAPTURA DE DADES DEL DATASET PRIVAT DE FOSSES DOCUMENTADES NO INCLOSES A L'OFICIAL
+%% pendent encara
+%% CAPTURA DE DADES DEL DATASET PRIVAT DE TRÀMITS DE RECLAMACIÓ I RESPOSTES
+%% pendent encara, doncs ara les fosses reclamades les hem posat en manual en la definició prèvia del diccionari /comarquesVSfosses
+
+%% lògica de les fosses:
+%% /o + /p = /f sempre
+%% /e + /r = /f quan haguem pentinat al 100% una comarca
+
+/comarquesVSfosses
+<<  %% estructura possible dels diccionaris comarcals, en base al codi alfabètic oficial, on s'hi hauran de desar les dades dels 3 datasets
+  /VN <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Aran)  %% nom normatiu
+	/i 39  %% codi territorial
+      >>
+  /AG <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alta Ribagorça)  %% nom normatiu
+	/i 05  %% codi territorial
+      >>
+  /PS <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Pallars Sobirà)  %% nom normatiu
+	/i 26  %% codi territorial
+      >>
+  /PJ <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Pallars Jussà)  %% nom normatiu
+	/i 25  %% codi territorial
+      >>
+  /AU <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alt Urgell)  %% nom normatiu
+	/i 04  %% codi territorial
+      >>
+  /CD <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Cerdanya)  %% nom normatiu
+	/i 15  %% codi territorial
+      >>
+  /RI <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Ripollès)  %% nom normatiu
+	/i 31  %% codi territorial
+      >>
+  /GX <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Garrotxa)  %% nom normatiu
+	/i 19  %% codi territorial
+      >>
+  /AE <<
+	/f 0   %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alt Empordà)  %% nom normatiu
+	/i 02  %% codi territorial
+      >>
+  /NG <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Noguera)  %% nom normatiu
+	/i 23  %% codi territorial
+      >>
+  /SL <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Solsonès)  %% nom normatiu
+	/i 35  %% codi territorial
+      >>
+  /BD <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Berguedà)  %% nom normatiu
+	/i 14  %% codi territorial
+      >>
+  /LL <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Lluçanès)  %% nom normatiu
+	/i 43  %% codi territorial
+      >>
+  /OS <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (Osona)  %% nom normatiu
+	/i 24  %% codi territorial
+      >>
+  /PE <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (Pla de l'Estany)  %% nom normatiu
+	/i 28  %% codi territorial
+      >>
+  /BM <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Empordà)  %% nom normatiu
+	/i 10  %% codi territorial
+      >>
+  /PU <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Pla d'Urgell)  %% nom normatiu
+	/i 27  %% codi territorial
+      >>
+  /SR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Segarra)  %% nom normatiu
+	/i 32  %% codi territorial
+      >>
+  /BG <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Bages)  %% nom normatiu
+	/i 07  %% codi territorial
+      >>
+  /MO <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Moianès)  %% nom normatiu
+	/i 42  %% codi territorial
+      >>
+  /SV <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Selva)  %% nom normatiu
+	/i 34  %% codi territorial
+      >>
+  /GN <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 1  %% reclamades
+	/n (el Gironès)  %% nom normatiu
+	/i 20  %% codi territorial
+      >>
+  /SI <<
+	/f 0   %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Segrià)  %% nom normatiu
+	/i 33  %% codi territorial
+      >>
+  /UR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Urgell)  %% nom normatiu
+	/i 38  %% codi territorial
+      >>
+  /AI <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Anoia)  %% nom normatiu
+	/i 06  %% codi territorial
+      >>
+  /VC <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Vallès Occidental)  %% nom normatiu
+	/i 40  %% codi territorial
+      >>
+  /VR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Vallès Oriental)  %% nom normatiu
+	/i 41  %% codi territorial
+      >> 
+  /GG <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (les Garrigues)  %% nom normatiu
+	/i 18  %% codi territorial
+      >> 
+  /CB <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Conca de Barberà)  %% nom normatiu
+	/i 16  %% codi territorial
+      >> 
+  /AP <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alt Penedès)  %% nom normatiu
+	/i 03  %% codi territorial
+      >> 
+  /BR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Barcelonès)  %% nom normatiu
+	/i 13  %% codi territorial
+      >> 
+  /MM <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Maresme)  %% nom normatiu
+	/i 21  %% codi territorial
+      >> 
+  /PR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 1  %% reclamades
+	/n (el Priorat)  %% nom normatiu
+	/i 29  %% codi territorial
+      >> 
+  /AC <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (l'Alt Camp)  %% nom normatiu
+	/i 01 %% codi territorial
+      >> 
+  /BP <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Penedès)  %% nom normatiu
+	/i 12  %% codi territorial
+      >> 
+  /GF <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Garraf)  %% nom normatiu
+	/i 17  %% codi territorial
+      >> 
+  /BT <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Llobregat)  %% nom normatiu
+	/i 11  %% codi territorial
+      >> 
+  /TT <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Terra Alta)  %% nom normatiu
+	/i 37  %% codi territorial
+      >> 
+  /RE <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (la Ribera d'Ebre)  %% nom normatiu
+	/i 30  %% codi territorial
+      >> 
+  /BC <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Camp)  %% nom normatiu
+	/i 08  %% codi territorial
+      >> 
+  /TR <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 1  %% reclamades
+	/n (el Tarragonès)  %% nom normatiu
+	/i 36  %% codi territorial
+      >> 
+  /MT <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Montsià)  %% nom normatiu
+	/i 22  %% codi territorial
+      >> 
+  /BB <<
+	/f 0  %% total fosses
+	/o 0  %% fosses publicades al dataset oficial
+	/p 0  %% fosses documentades pendents de publicar
+	/e 0  %% exhumades
+	/r 0  %% reclamades
+	/n (el Baix Ebre)  %% nom normatiu
+	/i 09  %% codi territorial
+      >> 
+>> def
+
+%% FARCIM LES DADES DE LA INFOGRAFIA
+%%+URL
+%% localhost Tuxedo
+(exhumaDataset_prototip00.ps) (r) file cvx exec
+%% servidor bTactic
+%% ?
+
+%% farcim les dades a representar de /comarquesVSfosses
+2glifsAfosses
+{  %% forall per 2glifsAfosses
+ exch dup /ARA## exch def
+ comarquesVSfosses exch get
+ dup /f 3 index 0 get put  %% farcim (ara sense sumar) el nombre total oficial de fosses d'aquesta comarca
+ dup /e 4 -1 roll 1 get put  %% farcim (ara sense sumar) el nombre total oficial de fosses exhumades d'aquesta comarca
+ comarquesVSfosses exch ARA## exch put
+}forall
+
+/iReticula 0 def
+
+%% mòdul pel format de pàgina i/o pantalla)
+xComarques xReticula div dup /cQ exch def  %% mòdul del quadrat comarcal
+
+DINa4
+{
+ pop 842
+ %% cal restar-li aquest marge perquè faci A4 exacte!
+ 54.1 2 mul sub
+}
+{
+ useragentV
+ {  %% hi posaríem el valor de la variable de l'useragent de la Y de la pantalla
+  MESaltQUEample  %% per saber la ràtio, aquí hauríem de comparar el valor X,Y de pantalla de la variable de l'useragent
+  {  %% si és més alt que ample treballem amb el valor Y de pantalla de la variable useragent
+   pop ALTtalla
+  }
+  {  %% si és més ample que alt treballem amb el quadrat de les 43 comarques
+   yReticula mul
+  }ifelse
+ }
+ {
+  yReticula mul
+ }ifelse
+}ifelse
+/yPagina exch def  %% y
+
+/margeALvoltant cQ def
+
+<<
+  /PageSize
+  [
+%%CAL +endavant
+%% corregim el valor del format de pàgina en vertical, proporcionalment al marge d'ample que, al deixar-lo fix en pantalles més altes que amples deixava un blanc a sota
+%% quan el format de pantalla és vertical (més alt que ample) cal que la ràtio original de xComarques/yPagina es mantingui, de manera que
+%% quan li sumem 2 margeALvoltant a X calculem quin és el valor (del marge) vertical (a sumar) per tal que aquesta ràtio es mantingui (nou ample/ràtio original)
+%% ara no ho fa i d'aquí el blanc de sota, aquest nou marge /2 serà sempre més gran que 1 margeALvoltant
+%   xComarques yPagina lt
+%   {  %% format de pantalla vertical: és més alt que ample
+%    xComarques margeALvoltant 2 mul add dup  %% ample original amb els 2 marges afegits
+%    xComarques yPagina div /mmmRatio exch def  %% aquesta ràtio és la mateixa que l'original de pantalla?
+%    yPagina mul  %% valor vertical original?
+%    xComarques div  %% aquest nou format vertical manté la ràtio?
+%pstack UUUUUUUUUUUUUU
+%   }
+%   {  %% format de pantalla horitzontal: és més ample que alt
+    xComarques margeALvoltant 2 mul add
+    yPagina margeALvoltant 2 mul add
+%   }ifelse
+  ]
+dup 4 1 roll
+  /HWResolution [4000 4000]
+>>setpagedevice
+
+%% fem l'HTML?
+%(MRCT_uaV) getenv pop cvx exec
+(MRCT_femHTML) getenv pop cvx exec
+/femHTML exch def
+
+femHTML
+{
+ /cols&fils exch def  %% és el format de pantalla [ample alt]
+ %% establim el càlcul pel multiplicador del factor de correcció per les posicions del mapa d'imatge HTML de manera que, treballant sempre a la resolució fixa de 72ppp,
+ %% els píxels d'ample de la imatge (a 72ppp sempre superaran als de la pantalla) s'adaptaran als de la pantalla (pensant en els zooms que pugui fer l'usuari)
+ AMPLEtalla 100 mul cols&fils 0 get div 100 div
+ /mfcmHtml exch def
+
+ /olucio 72 def  %% ídem a la variable -r de la línia de comanda del GS per la resolució d'escriptura del jpeg
+ /dHinting 72 def  %% constant divisora del valor de resolució amb què s'ha generat la imatge en jpeg per tal de trobar el multiplicador que ens localitzarà els píxels
+ olucio dHinting div /xHint exch def  %% multiplicador dels valors en punts per trobar el seu equivalent en píxels
+%%+URL
+ %% on escrivim l'HTML únic
+ (htmls/obriulesfosses_) dup length dup /araVa exch def IDunica length add 5 add string dup 3 -1 roll 0 exch putinterval
+ dup araVa dup IDunica length add /araVa2 exch def IDunica putinterval dup araVa2 (.html) putinterval
+ (w) file /43c exch def
+
+ 43c (<!DOCTYPE html>
+<html lang="ca">
+<head>
+<!-- fem el layout liquid?  -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Obriu les fosses d'una vegada!</title>
+<link rel="icon" type="image/x-icon" href="https://www.obriulesfosses.cat/Fvermella.png">
+<meta name="lang" content="ca"/>
+<meta name="description" content="Mapa comarcal generatiu de les fosses comunes de la Guerra d'ESpanya que hi ha a Cayalunya">
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Catalunya, el pa&iacute;s de les mil Fosses: obriu les fosses d'una vegada!" />
+<meta property="og:description" content="Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!" />
+<meta property="og:url" content="https://www.obriulesfosses.cat" />
+<meta property="og:site_name" content="obriulesfosses" />
+<meta property="og:image" content="https://www.obriulesfosses.cat/exhumeu/elGovernTrigara_1077x670.png" />
+<meta property='og:locale' content='ca_ES' />
+<meta name="twitter:card" content="summary_large_image"/>
+<!-- màxim 126 caràcters per la descripció -->
+<meta name="twitter:description" content="Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!"/>
+<meta name="twitter:image" content="https://www.obriulesfosses.cat/exhumeu/elGovernTrigara_1077x670.png"/>
+<meta name="twitter:image:alt" content="Mapa comarcal generatiu de les fosses comunes de la Guerra d'ESpanya que hi ha a Cayalunya"/>
+<meta name="twitter:site" content="http://twitter.com/@OnEtsOncleGuill"/>
+<meta name="twitter:creator" content="@OnEtsOncleGuill"/>
+<!-- ara sembla admet un màxim aproximat de 75 caràcters pel títol -->
+<meta name="twitter:title" content="Catalunya, el pa&iacute;s de les mil Fosses: obriu les fosses d'una vegada!"/>
+<meta name="twitter:url" content="https://www.obriulesfosses.cat"/>
+<style>
+html, body
+{  // caixa perfectament a l'ample de la pantalla (que no de la finestra)
+ height: 100%;
+ margin: 0;
+ padding: 0;
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas" width=") writestring
+
+43c AMPLEtalla round cvi 128 string cvs writestring  %% píxels d'ample que quaden amb els de l'UserAgent
+
+43c (" height=") writestring
+%% ens cal fer una regla de 3, entre ample/alt de cols&fils i AMPLEtalla (que serà el width) per tal de deduir l'height
+43c cols&fils aload pop AMPLEtalla mul exch div round cvi 128 string cvs writestring  %% píxels d'alt que quaden amb els de l'UserAgent)
+
+43c (">
+Sorry, your browser does not support canvas.
+</canvas>
+<script>
+) writestring
+
+43c (// aquí la imatge
+var canvas = document.querySelector("canvas");
+ctx = canvas.getContext("2d");
+
+const image = new Image\() writestring
+
+ 43c AMPLEtalla round cvi 128 string cvs writestring  %% píxels d'ample que quaden amb els de l'UserAgent
+
+43c (, ) writestring
+
+ %% ens cal fer una regla de 3 entre ample/alt de cols&fils i AMPLEtalla (que serà el width) per tal de deduir l'height
+ 43c cols&fils aload pop AMPLEtalla mul exch div round cvi 128 string cvs writestring  %% píxels d'alt que quaden amb els de l'UserAgent)
+
+43c (\); // Using optional size for image
+image.onload = drawImageActualSize; // Draw when image has loaded
+// URLserver pinta la imatge segons els CSS pixels
+// image.src = "http://localhost/www.obriulesfosses.cat/exhumeu/htmls/
+image.src = "https://www.obriulesfosses.cat/exhumeu/htmls/) writestring
+
+ 43c IDunica writestring
+
+43c (_obriulesfosses.png";
+) writestring
+
+43c (function drawImageActualSize() {
+  // Use the intrinsic size of image in CSS pixels for the canvas element
+  canvas.width = ) writestring
+
+43c AMPLEtalla round cvi 128 string cvs writestring  %% píxels d'ample que quaden amb els de l'UserAgent
+
+ 43c (;
+  canvas.height = ) writestring
+
+%% ens cal fer una regla de 3 entre ample/alt de cols&fils i AMPLEtalla (que serà el width) per tal de deduir l'height
+43c cols&fils aload pop AMPLEtalla mul exch div round cvi 128 string cvs writestring  %% píxels d'alt que quaden amb els de l'UserAgent
+
+ 43c (;
+
+  // Will draw the image as X0 Y0, ignoring the custom size of X1 Y1
+  // given in the constructor
+  ctx.drawImage(this, 0, 0);
+
+  // To use the custom size we'll have to specify the scale parameters
+  // using the element's width and height properties - lets draw one
+  // on top in the corner:
+  ctx.drawImage(this, 0, 0, this.width, this.height);
+}
+) writestring
+
+43c (// The Tool-Tip instance:
+function ToolTip(canvas, region, text, width, timeout)
+{
+ var me = this,                                // self-reference for event handlers
+     div = document.createElement("div"),      // the tool-tip div
+     parent = canvas.parentNode,               // parent node for canvas
+     visible = false;                          // current status
+
+ // set some initial styles, can be replaced by class-name etc.
+ div.style.cssText = "position:fixed;padding:7px;background:white;pointer-events:none;width:" + width + "px";
+ div.innerHTML = text;
+
+ // show the tool-tip
+ this.show = function(pos)
+ {
+  if (!visible) 
+  {                             // ignore if already shown (or reset time)
+   visible = true;                           // lock so it's only shown once
+   setDivPos(pos);                           // set position
+   parent.appendChild(div);                  // add to parent of canvas
+   setTimeout(hide, timeout);                // timeout for hide
+  }
+ }
+
+ // hide the tool-tip
+ function hide()
+ {
+  visible = false;                            // hide it after timeout
+  parent.removeChild(div);                    // remove from DOM
+
+  //EP! aquí quan s'amaga el tooltip ens fa cas
+  //  onclick = window.location.href='http://enlloc.cat';
+ }
+
+ // check mouse position, add limits as wanted... just for example:
+ function check(e)
+ {
+  var pos = getPos(e),
+  posAbs = {x: e.clientX, y: e.clientY};  // div is fixed, so use clientX/Y
+  if
+  (
+   !visible &&
+   pos.x >= region.x && pos.x < region.x + region.w &&
+   pos.y >= region.y && pos.y < region.y + region.h
+  )
+  {
+   me.show(posAbs);                          // show tool-tip at this pos
+  }
+  else setDivPos(posAbs);                     // otherwise, update position
+ }
+
+ // get mouse position relative to canvas
+ function getPos(e)
+ {
+  var r = canvas.getBoundingClientRect();
+  return {x: e.clientX - r.left, y: e.clientY - r.top}
+ }
+
+ // update and adjust div position if needed (anchor to a different corner etc.)
+ function setDivPos(pos)
+ {
+  if (visible)
+  {
+   if (pos.x < 0) pos.x = 0;
+   if (pos.y < 0) pos.y = 0;
+   // other bound checks here
+   div.style.left = pos.x + "px";
+   div.style.top = pos.y + "px";
+  }
+ }
+
+ // we need to use shared event handlers:
+ canvas.addEventListener("mousemove", check);
+ canvas.addEventListener("click", check);
+}
+) writestring
+
+}
+{
+ pop
+}ifelse
+
+%% glif (efa) /f /F alternativa:
+%% Fhook | Ghestrokecyrillic | ghestrokecyrillic | ff | uni024D | florin | uni0191 | uni0493 | uni0492 | f_f 
+/glifF (\000) def  %% glif utilitzat per representar una fossa
+
+/gruixF cQ 100 div def  %% el gruix del perfilat blanc del quadrat comarcal va en funció de la mida de la comarca
+/araX 0 def
+/araY yPagina cQ sub def 
+
+%%URL
+%% font dels crèdits
+(UbuntuMono-R.ttf)
+%(Hack-Regular.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+%dup length array copy dup 0
+%/Fhook put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0191 put
+%/uni0493 put
+%/uni0492 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /WApMono exch definefont pop
+/WApMono findfont
+/creditsMono exch def
+
+%% font del titular dels crèdits
+(UbuntuMono-B.ttf)
+%(Hack-Regular.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+%dup length array copy dup 0
+%/Fhook put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0191 put
+%/uni0493 put
+%/uni0492 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /WApMono exch definefont pop
+/WApMono findfont
+/creditsMonoB exch def
+
+%% font del glif que assenyala fosses
+%(/var/www/html/www.pliegos.net/maker/UBESH_/UBESH/Hack-Bold.ttf)  %% si el path és massa llarg (com aquest, el talla? i hi posa un font de sunstitució Helvetica?)
+%(Hack-Bold.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf)
+%(/usr/share/fonts/truetype/ubuntu/UbuntuMono-B.ttf)
+(UbuntuMono-B.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+dup length array copy dup 0
+%/Fhook put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+/f put
+%/uni0191 put
+%/uni0493 put
+%/uni0492 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /dUbuntu_WApMono exch definefont pop
+/dUbuntu_WApMono findfont
+/UbuntuMonoB exch def
+
+%%URL
+%% tipus que podem cridar
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-Th.ttf)
+(Ubuntu-Th.ttf)  %% adreça relativa
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-L.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
+%(/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf)
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+dup length array copy dup 0
+%/Fhook put
+/uni0191 put
+
+%/uni0492 put
+
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0493 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /dUbuntu_WAp exch definefont pop
+/dUbuntu_WAp findfont
+/dUbuntu exch def
+
+%%URL
+%% tipus que podem cridar
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
+(Ubuntu-C.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+dup length array copy dup 0
+%/Fhook put
+/uni0191 put
+
+%/uni0492 put
+
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0493 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /dUbuntu_WAp exch definefont pop
+/dUbuntu_WAp findfont
+/dUbuntuB exch def
+
+(Ubuntu-B.ttf)
+%(/usr/share/fonts/truetype/ubuntu/Ubuntu-C.ttf)
+%(Ubuntu-C.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+dup length array copy dup 0
+%/Fhook put
+/uni0191 put
+%/uni0492 put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0493 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /dUbuntu_WAp exch definefont pop
+/dUbuntu_WAp findfont
+/dUbuntuBB exch def
+
+%% pintem el ponent en groc?
+true
+{
+ gsave
+ %1 1 0
+ 187 255 div 88 255 div 31 255 div  %% taronja vell
+ setrgbcolor
+ 0 0 margeALvoltant cQ 3 mul add margeALvoltant 2 mul yPagina add
+ rectfill
+ grestore
+}if
+
+%% pintem el mar al sud?
+true
+{
+ DINa4
+ {
+  gsave
+  0 0 1 setrgbcolor
+  0 0 moveto margeALvoltant gruixF 8 mul sub
+  yPagina margeALvoltant add xComarques sub gruixF 6 mul sub
+2 copy 2 array astore /mefecit exch def
+  lineto
+  margeALvoltant 2 mul xComarques add margeALvoltant 2 mul yPagina add lineto
+  margeALvoltant 2 mul xComarques add 0 lineto
+  closepath fill
+  grestore
+ }
+ {  %% just al format de les 43 comarques?
+  MESaltQUEample
+  {  %% SI
+   gsave
+   0 0 1 setrgbcolor
+   0 0 moveto margeALvoltant gruixF 8 mul sub
+   yPagina margeALvoltant add xComarques sub gruixF 6 mul sub lineto
+   margeALvoltant 2 mul xComarques add margeALvoltant 2 mul yPagina add lineto
+   margeALvoltant 2 mul xComarques add 0 lineto
+   closepath fill
+   grestore
+  }
+  {  %% NO, i ens adaptem al format quadrat de les 43 comarques
+   gsave
+   0 0 1 setrgbcolor
+   0 0 moveto margeALvoltant 2 mul xComarques add dup 0 lineto margeALvoltant 2 mul yPagina add lineto
+   closepath fill
+   grestore
+  }ifelse
+ }ifelse
+}if
+
+%% pintem en vermell el nord?
+true
+{
+ DINa4
+ {
+  gsave
+  1 0 0 setrgbcolor
+  margeALvoltant cQ 2 mul add gruixF 5 mul sub
+  yPagina gruixF 7 mul add
+  margeALvoltant cQ 7 mul add gruixF 12 mul add
+  margeALvoltant cQ add gruixF 6 mul sub rectfill
+  grestore
+ }
+ {  %% just al format de les 43 comarques?
+  MESaltQUEample  %% és més alt que ample?
+  {  %% SI
+   gsave
+   1 0 0 setrgbcolor
+   margeALvoltant cQ 2 mul add gruixF 5 mul sub
+   yPagina gruixF 7 mul add
+   margeALvoltant cQ 7 mul add gruixF 10 mul add
+   margeALvoltant cQ add gruixF 7 mul sub rectfill
+   grestore
+  }
+  { %% NO, és més ample que alt i llavors fem el format de les 43 comarques
+   gsave
+   1 0 0 setrgbcolor
+   margeALvoltant cQ 2 mul add gruixF 5 mul sub
+   yPagina gruixF 7 mul add
+   margeALvoltant cQ 7 mul add gruixF 12 mul add
+   margeALvoltant cQ add gruixF 6 mul sub rectfill
+   grestore
+  }ifelse
+ }ifelse
+}if
+
+
+%% construïm el mapa de cairons comarcals com si no hi haguessin els 4 marges
+gsave
+%% posicionem l'inici de la graella de cairons comarcals en funció dels marges i el gruix de separació entre comarques
+margeALvoltant gruixF 2 mul xReticula 1 sub mul 2 div sub dup /xmapaHTML exch def
+margeALvoltant gruixF 2 mul yReticula 1 sub mul 2 div add dup /ymapaHTML exch def
+translate
+
+%%CAL trobar una altra estratègia per assenyalar LA COMARCA ON TREBALLEM?
+/laFEM 29 def  %% l'indicador ara és l'índex de com es pinta la comarca segons el mapa (ordre de dalt a baix i d'esquerra a dreta) però hauria de ser un clau de json?
+/ilaFEM 0 def
+
+0 1 yReticula 1 sub
+{  %% for de les Y per generar les 43 comarques (de dalt a baix i d'esquerra a dreta)
+ dup /yCairo exch def  %% tècniques per perfilar els cairons de manera que no calvalquin
+ xReticula mul /iY exch def
+ 0 1 xReticula 1 sub
+ {  %% for de les X
+  dup iY add nComarques exch get dup /araC exch def null eq  %% a quina comarca toca el quadrat que pintem ara?
+  {  %% no hi ha comarca
+   pop  %%cQ mul araY cQ dup gsave 1 1 1 setrgbcolor gruixF 2 mul setlinewidth rectstroke grestore  %% perfilem en blanc
+  }
+  {  %% comarca
+               dup gruixF 2 mul mul exch  %% tècniques per perfilar els cairons de manera que no calvalquin
+   cQ mul
+               add  %% tècniques per perfilar els cairons de manera que no calvalquin
+   araY
+   2 copy 2 array astore /LLc exch def  %% x,y d'inici al xamfrà de baix a l'esquerra del quadrat de la comarca
+   cQ dup
+   4 copy rectfill  %% omplim de negre
+   %% dues tècniques per perfilar els cairons de manera que no calvalquin malament quan tessel·lem (p.e. si perfilem pel centre del gruix del filet)
+   false  %% tècniques per perfilar els cairons de manera que no calvalquin
+   {  %% el gruix del filet per l'interior del cairó
+    gsave 4 copy
+    gruixF sub exch gruixF sub exch 4 -1 roll gruixF 2 div add 4 1 roll 3 -1 roll gruixF 2 div add 3 1 roll
+    1 1 1 setrgbcolor gruixF setlinewidth rectstroke grestore  %% perfilem en blanc el quadrat
+   }
+   {  %% el gruix del filet per l'exterior del cairó o el centre de la vora
+    false
+    {  %% l'exterior
+     gsave 4 copy
+     gruixF add exch gruixF add exch 4 -1 roll gruixF 2 div sub 4 1 roll 3 -1 roll gruixF 2 div sub 3 1 roll
+     1 1 1 setrgbcolor gruixF setlinewidth rectstroke grestore  %% perfilem en blanc el quadrat
+    }
+    {  %% el centre
+     gsave 4 copy
+
+%%CAL activar el tooltip i el vincle a la pàgina de la comarca de treball amb els tràmits i dades de les fosses
+%%TEST per assenyalar la comarca on estem treballant
+     ilaFEM laFEM eq
+     {
+      1 0 0 setrgbcolor
+     }
+     {
+      1 1 1 setrgbcolor
+     }ifelse
+
+     ilaFEM 1 add /ilaFEM exch def
+     gruixF 2 mul setlinewidth rectstroke grestore  %% perfilem en blanc o vermell el quadrat
+    }ifelse
+   }ifelse
+   2 index add exch 3 index add exch 4 array astore /pelRect exch def  %% /ANN
+
+   araC (BM)eq
+   {  %% si som al Baix Empordà
+    pelRect /d19361977 exch def  %% per situar el període a la part blava
+   }if
+
+   araC (MT)eq
+   {  %% si som al Montsià
+    pelRect /tibaPDF exch def  %% per situar el logo de descàrrega del PDF quan fem l'HTML
+   }if
+
+   araC (VN) eq
+   {  %% desem la coordenada x,y UL de l'Aran per poder situar el cap dels crèdits
+    pelRect dup 0 get exch 3 get 2 array astore /capcredits exch def
+   }if
+
+   araC (BR) eq
+   {  %% desem la coordenada x,y LR del Barcelonès per poder situar el rellotge de fosses i el garigot
+    pelRect dup 2 get exch 1 get 2 array astore /illademaians exch def
+   }if
+
+   comarquesVSfosses araC get dup
+   /e get /araE exch def dup /n get /araN exch def dup /r get /araR exch def /f get dup /araFosses exch def  %% fosses exhumades, reclamades i totals
+   sqrt ceiling dup mul sqrt cvi /finsXY exch def  %% nombre de tessel·les de costat
+   finsXY 0 ne
+   {  %% evitem la divisió per zero quan una comarca no té fosses
+    cQ gruixF sub finsXY div /tssll exch def  %% calculem la mida de la tessel·la que ha d'omplir el quadrat comarcal
+   }if
+
+   %% iniciem les anotacions de PDF compatibles amb qualsevol viewer que hem provat fins ara
+   araC (VN) eq
+   {  %% només 1 vegada perquè aquests objectes són compartits!
+    %% Detecta si l'interpret PS duu el recurs %Calendar% (p.e. GS)
+    /araCDstring (D:) def  %% cadena d'inici per la Creation Date
+    %% si el duu llavors farceix una cadena segons la sintaxi del Creation Date d'AcrobatPDF
+    (%Calendar%) /IODevice resourcestatus  %% existeix el recurs del calendari+rellotge?
+    {  %% existeix! (probablement siguem dins GS)
+     pop pop  %% ens carreguem les altres dues respostes del query
+     %% /araCDstring (D:) def  %% cadena d'inici per la Creation Date
+     (%Calendar%) currentdevparams  %%{== ==}forall quit
+     dup /Running get
+     {  %% suposem q per refiar-nos del calendari aquesta entrada ha d'estar a true
+      dup /Year get
+      4 string cvs dup length araCDstring length dup /afegit exch def add string dup
+      0 araCDstring putinterval dup afegit 4 -1 roll putinterval /araCDstring exch def
+      dup /Month get
+      2 string cvs dup length dup 2 ne {1 add exch (00) dup 3 -1 roll 1 exch putinterval exch}if
+      araCDstring length dup /afegit exch def add string dup 0 araCDstring putinterval
+      dup afegit 4 -1 roll putinterval /araCDstring exch def
+      dup /Day get
+      2 string cvs dup length dup 2 ne {1 add exch (00) dup 3 -1 roll 1 exch putinterval exch}if
+      araCDstring length dup /afegit exch def add string dup 0 araCDstring putinterval
+      dup afegit 4 -1 roll putinterval /araCDstring exch def
+      dup /Hour get
+      2 string cvs dup length dup 2 ne {1 add exch (00) dup 3 -1 roll 1 exch putinterval exch}if
+      araCDstring length dup /afegit exch def add string dup 0 araCDstring putinterval
+      dup afegit 4 -1 roll putinterval /araCDstring exch def
+      dup /Minute get
+      2 string cvs dup length dup 2 ne {1 add exch (00) dup 3 -1 roll 1 exch putinterval exch}if
+      araCDstring length dup /afegit exch def add string dup 0 araCDstring putinterval
+      dup afegit 4 -1 roll putinterval /araCDstring exch def
+      /Second get
+      2 string cvs dup length dup 2 ne {1 add exch (00) dup 3 -1 roll 1 exch putinterval exch}if
+      araCDstring length dup /afegit exch def add string dup 0 araCDstring putinterval
+      dup afegit 4 -1 roll putinterval /araCDstring exch def
+     }
+     {  %% si Running es a false deixem un missatge d'avis, pero no fem res ...
+      pop
+      (\n ... >>> Hi ha %Calendar% pero Running es a false :-\( \n) print flush
+     }ifelse
+     %% per què cal afefir en aquest format la desviació en relació a l'hora del sol?
+     araCDstring  %% és un format ídem a CreationDate del DocInfo
+     dup length dup /araVa exch def (+02'00') dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     /araCDstring exch def
+    }if  %% si NO existeix ... probablement siguem a Distiller
+
+    %% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+    mark /_objdef {clauAnnots} /type /array /OBJ pdfmark
+    mark {ThisPage} << /Annots {clauAnnots} >> /PUT pdfmark
+
+    %% crear 1 diccionari d'estat gràfic associat al XObject d'aparença gràfica
+    mark /_objdef {EstatGrafic0} /type /dict /OBJ pdfmark
+    mark {EstatGrafic0} <</ca 0 /CA 0 /Type /ExtGState /AIS false /BM /Multiply >> /PUT pdfmark
+
+    %% crear 1 objecte XObject d'aparença gràfica diccionari/stream associat a l'anotació
+    mark /_objdef {streamAP} /type /stream /OBJ pdfmark  %% l'stream
+
+    (q 0 0 1 rg 0 i 1 w 4 M 1 j 0 J []0 d /EstatGrafic0 gs 0 0 m )
+    dup length dup /araVa1 exch def pelRect dup 2 get exch 0 get sub 16 string cvs dup /cX exch def
+    dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa1 exch putinterval
+    dup length dup /araVa1 exch def ( 0 l ) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa1 exch putinterval
+    dup length dup /araVa1 exch def pelRect dup 3 get exch 1 get sub 16 string cvs /cY exch def cX
+    dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa1 exch putinterval
+    dup length dup /araVa1 exch def ( ) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa1 exch putinterval
+    dup length dup /araVa1 exch def cY dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa1 exch putinterval
+    dup length dup /araVa1 exch def ( l 0 ) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa1 exch putinterval
+    dup length dup /araVa1 exch def cY dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa1 exch putinterval
+    dup length dup /araVa1 exch def ( l s Q) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa1 exch putinterval
+    /stringStream exch def
+
+    mark {streamAP}
+    <<  %% el diccionari associat a l'stream cal que sigui el primer de tot!
+      /Type /XObject
+      /FormType 1
+      /Matrix [1 0 0 1 0 0 ]
+      /Resources
+      <<
+        /ProcSet [/PDF]
+        /ExtGState
+        <<
+          /EstatGrafic0 {EstatGrafic0}
+        >>
+      >>
+      %/Filter /FlateDecode  %% ja ho posa l'intèrpret
+      /Subtype /Form
+      %/Length araFa  %% ja ho dedueix l'intèrpret
+      /BBox [ 0 0 cX cY ]  %% és el valor absolut de pelRect
+    >>
+    /PUT pdfmark
+
+    %% perquè un stream funcioni correctament s'ha de ficar dins l'objecte després del seu diccionari!
+    mark {streamAP} stringStream /PUT pdfmark
+   }if
+
+   %%Per a cada anotació de PDF sofisticada per tal sigui llegible amb qualsevol dispositiu i viewer, ens cal:
+   %% generem un nom únic amb la posicio X Y de la comarca
+   LLc 0 get 64 string cvs dup length
+   LLc 1 get 64 string cvs
+   dup length 3 -1 roll add 1 add string dup /araT exch def
+   /NullEncode filter /fT exch def
+   fT exch writestring fT (_) writestring fT exch writestring
+   fT dup flushfile closefile araT
+   dup length dup 1 add /araVa exch def 2 add string dup 0 ({) putinterval dup 3 -1 roll 1 exch putinterval dup araVa (}) putinterval
+   /nomPopup exch def
+
+   %% crear 1 objecte diccionari que s'inscriu a les coordenades de la comarca i que s'afegirà cada vegada a {clauAnnots} (únic!)
+   ({  }) dup 1 araC putinterval /araAnnot exch def  %% el nom únic són les 2 lletres normatives que defineixen cada comarca
+   mark /_objdef araAnnot cvx exec /type /dict /OBJ pdfmark
+
+   %% incrustar els valors de l'aparença gràfica de l'anotació de la comarca al diccionari
+   mark araAnnot cvx exec
+   <<
+     /AP <<
+           /N {streamAP}  %% l'XObject de l'aparença gràfica
+         >>
+     /P {ThisPage}  %% la referència indirecta a /Page
+     /Type /Annot
+     /Contents  %% les dades comarcals que ha d'ensenyar l'anotació
+     araN
+     (decodificaWinAnsiEncoding_a1i2i3octets.ps)
+     (r) file cvx exec AliniesD1solOctet 0 get /laComarca exch def  %% aquí només decodifica 1 sola string dins d'una array
+     (_____) dup length dup /araVa1 exch def laComarca dup length 3 -1 roll add string dup dup length /araVa2 exch def
+     4 -1 roll 0 exch putinterval dup 3 -1 roll araVa1 exch putinterval
+     dup length (\nTotal fosses: ) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa2 exch putinterval
+     dup length dup /araVa2 exch def araFosses 4 string cvs dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa2 exch putinterval
+     dup length dup /araVa2 exch def (\nFosses exhumades: ) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa2 exch putinterval
+     dup length dup /araVa2 exch def araE 4 string cvs dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa2 exch putinterval
+     dup length dup /araVa2 exch def (\nFosses reclamades: ) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa2 exch putinterval
+     dup length dup /araVa2 exch def araR 4 string cvs dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup 3 -1 roll araVa2 exch putinterval
+     /M araCDstring  %% cal formatar les dades del nostre rellotge com es necessita aquí
+     /T (ObriuLesFosses.cat)  %% autor de l'anotació
+     /NM araC  %% string única
+     /F 28
+     /CA 1
+     /C [ 0 0 0 ]  %% és el color de fons de rectangle que s'ens desplega amb un doble clic i/o passant per sobre
+     /Rect pelRect aload pop
+     margeALvoltant add gruixF 8 mul add
+     exch margeALvoltant add gruixF 8 mul sub exch
+     3 -1 roll margeALvoltant add gruixF 8 mul add 3 1 roll
+     4 -1 roll margeALvoltant add gruixF 8 mul sub 4 1 roll
+     4 array astore dup /idemPopup exch def  %% valors de pelRect
+     /Popup nomPopup cvx exec  %% a l'objecte Popup
+     /Subtype /Text
+     /Name /Comment
+     /CreationDate araCDstring  %% cal formatar les dades del nostre rellotge com es necessita aquí
+   >> /PUT pdfmark
+
+   %% crear 1 objecte diccionari únic que s'incriu a les coordenades fixes d'on es vulgui obrir un Popup i lligat a l'anterior i que s'afegirà cada vegada a {clauAnnots}
+   mark /_objdef nomPopup cvx exec /type /dict /OBJ pdfmark
+
+   mark nomPopup cvx exec
+   <<
+     /Subtype /Popup
+     /Parent araAnnot cvx exec  %% apuntem a l'objecte /Annot
+     /Type /Annot
+     /Rect idemPopup  %% sembla que els hi és indiferent als viewers que despleguen més enllà d'on situem l'anotació
+     /Open false
+     /F 28
+   >> /PUT pdfmark
+
+   %% fiquem les dues referències indirectes /Type /Annot de cada anotació a l'array {clauAnnots}
+   mark {clauAnnots} araAnnot cvx exec /APPEND pdfmark
+   mark {clauAnnots} nomPopup cvx exec /APPEND pdfmark
+   %% fi d'anotacions de PDF
+
+   femHTML
+   {  %% per cada comarca
+    43c (
+    // el tooltip de la comarca
+    var ) writestring
+    43c araC 6 string cvs writestring
+    43c (= new ToolTip\(canvas, {x: ) writestring
+    43c pelRect 0 get
+    xmapaHTML add xHint mul round cvi
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    16 string cvs writestring
+    43c (, y: ) writestring
+    43c pelRect 3 get
+    cols&fils 1 get ymapaHTML sub exch sub
+    %cQ sub
+    xHint mul round cvi
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    16 string cvs writestring
+    43c (, w: ) writestring
+    43c %pelRect 2 get pelRect 0 get sub
+    cQ
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    xHint mul round cvi
+    16 string cvs writestring
+    43c (, h: ) writestring
+    43c %pelRect 3 get pelRect 1 get sub
+    cQ
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    xHint mul round cvi
+    16 string cvs writestring
+    43c (}, ") writestring
+    43c (<span style='font-family:mono;color:#000000;font-weight:Bold'>___) writestring
+    araN (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec
+    43c AliniesD1solOctet 0 get writestring
+    43c (</span><br><br><span style='font-family:mono;color:#000000;font-weight:Regular'>&nbsp;&nbsp;Total fosses: ) writestring
+    43c araFosses 4 string cvs writestring
+    43c (<br><br>&nbsp;&nbsp;Fosses exhumades: ) writestring
+    43c araE 4 string cvs writestring
+    43c (<br><br>&nbsp;&nbsp;Fosses reclamades: ) writestring
+    43c araR 4 string cvs writestring
+    43c (</span><br>&nbsp;<br>) writestring
+    43c (", 225, 3000\);
+) writestring
+
+   }if
+
+   /femF true def  %% gatell per saber si hem exhaurit el nombre de fosses i hem de pintar o no el glif
+   /iF 0 def  %% comptador de fosses per comarca
+   /iFe 0 def  %% comptador de fosses exhumades per comarca
+   /iFr 0 def  %% comptador de fosses reclamades per comarca
+   araE 0 eq {false}{true}ifelse /FEMe exch def
+   araR 0 eq {false}{true}ifelse /FEMr exch def
+   araE araR add dup /MAXsesr exch def  %% total de fosses sense exhumar i sense reclamar
+   araFosses gt
+   {
+    (\n >>> LES FOSSES PER EXHUMAR + RECLAMADES NO PODEN SUPERAR EL TOTAL, TENIU UN ERROR a la comarca: ) print flush araC print flush (\n\n)print flush quit
+   }if
+
+   0 1 finsXY 1 sub
+   {  %% for generador del tessel·lat comarcal de fosses (de baix a dalt i d'esquerra a dreta)
+    /YxT exch def
+    0 1 finsXY 1 sub
+    {  %% for
+     iF 1 add /iF exch def
+     femF
+     {  %% pintem el glif amb el color que toqui de la fossa
+      LLc aload pop
+      gruixF 2 div sub  %% correcció Y de la línia de base pel glif de les fosses
+      YxT tssll mul add gruixF add exch 3 -1 roll tssll mul add exch 2 copy 2 array astore /xyT exch def tssll
+
+      dup
+
+      false  %% pintem el perfil quadrat de la comarca i el cercle?
+      {
+       gsave 0 setlinewidth 1 0 0 setrgbcolor rectstroke grestore  %% perfilem en vermell la tessel·la
+       gsave 1 1 0 setrgbcolor newpath xyT aload pop tssll 2 div dup 4 -1 roll add 3 1 roll add tssll 2 div 0 360 arc fill grestore  %% fem una rodona blanca
+      }
+      {  %% 4 coordenades que sobren
+       pop pop pop pop
+      }ifelse
+
+      gsave  %% hi centrem un glif tipogràfic acolorit segons categoria
+      UbuntuMonoB tssll scalefont setfont 0 0 moveto glifF true charpath pathbbox
+      3 index 2 div /ajustX exch def  %% per ajustar la posició x del moveto
+      3 -1 roll sub 3 1 roll exch sub  %% ample i alt del glif inscrit
+      tssll exch sub 2 div  %% x moveto
+      exch tssll exch sub 2 div  %% y moveto
+      xyT aload pop 3 -1 roll add 3 1 roll add ajustX sub gruixF finsXY div sub exch  %% ajustem el marge blanc de la x pel nombre de tessel·les
+      %% pintem el glif de la fossa segons
+      FEMe
+      {
+       0 1 0 setrgbcolor  %% en verd exhumades
+       iFe 1 add /iFe exch def
+       iFe araE eq
+       {
+        /FEMe false def
+       }if
+      }
+      {
+       FEMr
+       {
+        1 0 0 setrgbcolor  %% en vermell reclamades
+        iFr 1 add /iFr exch def
+        iFr araR eq
+        {
+         /FEMr false def
+        }if
+       }
+       {
+        1 1 1 setrgbcolor  %% en blanc ni exhumades ni reclamades
+       }ifelse
+      }ifelse
+      moveto glifF show
+      grestore
+     }
+     {  %% fora l'índex de filera
+      pop
+     }ifelse
+     iF araFosses eq
+     {
+      /femF false def
+     }if
+    }for
+   }for
+  }ifelse
+ }for  %% de les X
+
+ /araX 0 def  %% ara no fa re
+ araY
+ %yCairo
+ gruixF 2 mul
+ sub  %% tècniques per perfilar els cairons de manera que no calvalquin
+ cQ sub
+ /araY exch def 
+
+% clear  %% brossa per comarca que podríem evitar?
+
+}for  %% de les Y per generar les 43 comarques (de dalt a baix i d'esquerra a dreta)
+grestore
+
+%% clams als tacs vermell i blau
+gsave
+true
+{
+ 1 -0.01 0
+ {  %% for pel multiplicador del cos que fa que hi càpiga per l'ample establert
+  dUbuntu cQ 3 -1 roll mul scalefont setfont
+  1 1 1 setrgbcolor
+  (Que mai ningú no pugui dir)
+%%URL
+  %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  (decodificaWinAnsiEncoding_a1i2i3octets.ps)
+  (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup stringwidth pop
+  cQ 8 mul  %% ample establert per tal hi càpiga
+  exch sub
+  dup gruixF 8 mul gt  %% marge mínim tolerable
+  {
+   2 div cQ 2 mul add margeALvoltant add
+   yPagina cQ .1 mul add
+   margeALvoltant add gruixF add
+   moveto show exit
+  }
+  {
+   pop pop
+  }ifelse
+ }for
+
+ 1 -0.01 0
+ {  %% for pel multiplicador del cos que fa que hi càpiga per l'ample establert
+  dUbuntuB cQ 3 -1 roll mul scalefont setfont
+  0 0 0 setrgbcolor
+  %(d'aquesta fossa mai n'han reclamat l'exhumació)
+  (mai no han reclamat l'exhumació d'aquesta fossa)
+%%URL
+  %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  (decodificaWinAnsiEncoding_a1i2i3octets.ps)
+  (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup stringwidth pop
+  cQ 8 mul  %% ample establert per tal hi càpiga
+  exch sub
+  dup gruixF 8 mul gt  %% marge mínim tolerable
+  {
+   2 div cQ 2 mul add margeALvoltant add
+   yPagina cQ .3 mul add
+   gruixF 10 mul add  %% correcció Y de la línia de base
+   moveto show exit
+  }
+  {
+   pop pop
+  }ifelse
+ }for
+
+%% clam vertical a la mar blava
+
+%% datem
+ gsave
+ 1 1 1 setrgbcolor
+ dUbuntu cQ 2.3 div scalefont setfont
+ d19361977 2 2 getinterval aload pop cQ 1.5 div add exch cQ add exch moveto (1936)show
+ d19361977 2 2 getinterval aload pop cQ 6 div add exch cQ add exch moveto (1977)show
+ grestore
+
+ gsave
+ 1 -0.01 0
+ {  %% for pel multiplicador del cos que fa que hi càpiga per l'ample establert
+  dUbuntuB cQ 3 -1 roll mul dup /araCOS exch def scalefont setfont
+  1 1 1 setrgbcolor
+  (Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!)
+%%URL
+  %(/var/www/html/www.ub.edu/tallerdetipografia/caixista/decodificaWinAnsiEncoding_a1i2octets.ps)
+  (decodificaWinAnsiEncoding_a1i2i3octets.ps)
+  (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup stringwidth pop
+  %% altura del tac vermell
+  DINa4
+  {
+   margeALvoltant cQ add gruixF 6 mul sub
+  }
+  {  %% just al format de les 43 comarques?
+   MESaltQUEample  %% és més alt que ample?
+   {  %% SI
+    margeALvoltant cQ add gruixF 7 mul sub
+   }
+   {  %% NO
+    margeALvoltant cQ add gruixF 6 mul sub
+   }ifelse
+  }ifelse
+   %% i el restem de la Y del format de pàgina
+   femHTML
+   {
+    cols&fils 1 get
+   }
+   {
+    842
+   }ifelse
+   margeALvoltant sub  %% marge inferior
+   exch sub
+   %% ample establert per tal hi càpiga
+   exch sub
+   dup gruixF 4 mul gt  %% marge mínim tolerable
+   {
+    DINa4
+    {
+     595
+    }
+    {
+     cols&fils 0 get
+    }ifelse
+    exch sub
+
+    femHTML
+    {
+     dup araCOS add cols&fils 0 get ge
+     {
+      pop cols&fils 0 get araCOS 2.5 mul margeALvoltant ge
+      {
+       araCOS 3 div sub
+      }
+      {
+       araCOS sub
+      }ifelse
+     }if
+%%ERROR al marge vertical?
+    }
+    {
+     margeALvoltant .1 mul add
+    }ifelse
+
+    margeALvoltant dup .3 mul sub
+    dup /peu2025 exch def
+    translate 90 rotate 0 0 moveto
+    show exit
+   }
+   {
+    pop pop
+   }ifelse
+ }for
+ grestore
+
+ gsave
+ dUbuntuB cQ .2 mul dup /yLB exch def 1.2 div scalefont setfont
+ 1 1 1 setrgbcolor
+%%ATENCIÓ: aquest applet s'executa 2 vegades a prototip##.php de manera que el 1er cop /useragentV és a false perquè la URL s'inicia amb &UA=false
+ useragentV
+ {  %% pantalla
+  margeALvoltant 2 div yLB moveto (Heu generat el mapa a les ) show hora show ( del )show
+  dia (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup dup length 4 sub 4 getinterval /anyDpena exch def  %% extraiem l'any per evitar posar-lo en manual sota el garigot
+  show currentpoint 2 array astore /XYeTcaP exch def  %% per compondre el TEMPS com a PENA més endavant
+ }
+ {  %% PDF A4
+  mefecit aload pop exch atan rotate
+  margeALvoltant 1.2 div yLB neg moveto (Heu generat el mapa a les ) show hora show ( del )show
+  dia (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec
+  AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+  dup dup length 4 sub 4 getinterval /anyDpena exch def  %% extraiem l'any per evitar posar-lo en manual sota el garigot
+  show
+ }ifelse
+ grestore
+}if
+grestore
+
+false{  %% ignorem el rellotge que cal polir-lo i generar-lo coom una infografia a part
+
+%% anàlisi per construir el rellotge de les fosses
+comarquesVSfosses
+%        /f 0  %% total fosses
+%        /o 0  %% fosses publicades al dataset oficial
+%        /p 0  %% fosses documentades pendents de publicar
+%        /e 0  %% exhumades
+%        /r 0  %% reclamades
+%        /n (l'Aran)  %% nom normatiu
+%        /i 39  %% codi territorial
+
+/TOTAL 0 def
+dup length array /TFxComarca exch def
+/i 0 def
+{
+ /f get dup TFxComarca exch i exch put
+ TOTAL add /TOTAL exch def
+ pop
+ i 1 add /i exch def
+}forall
+%% array del total de fosses per comarca desordenades
+TFxComarca
+
+%% ordena alfabèticament l'array d'strings o numèrics
+%%Hem descobert un bug en aquest famós algorisme que penja el loop sine die! 
+%% (QuickSort.ps) (r) file cvx exec QSortArray
+
+%% endreça una seqüència numèrica existent a l'stack de menys a més (operador ge) o de més a menys (operador le)
+%% a comptar des de la base de l'stack (molt útil mentre no sobreixim el màxim d'elements d'una stack)
+[ exch  %% per encabir-hi l'array ordenada de menys a més (ge)
+aload pop  %% desmpaquetem l'array d'alçades
+{  %% loop mentre estiguin desordenats
+ counttomark 1 sub /iCul exch def
+ %% escombrat d'ordenació
+ iCul
+ {  %% repeat
+  iCul index /araCul exch def
+  iCul 1 sub index araCul ge  %% ordre d'endreça
+  {
+   iCul 1 sub /iCul exch def
+  }
+  {
+   iCul -1 roll
+   iCul 1 add 1 roll
+  }ifelse
+ }repeat
+ %% mirem si estan per ordre de menys a més (ge)
+ %% o de més a menys (le), començant pel cul de l'stack
+ /Ordenats true def
+ counttomark 1 sub /iCul exch def
+ iCul
+ {  %% repeat
+  iCul index /araCul exch def
+  iCul 1 sub index araCul ge  %% ordre d'endreça
+  {
+   iCul 1 sub /iCul exch def
+  }
+  {
+   /Ordenats false def
+   exit
+  }ifelse
+ }repeat
+ Ordenats{exit}if
+}loop
+
+]  %% tanquem l'array ordenada de menys a més
+%% array ordenada del total de fosses per comarca
+/oTFxComarca exch def
+
+%% passem el nombre de fosses a angles perquè sumin 360
+[
+ oTFxComarca
+ {
+  360 mul TOTAL div
+ }forall
+]
+%% array ordenada d'angles, que sumenn 360, amb concordança amb el nombre de fosses de menys a més
+/aTFxComarca exch def
+
+%% ordenem els noms de les comarques pel nombre total de fosses afegint-hi
+/feta 1 dict def
+[
+ oTFxComarca
+ {  %% forall per pescar el nombre total de fosses ordenades comarca a comarca
+  /araF exch def
+  comarquesVSfosses
+  {  %% forall per saber a quina comarca correspon el nombre total de fosses amb /f
+   1 index feta exch known
+   {
+    pop pop
+   }
+   {
+    dup /f get araF eq
+    {
+     dup /f get exch
+     dup /e get exch
+     dup /r get exch
+     /n get 5 array astore  %% deixem l'array a l'stack de cada comarca ordenada per [ /ID #totalFosses #exhumades #reclamades (nom de la comarca)]
+     dup 0 get feta exch null put  %% desem a fetes per no repetir-la
+    }
+    {
+     pop pop
+    }ifelse
+   }ifelse
+  }forall
+  
+ }forall
+]
+%% array amb el nom /n de les comarques ordenats de menys a més pel seu nombre de fosses /f també hi afegim les exhumades /e i les reclamades /r i l'ID de 2 lletres
+/nTFxComarca exch def
+
+ useragentV
+ {  %% pantalla
+ }
+ {
+%% dibuixem el rellotge de les fosses amb la distribució per comarques de més a menys
+%% la referència d'x és la comarca del Barcelonès
+gsave
+%% on som?
+1 1 1 setrgbcolor
+%% situem el centre del rellotge
+illademaians aload pop cQ 5 mul sub margeALvoltant add exch cQ 3 mul sub margeALvoltant add exch 2 array astore /cR exch def
+/rad cQ 2.5 mul def
+
+gsave
+.6 .6 .6 setrgbcolor
+cR aload pop rad 0 360 arc fill
+false{
+%cR aload pop translate
+%/aComarca 0 def
+%aTFxComarca  %% array amb el nombre fosses traduïdes a graus i que sumen 360
+%{
+% aComarca add dup /aComarca exch def
+% gsave
+% rotate
+% 0 0 moveto rad 1.25 mul 0 lineto stroke
+% grestore
+%}forall
+}if
+grestore
+
+%% el cos del tipus que descriurà la comarca i el seu nombre de fosses l'hem de deduir del nombre de fosses més petit que NO sigui zero
+%% amb una regla de tres amb el perímetre pel radi triat (2PIr) i el nombre total de fosses= perímetre x minFosses / total fosses
+2 3.1416 mul rad mul  %% perimetre
+dup 360 div  %% valor perimetral d'1 grau
+aTFxComarca 1 get mul  %% multiplicat per l'angle nozero del mínim comarcal és el cos
+/cosR exch def
+UbuntuMonoB cosR scalefont setfont
+
+gsave
+0.3 setlinewidth
+cR aload pop translate
+1 1 1 setrgbcolor
+/aComarca 0 def
+aTFxComarca  %% array amb el nombre fosses traduïdes a graus i que sumen 360
+dup length 1 sub 0 exch 1 exch
+{  %% for
+ dup/iR exch def  %% índex pels talls del rellotge
+ aTFxComarca exch get
+ aComarca add dup /aComarca exch def
+ gsave
+ rotate
+ 0 0 moveto rad 0 lineto stroke
+%% aquí hi ha d'anar el nombre de fosses i el nom de la comarca
+%% farcirem el nombre de fosses en una màscara de 3 zeros
+ nTFxComarca iR get
+ 1 get 3 string cvs dup length 3 exch sub (000) dup 3 -1 roll 4 -1 roll putinterval
+ rad cosR add cosR neg moveto show ( )show
+ nTFxComarca iR get 4 get (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ grestore
+ iR 1 add /iR exch def
+}for
+grestore
+
+gsave
+0 0 0 setrgbcolor
+newpath
+cR aload pop rad 1.5 div 0 360 arc fill
+grestore
+
+grestore
+
+}ifelse
+
+}if  %% ignorem el rellotge que cal polir-lo i generar-lo coom una infografia a part
+
+%%TEXT
+ %% qui som
+ gsave
+ creditsMonoB
+ %dUbuntuBB
+	 cQ .6 mul dup /araCos exch def scalefont setfont
+ %1 1 0
+ %1 1 1
+ 74 255 div 28 255 div 74 255 div  %% lila vell
+ setrgbcolor
+ cQ 4 div yPagina margeALvoltant 2 mul add araCos 1.1 mul sub moveto
+ gsave
+ (SOM) show
+ grestore
+false{
+ gsave
+ femHTML
+ {
+  1 setlinewidth
+ }
+ {
+  .4 setlinewidth
+ }ifelse
+ 1 0 0 setrgbcolor (SOM) true charpath stroke
+ grestore
+}if
+ cQ 4 div yPagina margeALvoltant 2 mul add araCos sub cQ 7 mul sub moveto
+ gsave
+ (FONTS) show
+ grestore
+false{
+ gsave
+ femHTML
+ {
+  1 setlinewidth
+ }
+ {
+  .4 setlinewidth
+ }ifelse
+ 1 0 0 setrgbcolor (FONTS) true charpath stroke
+ grestore
+}if
+ grestore
+ %% crèdits
+ gsave
+ creditsMono cQ .12 mul dup /araCos exch def scalefont setfont
+ %0 0 0
+ 1 1 1
+ %74 255 div 28 255 div 74 255 div  %% lila vell
+ setrgbcolor
+ capcredits aload pop exch cQ sub dup /araXlb exch def exch margeALvoltant add moveto
+ ( Com a activistes i mecenes) show
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( des del Col·lectiu Republicà)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( del Baix Llobregat \(Cornellà\))
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( impulsem aquesta acció:)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
+ gsave
+ creditsMonoB cQ .12 mul scalefont setfont
+%%CAL posar un vincle a la web només pel PDF i en negretes?
+ ( www.ObriuLesFosses.cat) dup
+%%PODEM fer servir l'estructura Annots que ja tenim creada
+ gsave false charpath pathbbox 4 array astore /OLFcat exch def grestore
+ show
+ grestore
+ currentpoint araCos 2.8 mul sub exch pop araXlb exch moveto
+ ( Com a activistes i familiars de víctimes per)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( Desaparició Forçada o Involuntària, donants)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( d'ADN del Programa d'Identificació Genètica)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( de la Generalitat, ens fem responsables dels) show
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( registres de petició d'exhumació, fossa a)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( fossa, que fem al departament de Justícia del)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( Govern, informant-ne als ajuntaments i als Consells Comarcals.) show
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ (     En formem part:) show
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( Eva Bosch Gibert <eva_bosch_gibert@hotmail.com>) show
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( Marcantoni Malagarriga-Picas <OnEtsOncleGuillem@gmail.com>) show
+ grestore
+
+
+ %% fonts de dades
+ gsave
+ creditsMono cQ .12 mul dup /araCos exch def scalefont setfont
+ %0 0 0
+ 1 1 1
+ setrgbcolor
+ capcredits aload pop exch cQ sub dup /araXlb exch def exch margeALvoltant add cQ 6.9 mul sub %araCos 1.4 mul add
+ moveto
+ ( Dades de la Direcció General)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( de Memòria Democràtica tretes)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( del Portal de Dades Obertes)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( de Catalunya, del dataset)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( «Fosses Comunes a Catalunya»)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( publicat el ) show
+ gsave
+ currentpoint 2 array astore /LLfonts exch def
+ creditsMonoB cQ .12 mul scalefont setfont
+ ddp show
+ currentpoint cQ .12 mul add 2 array astore /URfonts exch def
+ grestore
+
+%%CAL fer un vincle tant al PDF com a l'HTML cap al dataset
+%% per veure el rectangle on serà actiu el link
+%gsave
+%1 1 1 setrgbcolor
+%LLfonts aload pop 2 copy URfonts 1 get exch sub exch URfonts 0 get exch sub exch rectstroke
+%grestore
+
+ grestore
+
+ %% garigot
+ gsave
+
+ 1 1 1 setrgbcolor
+ illademaians aload pop exch cQ 3 mul sub margeALvoltant add exch cQ 2.3 div sub margeALvoltant add 2 copy 2 array astore /ULgarigot exch def moveto
+ dUbuntu cQ 2.3 div scalefont setfont
+ (1977) show
+ femHTML
+ {
+  illademaians aload pop exch margeALvoltant add exch
+  MESaltQUEample
+  {
+   pop  %margeALvoltant dup .3 mul sub
+   peu2025
+  }
+  {
+   %cQ 2.3 div sub cQ 3 mul sub margeALvoltant add cQ .5 mul add
+   pop peu2025
+  }ifelse
+  moveto
+ }
+ {
+  illademaians aload pop pop margeALvoltant add
+  peu2025  %margeALvoltant
+  moveto
+ }ifelse
+%%CAPTUREM l'any de la galeta de l'hora del client
+ anyDpena show
+ currentpoint
+ cQ 2.3 div add  %% corregim perquè el garigot no trepitgi l'any?
+ 2 array astore /LRgarigot exch def
+
+ %% el temps com a pena
+ femHTML
+ {
+  gsave
+  LRgarigot aload pop
+  cQ 2.3 div sub  %% corregim perquè el garigot no trepitgi l'any?
+  exch /aCaixaD exch def
+  XYeTcaP aload pop exch pop dup /yPEUStxt exch def
+  sub dUbuntuB exch scalefont setfont
+  %% fem que faci caixa per la dreta on acaba el 2025
+  0 0 moveto (el TEMPS com a PENA) stringwidth pop
+  aCaixaD exch sub yPEUStxt moveto
+
+%  exch cQ 4 div add exch moveto
+  1 0 0 setrgbcolor
+%  /aracos 1 def
+%  {  %% loop
+%   dUbuntuB cQ aracos mul scalefont setfont
+%   (el TEMPS com a PENA) stringwidth pop currentpoint pop add LRgarigot aload pop pop gt
+%   {
+%    aracos .1 sub /aracos exch def
+%   }
+%   {
+%    exit
+%   }ifelse
+%  }loop
+  (el TEMPS com a PENA) show  %% petit homenatge a l'Ana Messuti
+  grestore
+
+  %% afegim l'EPS del logo de descàrrega del PDF
+  %% l'EPS
+  /BeginEPSF
+  {
+   /b4_Inc_state save def
+   /dict_count countdictstack def
+   /op_count count 1 sub def
+   userdict begin
+   /showpage {} def
+   /setpagedevice {pop} def  % NOU ! servira per .ps amb pagina configurada ?
+   /erasepage {} def  % NOU! (06.98) test de .PS de Quark
+   %/statusdict {5 dict} def  % NOU! PageMaker 5.0 (hem de trobar una altra solucio)
+   0 setgray 0 setlinecap
+   1 setlinewidth 0 setlinejoin
+   10 setmiterlimit [] 0 setdash newpath
+   /languagelevel where
+   {
+    pop languagelevel
+    1 ne
+    {
+     false setstrokeadjust false setoverprint
+    }if
+   }if
+  }bind def
+  /EndEPSF
+  {
+   count op_count sub
+   {
+    pop
+   }repeat
+   countdictstack dict_count sub {end} repeat
+   b4_Inc_state restore
+  }bind def
+  BeginEPSF
+  ULgarigot aload pop cQ 3 mul sub exch cQ 6 mul sub exch
+  translate
+  %% calculem l'escala perquè el logo ens encaixi amb marges dins /margeALvoltant
+  cQ 3 div 525 75 sub div dup scale
+  %%PageBoundingBox: 75 38 525 564
+  (tibaPDF.eps) (r) file cvx exec
+  EndEPSF
+  %% fi del logo de descàrrega del PDF
+  
+%  gsave
+%  1 1 1 setrgbcolor
+  ULgarigot aload pop cQ 3 mul sub exch cQ 6 mul sub exch
+  cQ 3 div 525 75 sub div 564 mul dup
+  4 array astore /xyAAtibaPDF exch def
+%  rectstroke
+%  grestore
+  %% codi JS del tooltip html
+  43c (
+  // el tooltip de què trigarà
+  var tibaPDF = new ToolTip\(canvas, {x: ) writestring
+  43c xyAAtibaPDF 0 get
+  %xmapaHTML add
+  xHint mul round cvi
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  16 string cvs writestring
+  43c (, y: ) writestring  %% l'origen de les coordenades en canvas és al UL
+  43c xyAAtibaPDF dup 3 get exch 1 get add
+  cols&fils 1 get
+  %ymapaHTML sub
+  exch sub
+  xHint mul round cvi
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html 
+  16 string cvs writestring
+  43c (, w: ) writestring
+  43c xyAAtibaPDF 2 get  %% ample del tooltip
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+  16 string cvs writestring
+  43c (, h: ) writestring
+  43c xyAAtibaPDF 3 get  %% alt del tooltip
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+  16 string cvs writestring
+  43c (}, ") writestring
+  43c (<span style='font-family:mono;color:#000000;font-weight:Regular'>)  writestring
+
+%%URLserver al PDF únic
+  %(http://localhost/www.obriulesfosses.cat/exhumeu/pdfs/)
+  (https://www.obriulesfosses.cat/exhumeu/pdfs/)
+  dup length dup /araVa exch def IDunica length add
+  (_obriulesfosses_prototip03.pdf) dup length exch 4 1 roll
+  add
+  string dup 3 -1 roll 0 exch putinterval
+  dup araVa dup IDunica length add /araVa2 exch def IDunica putinterval dup araVa2
+  4 -1 roll putinterval dup /URLaPDF exch def
+
+%  (Us podeu descarregar un fitxer PDF idèntic amb totes les referències vinculades)
+%  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+%  AliniesD1solOctet 0 get
+
+%  {  %% qualsevol canvi de línia atura el JS i tot el text ha d'anar seguit amb el codi html
+%   {
+%    43c exch writestring
+%    43c (<br>) writestring
+%   }
+%   {
+    43c exch writestring
+    43c (<br>) writestring
+%    pop exit
+%   }ifelse
+%   dup 1024 string readline
+%  }loop
+  43c (</span>) writestring
+  43c (", 500, 3000\);
+) writestring
+
+  43c (
+// permet clicar en una àrea del canvas
+var PDFurl = document.getElementById\('canvas'\);
+PDFurl.addEventListener\(
+                       'click', function\(event\)
+                       { 
+                        var x = event.pageX, y = event.pageY;
+) writestring
+
+43c (                        if \( x > ) writestring
+
+%% 160 x UL
+43c xyAAtibaPDF 0 get
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+6 string cvs writestring
+
+43c ( && x < ) writestring
+
+%% 160+175  x + ample logo
+43c xyAAtibaPDF dup 0 get exch 2 get add
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+6 string cvs writestring
+
+43c ( && y > ) writestring
+
+%% 1585 y UL
+43c xyAAtibaPDF dup 1 get exch 3 get add  cols&fils 1 get exch sub
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+  dup /araYul exch def
+6 string cvs writestring
+
+43c ( && y < ) writestring
+
+%% 1585+175 y + alt logo
+43c xyAAtibaPDF 3 get araYul add
+  round cvi
+6 string cvs writestring
+
+43c ( \)
+                        {
+                         //alert\('EP NANO AIXO JA RUTLLA!'\);
+                         //onclick=location.href='pageurl.html';
+                         //onclick=location.href='https://femfum.com';
+                         onclick=window.open\(') writestring
+
+%% aquí la URL única al PDF
+43c URLaPDF writestring
+
+43c ('\);
+                        }
+                       },
+                       false
+                      \);
+) writestring
+
+  %% tooltip per l'àrea de la data de publicació del dataset text+link
+  %% codi JS del tooltip html
+  43c (
+  // el tooltip per la data del dataset
+  var dataDataset = new ToolTip\(canvas, {x: ) writestring
+  43c LLfonts 0 get
+  xHint mul round cvi
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  16 string cvs writestring
+  43c (, y: ) writestring  %% l'origen de les coordenades en canvas és al UL
+  43c URfonts 1 get cols&fils 1 get exch sub  %% estem llegint un format Bbox!
+  xHint mul round cvi
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html 
+  16 string cvs writestring
+  43c (, w: ) writestring
+  43c URfonts 0 get LLfonts 0 get sub  %% ample del tooltip
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+  16 string cvs writestring
+  43c (, h: ) writestring
+  43c URfonts 1 get LLfonts 1 get sub  %% alt del tooltip
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+  16 string cvs writestring
+  43c (}, ") writestring
+  43c (<span style='font-family:mono;color:#000000;font-weight:Regular'>)  writestring
+
+%%CAL una variable al geojsonps amb aquest valor?
+%%URL a la pàgina on es publiquen els datasets
+  43c (https://analisi.transparenciacatalunya.cat/Legislaci-just-cia/Fosses-comunes-a-Catalunya/6js6-vud6/about_data) writestring
+  43c (<br>) writestring
+  43c (</span>) writestring
+  43c (", 500, 3000\);
+) writestring
+
+  43c (
+// permet clicar en una àrea del canvas
+var urlDataset = document.getElementById\('canvas'\);
+PDFurl.addEventListener\(
+                       'click', function\(event\)
+                       { 
+                        var x = event.pageX, y = event.pageY;
+) writestring
+
+43c (                        if \( x > ) writestring
+
+%% 160 x UL
+43c LLfonts 0 get
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+6 string cvs writestring
+
+43c ( && x < ) writestring
+
+%% 160+175  x + ample logo
+43c URfonts 0 get
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+6 string cvs writestring
+
+43c ( && y > ) writestring
+
+%% 1585 y UL
+43c URfonts 1 get cols&fils 1 get exch sub
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+6 string cvs writestring
+
+43c ( && y < ) writestring
+
+%% 1585+175 y + alt logo
+43c LLfonts 1 get cols&fils 1 get exch sub
+  mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+  xHint mul round cvi
+6 string cvs writestring
+
+43c ( \)
+                        {
+                         //alert\('EP NANO AIXO JA RUTLLA!'\);
+                         //onclick=location.href='pageurl.html';
+                         //onclick=location.href='https://femfum.com';
+                         onclick=window.open\(') writestring
+
+%%CAL una variable al geojsonps amb aquest valor?
+%%URL a la pàgina on es publiquen els datasets
+  43c (https://analisi.transparenciacatalunya.cat/Legislaci-just-cia/Fosses-comunes-a-Catalunya/6js6-vud6/about_data) writestring
+
+43c ('\);
+                        }
+                       },
+                       false
+                      \);
+) writestring
+
+ }
+ {  %% PDF A4
+  gsave
+  %currentpoint exch cQ 2 div add exch moveto
+  margeALvoltant yLB moveto
+  1 0 0 setrgbcolor dUbuntuB cQ .7 mul scalefont setfont
+  (el TEMPS com a PENA) show  %% petit homenatge a l'Ana Messuti
+  grestore
+ }ifelse
+
+ %% inici del garigot
+ realtime srand  % posem la llavor de l'aleatori amb usertime 
+ gsave
+
+ %% ample x i alt y màxims per les coordenades del garigot
+ LRgarigot 0 get ULgarigot 0 get sub cvi /maX exch def
+ ULgarigot 1 get LRgarigot 1 get sub cQ 2.3 div sub cvi /maY exch def
+ ULgarigot 0 get LRgarigot 1 get 2 copy 2 array astore /aCorregir exch def
+ %cQ 4.6 div add  %% li sumem mig cos perquè les béziers no trepitgin el 2025
+ translate
+ 
+ cQ
+ %60  %% fem que el gruix del garigot sigui el màxim d'igual que el gruix del ductus dels anys
+ 130
+ div setlinewidth
+ ULgarigot aload pop cQ 4.4 div add aCorregir 1 get sub
+ exch cQ 2.7 div add aCorregir 0 get sub
+ exch moveto  %% fem que comenci al centre de l'ull del 9
+ 10  %% nonre de béziers
+ {
+  2 {rand maX mod rand maY mod} repeat
+  rand maX mod rand maY mod curveto
+ }repeat
+ 2 {rand maX mod rand maY mod} repeat
+
+ LRgarigot aload pop cQ 7.8 div add aCorregir 1 get sub
+ exch cQ 1.65 div sub aCorregir 0 get sub  
+ exch
+ cQ 2.3 div sub
+ curveto  %% fem que acabii al centre de l'ull del 0
+ stroke
+
+ %% trigarà
+ gsave
+ 0 1 0 setrgbcolor
+ dUbuntuB cQ 2.5 div scalefont setfont
+ 0 maY
+ moveto
+ (el Govern trigarà) dup stringwidth pop maX exch sub 2 div maY
+ cQ 2.5 div 2 mul cQ 2.5 div 1.2 mul 2 mul add sub 2 div maY exch sub  %% centrat vertical?
+
+ 2 copy 2 array astore /ULtrigara exch def
+% 2 copy 2 array astore /xyOUT exch def
+ moveto
+
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get
+ %dup
+ show  %% aquí només decodifica 1 sola string dins d'una array
+
+%gsave
+%2.5 setlinewidth 1 1 1 setrgbcolor xyOUT aload pop moveto true charpath stroke
+%grestore
+
+ currentpoint exch pop cQ 2.5 div 1.2 mul sub
+ 1 1 1 setrgbcolor
+ dUbuntuBB cQ 2.5 div scalefont setfont
+
+%%CAPTURA
+ %% càlcul dels dies passats entre el 15.10.1977 fins avui mateix
+ (MRCT_A77) getenv pop cvx exec /etcp exch def  %% el temps (en dies) com a pena
+ %% regla de 3 amb la captura de les fosses exhumades i les que queden per exhumar que fem més avall
+ tfxc exhmds sub /fpd exch def  %% fosses pendents d'exhumar
+ %% si s'han exhumat /exhmds fosses en /etcp dies 
+ %% per exhumar totes les fosses que falten /fpd necessitarem? (dies passats a anys i dies)
+ etcp fpd mul exhmds div 365 div 1000 mul cvi  %% juguem amb nombres de 3 xifres pels anys (enters) i els dies (decimals) i apreciar millor com anirà canviant
+ 16 string cvs dup 0 3 getinterval /elsAnys exch def 3 3 getinterval /elsDies exch def
+ elsDies cvx exec 100 div 365 mul 10 div round cvi 3 string cvs /elsDies exch def
+ ( 000 anys i 000 dies) dup 12 elsDies putinterval
+ dup 1 elsAnys putinterval  %% ho planxem a la màscara final
+
+ dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto
+ show currentpoint exch pop cQ 2.5 div 1.2 mul sub
+ 0 1 0 setrgbcolor
+ dUbuntuB cQ 2.5 div scalefont setfont
+ (   en exhumar-les totes   ) dup stringwidth pop maX exch sub 2 div 3 -1 roll
+
+ 2 copy 2 array astore /xyOUT exch def
+ moveto
+
+ %dup
+ show
+
+%gsave
+%2.5 setlinewidth 1 1 1 setrgbcolor xyOUT aload pop moveto true charpath stroke
+%grestore
+
+ currentpoint 2 array astore /LRtrigara exch def  %% pel Bbox del tooltip
+
+ grestore
+
+ grestore
+
+ grestore  %% fi de garigot
+
+%% tooltip del PDF del què trigarà
+   %%Per a cada anotació de PDF sofisticada per tal sigui llegible amb qualsevol dispositiu i viewer, ens cal:
+   %% generem un nom únic del tooltip de què trigarà
+   /nomPopup ({queTrigara}) def
+
+   %% crear 1 objecte diccionari que s'inscriu a les coordenades del què trigarà i que s'afegirà a {clauAnnots}
+   ({trigaraMolt}) /araAnnot exch def  %% el nom únic
+   mark /_objdef araAnnot cvx exec /type /dict /OBJ pdfmark
+
+   %% incrustar els valors de l'aparença gràfica de l'anotació de la comarca al diccionari
+   mark araAnnot cvx exec
+   <<
+     /AP <<
+           /N {streamAP}  %% l'XObject de l'aparença gràfica
+         >>
+     /P {ThisPage}  %% la referència indirecta a /Page
+     /Type /Annot
+     /Contents  %% text per raonar la regla de 3 des del 15 d'octubre de 1977 fins a data d'avui
+     (\nAquesta vergonyosa xifra és el resultat d'una senzilla regla de 3, entre els )
+%%CAPTURA de la variable /etcp dels dies passat des del 15 d'octubre de 1977 fins avui
+     dup length dup /araVa exch def etcp cvi 6 string cvs dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( dies passats \()
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+%%CAPTURA de la variable dels dies passats transformats en anys
+     etcp 365 div round cvi 4 string cvs
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( anys\) des del 15 d'octubre de 1977, les )
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+%%CAPTURA de la variable /exhmds
+     exhmds 4 string cvs
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( fosses exhumades i les )
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+%%CAPTURA de la variable /tfxc del total de fosses localitzades
+     tfxc cvi 6 string cvs
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( fosses localitzades fins avui.\n\nEl 15 d'octubre de 1977 es promulgà la Llei estatal 46/1977 d'Amnistia. Aquesta llei de punt i final ens ha expulsat de l'àmbit penal i també de l'àmbit forense, tant a víctimes com a familiars. Certificant la impunitat dels botxins franquistes pels crims comesos de lesa humanitat.\n\nD'aleshores ençà, exhumar les )
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+%%CAPTURA del total de fosses amb la variable /tfxc
+     tfxc cvi 6 string cvs
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+     dup length dup /araVa exch def
+     ( fosses comunes que tenim a Catalunya és una obligació que pel Govern de la Generalitat té una prioritat baixíssima, extraordinàriament per sota de qualsevol altra excavació arqueològica. El patrimoni abans que els #DDHH.\n\nLa condició NO forense de les exhumacions aboca al Govern a violar la Llei de Recerca Biomèdica, amagant els ADNs dels familiars en una falsa col·lecció de malalties. Ignorant també la condició forense de l'ADN de les víctimes.\n)
+     dup length 3 -1 roll add string dup 3 -1 roll araVa exch putinterval dup 3 -1 roll 0 exch putinterval
+
+     (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+     AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+     /M araCDstring  %% cal formatar les dades del nostre rellotge com es necessita aquí
+     /T (ObriuLesFosses.cat)  %% autor de l'anotació
+     /NM araC  %% string única
+     /F 28
+     /CA 1
+     /C [ 0 0 0 ]  %% és el color de fons de rectangle que s'ens desplega amb un doble clic i/o passant per sobre
+     /Rect
+     aCorregir 0 get xyOUT 0 get add xyOUT 1 get aCorregir 1 get add  %% xyll
+     aCorregir 0 get LRtrigara 0 get add ULtrigara 1 get aCorregir 1 get add cQ 2.5 div add  %% xyur
+     %margeALvoltant
+     4 array astore
+     dup /idemPopup exch def  %% valors de pelRect
+     /Popup nomPopup cvx exec  %% a l'objecte Popup
+     /Subtype /Text
+     /Name /Comment
+     /CreationDate araCDstring  %% cal formatar les dades del nostre rellotge com es necessita aquí
+   >> /PUT pdfmark
+
+   %% crear 1 objecte diccionari únic que s'incriu a les coordenades fixes d'on es vulgui obrir un Popup i lligat a l'anterior i que s'afegirà cada vegada a {clauAnnots}
+   mark /_objdef nomPopup cvx exec /type /dict /OBJ pdfmark
+
+   mark nomPopup cvx exec
+   <<
+     /Subtype /Popup
+     /Parent araAnnot cvx exec  %% apuntem a l'objecte /Annot
+     /Type /Annot
+     /Rect idemPopup  %% sembla que els hi és indiferent als viewers que despleguen més enllà d'on situem l'anotació
+     /Open false
+     /F 28
+   >> /PUT pdfmark
+
+   %% generem els objectes per vincular el dataset oficial de fosses
+   %% crear 1 objecte diccionari que s'inscriu a la data de publicació del darrer dataset i que s'afegirà a {clauAnnots}
+   ({URLalDataset}) /araAnnot2 exch def  %% el nom únic
+   mark /_objdef araAnnot2 cvx exec /type /dict /OBJ pdfmark
+%   cols&fils
+   %% incrustar els valors de l'aparença gràfica de l'anotació de la comarca al diccionari
+   mark araAnnot2 cvx exec
+   <<
+     /Rect [
+            LLfonts aload pop URfonts aload pop
+           ]  %% té format Bbox amb origen a LL
+     /Subtype /Link
+     /A <<
+          /URI (https://analisi.transparenciacatalunya.cat/Legislaci-just-cia/Fosses-comunes-a-Catalunya/6js6-vud6/about_data)
+          /S /URI
+        >>
+      /Border [0 0 0]
+      /Type/Annot
+   >> /PUT pdfmark
+
+   %% fiquem les 3 referències indirectes /Type /Annot de cada anotació a l'array {clauAnnots}
+   mark {clauAnnots} araAnnot cvx exec /APPEND pdfmark
+   mark {clauAnnots} araAnnot2 cvx exec /APPEND pdfmark
+   mark {clauAnnots} nomPopup cvx exec /APPEND pdfmark
+   %% fi d'anotacions de PDF
+
+   femHTML
+   {
+    %% per l'àrea del tooltip de quan trigarà
+    43c (
+    // el tooltip del text el Govern trigara
+    var queTrigara = new ToolTip\(canvas, {x: ) writestring
+    43c idemPopup 0 get
+    %xmapaHTML add
+    xHint mul round cvi
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    16 string cvs writestring
+    43c (, y: ) writestring  %% l'origen de les coordenades en canvas és al UL
+    43c idemPopup 3 get
+    cols&fils 1 get
+    %ymapaHTML sub
+    exch sub
+    xHint mul round cvi
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    16 string cvs writestring
+    43c (, w: ) writestring
+    43c idemPopup dup 2 get exch 0 get sub  %% ample del tooltip
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    xHint mul round cvi
+    16 string cvs writestring
+    43c (, h: ) writestring
+    43c idemPopup dup 3 get exch 1 get sub  %% alt del tooltip
+    mfcmHtml mul round cvi  %% corregim amb el multiplicador del factor de correcció del mapa html
+    xHint mul round cvi
+    16 string cvs writestring
+    43c (}, ") writestring
+    43c (<span style='font-family:mono;color:#000000;font-weight:Regular'>)  writestring
+    AliniesD1solOctet 0 get /ReusableStreamDecode filter dup 1024 string readline
+    {  %% qualsevol canvi de línia atura el JS i tot el text ha d'anar seguit amb el codi html
+     {
+      43c exch writestring
+      43c (<br>) writestring
+     }
+     {
+      43c exch writestring
+      43c (<br>) writestring
+      pop exit
+     }ifelse
+     dup 1024 string readline
+    }loop
+    43c (</span>) writestring
+    43c (", 600, 5000\);
+) writestring
+   }if
+
+%%PENDENT d'activar-ho amb codi i a lloc
+%var MTurl = document.getElementById('canvas')
+%MTurl.addEventListener(  // un guaita per comarca
+%                       'click', function(event)
+%                       { 
+%                        var x = event.pageX, y = event.pageY;
+%                        if ( x > 160 && x < 160+175 && y > 1585 && y < 1585+175 )
+%                        {
+%                         //alert('EP NANO AIXO JA RUTLLA!');
+%                         //onclick=location.href='pageurl.html';
+%                         //onclick=location.href='https://femfum.com';
+%                         onclick=window.open('https://femfum.com');
+%                        }
+%                       },
+%                       false
+%                      );
+
+   femHTML
+   {  %% cua i tancament
+    43c dup dup (</script></body></html>)writestring flushfile closefile
+   }if
+
+ %% termòmetre de fosses
+ gsave
+
+ %% totals
+ 1 1 1 setrgbcolor
+ illademaians aload pop cQ 2 mul .83 mul sub exch cQ 6.1 mul sub exch dup /xEx exch def moveto
+ dUbuntuBB cQ .8 mul scalefont setfont
+
+%%CAPTURA de la variable /tfxc amb el total de fosses comunes del mapa oficial
+ tfxc cvi 6 string cvs dup /Stfxc exch def
+
+ show  %% aquí no fa falta planxar-ho amb cap màscara numèrica
+ %% retallador pel % de fosses exhumades en verd
+ gsave
+ illademaians aload pop cQ 2 mul .83 mul sub exch cQ 6.1 mul sub exch moveto
+ Stfxc true charpath clip
+ %% hauríem de fer el rectangle ple de verd segons el % Y de fosses exhumades
+ Stfxc false charpath pathbbox 2 index sub
+
+%%CAPTURA del % de l'exhumat en relació al total i el temps com a pena des de 1977
+exhmds 100 mul tfxc div 100 div mul  %% això és el % que omple en verd la xifra del total
+
+ 0 1 0 setrgbcolor
+ exch 3 index sub exch rectfill
+ grestore
+ gsave
+ 1 0 0 setrgbcolor
+ currentpoint cQ .3 mul sub exch pop illademaians aload pop pop cQ 6.1 mul sub exch moveto
+ dUbuntuB cQ .33 mul scalefont setfont
+ (fosses al mapa) show
+ 1 1 1 setrgbcolor (  vs  ) show
+ %% exhumades
+ 0 1 0 setrgbcolor
+ ( exhumades) show
+ illademaians aload pop pop cQ 4 mul sub xEx 2 copy 2 array astore /llgnd exch def moveto
+ dUbuntuBB cQ .8 mul scalefont setfont
+
+%%CAPTURA de la variable /exhmds amb el total de fosses exhumades del mapa oficial
+ (0000) dup  %% ho planxem en una màscara numèrica
+ exhmds cvi 6 string cvs dup /Sexhmds exch def
+ dup length 4 exch sub exch putinterval
+ show
+
+ %% llegenda
+ currentpoint pop /xDreta exch def
+ dUbuntuB cQ .17 mul scalefont setfont
+ 1 0 0 setrgbcolor
+ femHTML
+ {  %% al fer l'HTML per pantalla el gruix de línia queda condicionat per l'ample en píxels
+  gruixF 2 mul setlinewidth
+ }
+ {
+  1 setlinewidth
+ }ifelse
+ xDreta cQ .15 mul sub llgnd aload pop exch pop cQ dup .5 mul add add cQ .15 mul dup rectstroke
+ 1 1 1 setrgbcolor
+ (Comarca on treballem) dup stringwidth pop
+ xDreta exch sub cQ .15 mul 2 mul sub llgnd aload pop exch pop cQ dup .5 mul add add moveto
+ show
+ currentpoint exch pop xDreta
+ (Fosses pendents d'exhumar  ) stringwidth pop sub
+ gsave
+ UbuntuMonoB cQ .2 mul scalefont setfont 0 0 moveto glifF stringwidth pop sub
+ grestore
+ exch
+ cQ .25 mul
+ sub moveto
+ (Fosses pendents d'exhumar  ) show
+ gsave
+ UbuntuMonoB cQ .2 mul scalefont setfont glifF show
+ grestore
+
+ currentpoint exch pop xDreta
+ (Fosses exhumades  ) stringwidth pop sub
+ gsave
+ UbuntuMonoB cQ .2 mul scalefont setfont 0 0 moveto glifF stringwidth pop sub
+ grestore
+ exch
+ cQ .25 mul
+ sub moveto
+ (Fosses exhumades  ) show
+ gsave
+ 0 1 0 setrgbcolor
+ UbuntuMonoB cQ .2 mul scalefont setfont glifF show
+ grestore
+
+ currentpoint exch pop xDreta
+ (Fosses reclamades  ) stringwidth pop sub
+ gsave
+ UbuntuMonoB cQ .2 mul scalefont setfont 0 0 moveto glifF stringwidth pop sub
+ grestore
+ exch
+ cQ .25 mul
+ sub moveto
+ (Fosses reclamades  ) show
+ gsave
+ 1 0 0 setrgbcolor
+ UbuntuMonoB cQ .2 mul scalefont setfont glifF show
+ grestore
+
+
+ grestore
+
+ grestore
+
+mark
+%% camps públics del Docinfo
+/Subject (Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!)
+/Title (Obriu les fosses d'una vegada!)
+/Author (copyleft 2025: marcantoni.malagarriga.picas@ub.edu | Eva Bosch Gibert <eva_bosch_gibert@hotmail.com>)
+/Keywords (DDHH, Spanish Civil War, forensic, fosses comunes, mass graves, ADN, DNA, Guerra d'Espanya, 1936-1977, Desaparició Forçada o Involuntària, Missing Persons, Enforced or Involuntary Disappearances)
+(decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+AliniesD1solOctet 0 get  %% aquí només decodifica 1 sola string dins d'una array
+/Creator (https://github.com/marcantonifemfum/obriulesfosses)
+/DOCINFO pdfmark
+
+showpage
+
+(BROSSA?)pstack
+

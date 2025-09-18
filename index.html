@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html style="" class="" lang="ca">
+<head>
+<!-- fem el layout liquid?  -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--<meta http-equiv="refresh" content="0"> refresca la pàgina constantment o cada n segons -->
+<!-- només ho fa 1 vegada
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="-1">
+-->
+
+<link rel="icon" type="image/x-icon" href="Fvermella.png">
+<meta name="robots" content="noindex">
+<title>Obriu les fosses d'una vegada!</title>
+<link rel="icon" type="image/x-icon" href="Fvermella.png">
+<meta name="lang" content="ca"/>
+<meta name="description" content="Mapa comarcal generatiu de les fosses comunes de la Guerra d'ESpanya que hi ha a Cayalunya">
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Catalunya, el pa&iacute;s de les mil Fosses: obriu les fosses d'una vegada!" />
+<meta property="og:description" content="Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!" />
+<meta property="og:url" content="https://www.obriulesfosses.cat" />
+<meta property="og:site_name" content="obriulesfosses" />
+<meta property="og:image" content="https://www.obriulesfosses.cat/obriuLesFossesDunaVegada_1110x670.png" />
+<meta property='og:locale' content='ca_ES' />
+<meta name="twitter:card" content="summary_large_image"/>
+<!-- màxim 126 caràcters per la descripció -->
+<meta name="twitter:description" content="Cap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!"/>
+<meta name="twitter:image" content="https://www.obriulesfosses.cat/obriuLesFossesDunaVegada_1110x670.png"/>
+<meta name="twitter:image:alt" content="Mapa comarcal generatiu de les fosses comunes de la Guerra d'ESpanya que hi ha a Cayalunya"/>
+<meta name="twitter:site" content="http://twitter.com/@OnEtsOncleGuill"/>
+<meta name="twitter:creator" content="@OnEtsOncleGuill"/>
+<!-- ara sembla admet un màxim aproximat de 75 caràcters pel títol -->
+<meta name="twitter:title" content="Catalunya, el pa&iacute;s de les mil Fosses: obriu les fosses d'una vegada!"/>
+<meta name="twitter:url" content="https://www.obriulesfosses.cat"/>
+
+<!-- a la primera càrrega de la font css, per defecte, apareix la que té el navegador preconfigurada, per això fem un reload -->
+<!--
+https://fonts.google.com/
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!--FONT
+<link href="https://fonts.googleapis.com/css2?family=Sonsie+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Medula+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tulpen+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cookie&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Niconne&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Six+Caps&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Denk+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Wire+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Offside&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Mansalva&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Loop&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sacramento&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dorsa&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Carter+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Imbue:wght@100&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poiret+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bungee+Hairline&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@700&display=swap" rel="stylesheet">
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500&display=swap" rel="stylesheet" /> 
+
+<!-- aquestes tres entrades configuren les crides al tooltip que obre i tanca {} a un cap de bézier
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+ -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500&display=swap');
+
+@font-face
+{
+ font-family: 'Big Shoulders Stencil Display';
+}
+
+/* RELLOTGE http://www.w3schools.com/bootstrap/bootstrap_ref_js_tooltip.asp
+.test + .tooltip > .tooltip-inner
+{
+ background-color: transparent;;
+ color: #ffffff;
+ padding: 15px;
+ font-family: 'Big Shoulders Stencil Display';
+/*FONT
+ font-family: 'Jomhuria';
+ font-size: 60px;
+}
+*/
+/* RELLOTGE Tooltip on right
+.test + .tooltip.right > .tooltip-arrow
+{
+ border-right: 5px solid transparent;
+}
+*/
+a:link {
+  color: red;
+}
+a:visited {
+  color: red;
+}
+a:hover {
+  color: red;
+}
+a:active {
+  color: white;
+}
+</style>
+
+<script type="text/javascript">
+// aquest va
+window.onload = function() {
+ if(!window.location.hash) {
+  window.location = window.location + '#exhumeu!';
+  window.location.reload();
+ }
+}
+
+// programem un petit temps d'espera per tal es carreguin bé les fonts de la pàgina
+var delay = ( function() {
+    var timer = 0;
+    return function(callback, ms) {
+        clearTimeout (timer);
+        timer = setTimeout(callback, ms);
+    };
+})();
+delay(function(){
+alert("O B R I U   L E S   F O S S E S   és una acció de #DDHH promoguda per familiars de víctimes en Desaparició Forçada o Involuntària de la Guerra d\'Espanya i el Franquisme, molts d\'ells donants d\'ADN del Programa d\'Identificació Genètica dels departaments de Salut i Justícia de la Generalitat.\n\nCap fossa comuna de la Guerra d'Espanya i el Franquisme no pot quedar impune a Catalunya!");
+
+//var ample = screen.width;
+var ample = window.innerWidth;
+//var alt = screen.height;
+var alt = window.innerHeight;
+
+window.location = 'exhumeu/prototip03.php?laX=' + ample + '&laY=' + alt + '&laH=' + _quinHoraEs + '&elD=' + _quinDiaSom + '&UA=false';
+}, 2000 );
+
+</script>
+
+</head>
+
+<body class="">
+
+<!-- l'empremt del canvas no és sensible a la seva posició en relació als altres p, span o img, doncs sempre va per sobre -->
+<canvas id = 'canemas' style = "position:absolute;left:0px;top:0px;font-family:'Big Shoulders Stencil Display';"></canvas>
+
+<!-- RELLOTGE fem que aparegui el que sigui: olla al foc ;&#x2668; | megàfon &#x1F4E3;
+<span onmouseover = "this.innerHTML='<span style=\'font-size:60px;\'>&nbsp;&nbsp;&#x2668;&nbsp;&nbsp;</span>'" onmouseout = "this.innerHTML='<span style=\'position:absolute;cursor:pointer;font-family:Big Shoulders Stencil Display;font-size:60px;\'>{&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color:#ff0000;\'>clic</span>&nbsp;&nbsp;&nbsp;&nbsp;}</span>'" id='swatch' class='test' data-toggle='dejutip' data-placement='right' data-html=true data-viewport='#viewport' trigger='hover focus' container:'body' animation:'true' style='position:absolute;left:0;top:0;font-family:sans-serif;font-size:60px;color:#ffffff;cursor:pointer'></span>
+ -->
+
+<span id='swatch' class='test'
+
+onclick = "this.innerHTML='<span style=\'font-size:60px;font-family:Big Shoulders Stencil Display;\'>{&nbsp;obriu&nbsp;les&nbsp;fosses<a href=\'https://obriulesfosses.cat\' style=\'text-decoration:none;\'> d\'una&nbsp;vegada&nbsp;!&nbsp;</a>}</span>';"
+
+onmouseout = "this.innerHTML='<span style=\'position:absolute;cursor:pointer;font-family:Big Shoulders Stencil Display;font-size:60px;\'>{&nbsp;&nbsp;<span style=\'color:#ff0000\'>obriu&nbsp;les&nbsp;fosses&nbsp;!</span>&nbsp;&nbsp;}</span>'"
+
+style='position:absolute;left:0;top:0;font-family:sans-serif;font-size:60px;color:#ffffff;cursor:pointer'
+></span>
+
+<!--FONT
+<span id='swatch' class='test' data-placement='right' data-html=true data-viewport='#viewport' trigger='hover focus' container:'body' delay:0 animation:'true' style='position:absolute;left:0;top:0;font-family:sans-serif;font-size:60px;color:#ffffff;cursor:pointer' data-toggle="dejutip" title="0 0 3 3"><a href="#">clic</a></span>
+<span onmouseover = "this.innerHTML='<span style=\'font-size:60px;\'>&nbsp;&nbsp;&#x2668;&nbsp;&nbsp;</span>';" onmouseout = "this.innerHTML='<span style=\'position:absolute;cursor:pointer;font-family:Jomhuria;font-size:60px;\'>{&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color:#ff0000;\'>clic</span>&nbsp;&nbsp;&nbsp;&nbsp;}</span>';" id='swatch' class='test' data-toggle='tooltip' data-placement='right' data-html=true data-viewport='#viewport' style='position:absolute;left:0;top:0;font-family:sans-serif;font-size:60px;color:#ffffff;cursor:pointer'></span>
+-->
+
+
+<script>
+/*
+// RELLOTGE inicialitzem la crida CSS del tooltip
+$(document).ready(function()
+{  // http://www.w3schools.com/bootstrap/tryit.asp?filename=trybs_ref_js_tooltip_title&stacked=h
+ // dins a tooltip, entre {}, poden anar-hi propietats
+// $("[data-toggle='dejutip']").tooltip({title:"<a href=''> 3 3 0 0 </a>"});
+//   $('[data-toggle="dejutip"]').tooltip();
+//  $('.test').tooltip({title: "3 3 0 0"});
+});
+*/
+
+//* llegim i adaptem dinàmicament el View Port *//
+(
+ function()
+ { // aquest canemàs és autènticament dinàmic
+
+  // capturem l'empremt html via l'id canemas
+  var htmlCanvas = document.getElementById('canemas'),
+
+  // capturem el context gràfic per dibuixar en 2d
+  elMeuContext = htmlCanvas.getContext('2d');
+
+  // inici del tafaner per dimensionar i redibuixar el canemàs
+  initialize();
+
+  function initialize()
+  { // registre del tafaner per cridar la funció resizeCanvas() cada cop que la finestra canvia de mida
+   window.addEventListener('resize', resizeCanvas, false);
+
+   // dibuixem el canemàs una primera vegada
+   resizeCanvas();
+  }
+
+  // redibuixem el contingut del canemàs
+  function redraw()
+  {
+//RELLOTGE
+   // https://en.wikipedia.org/wiki/Swatch_Internet_Time
+   // The formula for calculating the current time in .beats from UTC+1 is:
+   // (UTC+1seconds + (UTC+1minutes * 60) + (UTC+1hours * 3600)) / 86.4
+   // Round down the outcome
+   var avui = new Date();
+   // http://www.w3schools.com/jsref/jsref_gettimezoneoffset.asp
+   // distància en minuts per quadrar l'hora del sol UTC amb l'hora local (estiu/hivern)
+   //var aLhoraDelSol = Math.abs(avui.getTimezoneOffset()) / 60;  // hores amb valor absolut (doncs al nostre fus dóna negatiu)
+   // aquí farem servir l'internet Time amb l'hora solar UTC sense correcció
+   var aLhoraDelSol = 0;  // l'ego d'Swatch suggereix que l'internet Time dugui una correcció de fus +1h UTC per ser a Biel, Suïssa
+   // també en PHP a http://php.net/manual/en/datetimezone.getoffset.php
+   var hora = avui.getUTCHours();
+   var minut = avui.getMinutes();
+   var segon = avui.getSeconds();
+/* simulem
+var hora = 12;
+var minut = 00;
+var segon = 00;
+*/
+   var iTime = Math.floor(((segon + aLhoraDelSol) + ((minut + aLhoraDelSol) * 60) + (hora + aLhoraDelSol) * 3600) / 86.4);
+   // màscara dels 3 zeros
+   /*
+   Number.prototype.pad = function(size)
+   {
+    var s = String(this);
+    while (s.length < (size || 2)) {s = "0" + s;}
+    return s;
+   }
+   var farcit3zeros = (iTime).pad(3);
+   */
+   // de com passar una variable js a php via galeta
+   // document.cookie = "aviam =" + farcit3zeros;
+   // posem dinàmicament el text via html tag
+   document.getElementById("swatch").innerHTML = "{&nbsp;}";
+   document.getElementById("swatch").style.top= ((iTime * batecY)) + "px";
+   document.getElementById("swatch").style.left= "0px";
+
+   //REPRESSIÓ
+   let Xginy = window.innerWidth;
+   let Yginy = window.innerHeight;
+
+   //REPRESSIÓ
+   //càlcul de la mètrica del text a escriure a cos 100
+/*FONT
+elMeuContext.font = "100px Jomhuria";
+*/
+
+elMeuContext.font = "100px Big Shoulders Stencil Display";
+
+   var aEscriure = 'exhumeu !';
+
+   let metrica = elMeuContext.measureText(aEscriure);
+//   alert(metrica.width);  // 122.216796875
+   var AMple = metrica.width;
+//   alert(metrica.actualBoundingBoxAscent);  // 89.404296875 i aquest valor és el de la línia de base
+   var SObira = metrica.actualBoundingBoxAscent;
+//   alert(metrica.actualBoundingBoxDescent);  // 21.77734375
+   var JUssa = metrica.actualBoundingBoxDescent;
+
+   //REPRESSIÓ
+   // rectangle de fons amb les mides del canemàs i sense escalar
+   elMeuContext.fillStyle = '#222222';
+   elMeuContext.fillRect(0, 0, Xginy, Yginy);
+
+   //REPRESSIÓ
+   // valors d'escala adaptats a la mida de la pantalla
+   var eX = (Xginy / AMple);
+   var eY = (Yginy / (SObira + JUssa));  // aquests càlculs de la mètrica s'han fet amb un cos a 100
+
+   //REPRESSIÓ
+   // l'escala ha d'anar després de les mides del canemàs!
+   // dues crides equivalents de com alterar l'escala 1:1 per tal que el text compost s'hi adapti
+   // elMeuContext.scale(eX, eY);
+   elMeuContext.setTransform(eX, 0, 0, eY, 0, 0);
+   // un cop escalat ens cal mantenir el cos amb què s'han fet els càlculs de la mètrica
+
+/*FONT
+elMeuContext.font = "100px Jomhuria";
+*/
+
+elMeuContext.font = "100px Big Shoulders Stencil Display";
+
+
+elMeuContext.fillStyle = 'black';
+   // pintem el text abans de saber quines són les seves mides per adaptar-lo via scale a la pantalla del dispositiu
+   // però li passen al davant els alert i no es pinta fins després que haguem matat les finestres
+   // 0,0 d'inici al xamfrà UL
+elMeuContext.fillText(aEscriure, 0, SObira);  // s'apliquen els càlculs de la mètrica fets a cos 100
+
+   // restablim l'escala 1:1
+   elMeuContext.setTransform(1, 0, 0, 1, 0, 0);
+   /* garigot */
+   // torna un enter a l'atzar entre min (inclòs) i max (inclòs)
+   // usant Math.round() ens dóna una distribució no uniforme!
+   function getRandomIntInclusive(min, max)
+   {
+    return Math.round(Math.random() * (max - min + 1)) + min;
+   }
+   // un paral·lel JS de l'algorisme PS garigotweb.ps
+   elMeuContext.strokeStyle = '#aaaaaa';
+   elMeuContext.lineWidth = '0';
+
+   //elMeuContext.moveTo(0, 0);  // inici del garigot a l'orígen de l'eix de coordenades: ul
+// RELLOTGE
+   elMeuContext.moveTo(32, (iTime * batecY)+24);  // inici del garigot ul en funció de l'iTime
+
+   // un garigot fet entre 1 i ## Béziers
+   for(var i= 0; i < getRandomIntInclusive(1, 40); i++)
+   {
+    elMeuContext.bezierCurveTo(getRandomIntInclusive(0,window.innerWidth), getRandomIntInclusive(0,window.innerHeight), getRandomIntInclusive(0,window.innerWidth), getRandomIntInclusive(0,window.innerHeight), getRandomIntInclusive(0,window.innerWidth), getRandomIntInclusive(0,window.innerHeight));
+   }
+
+   // darrera Bézier que tanca el garigot a lr just a tocar el ul del logo
+   // context.bezierCurveTo(getRandomIntInclusive(0,window.innerWidth), getRandomIntInclusive(0,window.innerHeight), getRandomIntInclusive(0,window.innerWidth), getRandomIntInclusive(0,window.innerHeight), (window.innerWidth - 31), (window.innerHeight - 31));
+   // darrera Bézier que tanca el garigot a lr absolut
+   elMeuContext.bezierCurveTo(getRandomIntInclusive(0,window.innerWidth), getRandomIntInclusive(0,window.innerHeight), getRandomIntInclusive(0,window.innerWidth), getRandomIntInclusive(0,window.innerHeight), (window.innerWidth), (window.innerHeight));
+   elMeuContext.stroke();  // pintem el garigot
+
+  }  // fi de redraw
+
+  // s'engega cada cop que la finestra del DOM canvia d'orientació o mida
+  // refà les dimensions del canvas i les quadra amb les de la finestra
+  function resizeCanvas()
+  {
+   // diferències entre dispositius?
+   htmlCanvas.width = window.innerWidth;
+   htmlCanvas.height = window.innerHeight;
+
+//Rellotge
+   // el batec temporal com a unitat x,y de salt del rellotge
+   // batecX = (window.innerWidth - 32) / 1000;
+   batecY = (window.innerHeight - 80) / 1000;  // al salt li restem 80 píxels per donar marge al posicionat ll dels textos
+
+   // diferències entre dispositius?
+   // htmlCanvas.width = window.clientWidth;
+   // htmlCanvas.height = window.clientHeight;
+
+   redraw();
+  }
+ }
+)();
+
+// el dia i l'hora del client (oju perquè el servidor de bTactic va a l'hora del sol, o sigui 2h enrera!)
+var _quinHoraEs = new Date().toLocaleTimeString();
+const options = {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
+var _quinDiaSom = new Date().toLocaleDateString("ca-ES", options); 
+//	setCookie('quinHoraEs', _quinHoraEs, 1);
+
+</script>
+</body>
+</html>
