@@ -1,0 +1,636 @@
+%!
+%% generem unes llistes en html com a guia web i de registre de petició d'exhumació, comarca a comarca
+
+%0% estructura d'1 fossa al dataset original passat a PS
+%% <<
+%%   (type) (Feature)
+%%   (geometry) <<
+%%                (type) (Point)
+%%                (coordinates) [2.97553539276123 42.2641378583618]
+
+%% com fem el trasllat a l'ICC sens haver de convertir les coordenades geogràfiques a UTM31N-ETRS89 i assenyalem el punt?
+%% http://appmaps.icgc.cat/index.html?zoom=9&lon=497930.9335&lat=4679105.88
+
+%%              >>
+%%   (properties) <<
+%%                  (:id) (row-9s8e_ew9i~gs9p)
+%%                  (:version) (rv-pv8p.yu6z-dwu7)
+%%                  (:created_at) (2025-02-17T10:51:08.031Z)
+%%                  (:updated_at) (2025-02-18T09:02:37.369Z)
+%%                  (id) (147)
+%%                  (titol) (Cementiri de Figueres)
+%%                  (categoria_de_fosses) (Confirmada)
+%%                  (conservaci_) (Existent)
+%%                  (tipologia_inhumats) (Civil, Soldat republicà)
+%%                  (context_defunci_) (Repressió rereguarda)
+%%                  (mida) (200)
+%%                  (municipi) (Figueres)
+%%                  (comarca) (Alt Empordà)
+%%                  (prov_ncia) (Girona)
+%%                  (comunitat_aut_noma) (Catalunya)
+%%                  (pa_s) (Espanya)
+%%                  (fitxa) <<
+%%                            (url) (https://banc.memoria.gencat.cat/ca/results/mapa_fosses/147)
+%%                          >>
+%%                  (y) (42.2641378583618)
+%%                  (x) (2.97553539276123)
+%%                  (:@computed_region_bh64_c7uy) (191)
+%%                  (:@computed_region_wvic_k925) (6)
+%%                >>
+%% >>
+
+%% l'intèpret ens dóna una prefecta equivalència entre la notació decimal i UTF8, com es pot veure en aquest exemple:
+%% GS>(Lluçanès) (Llu\303\247an\303\250s) eq ==
+%% true
+
+/42cIDnom
+<<  %% el codi alfabètic identificatiu de 2 lletres en caixa alta, oficial, i el nom de la comarca
+/AE
+(l'Alt Empord\303\240)
+/LL
+(el Llu\303\247an\303\250s)
+/BD
+(el Bergued\303\240)
+/GX
+(la Garrotxa)
+/VN
+(l'Aran)
+/AU
+(l'Alt Urgell)
+/TR
+(el Tarragon\303\250s)
+/RI
+(el Ripoll\303\250s)
+/SL
+(el Solson\303\250s)
+/GN
+(el Giron\303\250s)
+/OS
+(Osona)
+/PE
+(Pla de l'Estany)
+/BC
+(el Baix Camp)
+/PR
+(el Priorat)
+/VR
+(el Vall\303\250s Oriental)
+/MO
+(el Moian\303\250s)
+/PU
+(el Pla d'Urgell)
+/GG
+(les Garrigues)
+/SR
+(la Segarra)
+/GF
+(el Garraf)
+/BP
+(el Baix Pened\303\250s)
+/TT
+(la Terra Alta)
+/AP
+(l'Alt Pened\303\250s)
+/BG
+(el Bages)
+/VC
+(el Vall\303\250s Occidental)
+/CB
+(la Conca de Barber\303\240)
+/BT
+(el Baix Llobregat)
+/AG
+(l'Alta Ribagor\303\247a)
+/SI
+(el Segri\303\240)
+/BB
+(el Baix Ebre)
+/AC
+(l'Alt Camp)
+/UR
+(l'Urgell)
+/RE
+(la Ribera d'Ebre)
+/MM
+(el Maresme)
+/AI
+(l'Anoia)
+/BM
+(el Baix Empord\303\240)
+/SV
+(la Selva)
+/PJ
+(el Pallars Juss\303\240)
+/NG
+(la Noguera)
+/MT
+(el Montsi\303\240)
+/PS
+(el Pallars Sobir\303\240)
+/BR
+(el Barcelon\303\250s)
+/CD
+(la Cerdanya)
+>> def
+
+%%PER CERCAR EN EL DATASET ORIGINAL, DEGUT A QUE HI HA COMARQUES REPETIDES, ENS CAL FILTRAR PELS 2 CARÀCTERS NORMATIUS QUE DEFINEIXEN LES 42 COMARQUES CATALANES
+(AU)  %% 2 caràcter indicatius de les Garrigues
+/CERQUEM exch def
+
+/diccionarisDeFossesD1comarca [] def  %% hi haurà el diccionari de la clau (properties) de cada fossa!
+
+desoriComarcal
+{  %% forall per l'indicatiu comarcal de 2 glifs que ens desa les fosses d'1 comarca
+ CERQUEM eq
+ {
+  /nCERQUEM exch def
+  arrayFosses
+  {  %% forall
+   (properties)get dup /dComarca exch def
+   (comarca)get nCERQUEM eq
+   {
+    dComarca dup length dict copy  %% profilaxi
+    diccionarisDeFossesD1comarca dup length dup /araVa exch def 1 add array dup 3 -1 roll 0 exch putinterval
+    dup 3 -1 roll araVa exch put /diccionarisDeFossesD1comarca exch def
+   }if
+  }forall
+ }
+ {
+  pop
+ }ifelse
+}forall  %% per l'indicatiu comarcal de 2 glifs que ens desa les fosses d'1 comarca
+
+
+%% de l'array de diccionaris de fosses d'1 comarca, n'hauríem d'extraure els noms únics dels municipis per tal de poder-los ordenar alfabèticament
+/municipisNOordenats <<>> def
+
+diccionarisDeFossesD1comarca
+{
+ (municipi) get dup municipisNOordenats exch known
+ {
+  pop
+ }
+ {
+  municipisNOordenats exch null put
+ }ifelse
+}forall
+
+[  %% les posem desordenadament en format string en una array
+ municipisNOordenats
+ {
+  pop 128 string cvs
+ }forall
+]
+
+%% ordena alfabèticament l'array d'strings o numèrics
+%%Hem descobert un bug en aquest famós algorisme que penja el loop sine die! 
+%% (QuickSort.ps) (r) file cvx exec QSortArray
+
+%% endreça una seqüència de cadenes o numèrica existent a l'stack de menys a més (operador ge) o de més a menys (operador le)
+%% a comptar des de la base de l'stack (molt útil mentre no sobreixim el màxim d'elements d'una stack)
+[ exch  %% per encabir-hi l'array ordenada de menys a més (ge)
+aload pop  %% desmpaquetem l'array d'alçades
+{  %% loop mentre estiguin desordenats
+ counttomark 1 sub /iCul exch def
+ %% escombrat d'ordenació
+ iCul
+ {  %% repeat
+  iCul index /araCul exch def
+  iCul 1 sub index araCul ge  %% ordre d'endreça
+  {
+   iCul 1 sub /iCul exch def
+  }
+  {
+   iCul -1 roll
+   iCul 1 add 1 roll
+  }ifelse
+ }repeat
+ %% mirem si estan per ordre de menys a més (ge)
+ %% o de més a menys (le), començant pel cul de l'stack
+ /Ordenats true def
+ counttomark 1 sub /iCul exch def
+ iCul
+ {  %% repeat
+  iCul index /araCul exch def
+  iCul 1 sub index araCul ge  %% ordre d'endreça
+  {
+   iCul 1 sub /iCul exch def
+  }
+  {
+   /Ordenats false def
+   exit
+  }ifelse
+ }repeat
+ Ordenats{exit}if
+}loop
+
+]  %% tanquem l'array ordenada de menys a més
+
+/AmunicipisOrdenats exch def  %% array de municipis ordenats d'1 comarca
+
+{
+%% un cop ho tinguem fet, els cridarem a /diccionarisDeFossesD1comarca per agrupar les fosses per municipi
+[  %% array de dicionaris de fosses per municipi amb les dades que necessitem pel registre a Justícia que quedaran en el mateix ordre que /AmunicipisOrdenats
+ AmunicipisOrdenats
+ {  %% forall per treure per ordre alfabètic de municipis les fosses de cadascun
+  /araM exch def
+  /dMunicipi <<>> def  %% diccionari amb les fosses d'1 municipi
+  diccionarisDeFossesD1comarca
+  {  %% forall pels diccionaris (properties) de cadacuna de les fosses de la comarca
+   dup (municipi) get araM eq
+   {
+    /araDF exch def
+    /dFossa <<>> def  %% diccionari amb les dades d'1 fossa
+    %% claus amb dades de cadascuna de les fosses: _municipi _IDdataset _nom _exhumada _URLbanc _URLicgc _reclamada _IDtramit _URLtramits
+    dFossa /_municipi araM put
+    dFossa /_IDdataset araDF (id) get put
+    dFossa /_nom araDF (titol) get put
+    dFossa /_exhumada araDF (conservaci_) get (Excavada) eq  %% s'ha exhumat?
+    {
+     true put
+    }
+    {
+     false put
+    }ifelse
+    dFossa /_URLbanc araDF (fitxa) get (url) get put
+    dFossa /_URLicgc (https://icgc.cat/veshi?) dup length dup /araVa exch def araDF (x) get
+    dup null eq
+    {
+dFossa /_nom get ==
+(sense lat/lon?)==
+     pop (null)
+    }if
+    dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def (,) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def araDF (y) get
+    dup null eq
+    {
+     pop (null)
+    }if
+    dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval put
+    dFossa /_reclamada
+    %GGtramits (<<>>) %% per saber si ha estat reclamada hauríem de fer una consulta a un diccionari que haguem bastit abans amb aquesta dada, via la seva ID al dataset
+    <<>> araDF (id) get known
+    {
+     true put
+     dFossa /_IDtramit <<>> araDF (id) get get (IDtrami) get put
+     dFossa /_IDtramit <<>> araDF (id) get get (URLtramits) get put
+    }
+    {
+     false put
+     dFossa /_IDtramit (--) put
+     dFossa /_URLtramits (--) put
+    }ifelse
+
+    %% desem la fossa amb les dades que ens interessen pel registre amb la clau id del dataset
+    dMunicipi araDF (id) get dFossa dup length dict copy put
+   }
+   {
+    pop
+   }ifelse
+  }forall  %% pels diccionaris originals de cadacuna de les fosses de la comarca
+  dMunicipi dup length dict copy  %% profilaxi pel munici enllestit abans no quedi a l'stack per l'array
+ }forall  %% per treure per ordre alfabètic de municipis les fosses de cadascun
+] /adddfpm exch def  %% array de dicionaris de fosses per municipi 
+
+}stopped
+{
+pstack quit
+}if
+%%AQUÍ ÉS ON PODRÍEM GENERAR UN PDF/HTML, PER COMARQUES, AMB LES DADES DE LES FOSSES DE CADA MUNICIPI
+(UbuntuMono-R.ttf)
+%(Hack-Regular.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+%dup length array copy dup 0
+%/Fhook put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+%/f put
+%/uni0191 put
+%/uni0493 put
+%/uni0492 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /WApMono exch definefont pop
+/WApMono findfont /araDfont exch def
+
+(UbuntuMono-B.ttf)  %% adreça relativa
+findfont
+%% codifiquem pels accents catalans i els possibles glifs alternatius de la F
+dup length dict begin
+{
+ 1 index /FID ne
+ {def}{pop pop}ifelse
+}forall
+%% atenció que aquesta crida només és vàlida a Ghostscript!
+/Encoding systemdict /EncodingDirectory get /WinAnsiEncoding get
+dup length array copy dup 0
+%/Fhook put
+%/Ghestrokecyrillic put
+%/ghestrokecyrillic put
+%/uni024D put
+%/florin put
+/f put
+%/uni0191 put
+%/uni0493 put
+%/uni0492 put
+%/f_f put
+def  %% xifrat WinAnsi
+currentdict end /dUbuntu_WApMono exch definefont pop
+/dUbuntu_WApMono findfont
+/UbuntuMonoB exch def
+
+
+/ample 595 def
+/alt 842 def
+<</PageSize[ample alt]>>setpagedevice  %% A4
+/margE 40 def
+
+/maxX ample margE sub def
+/arasomX margE def
+alt margE 2 mul sub /arasomY exch def
+
+42cIDnom CERQUEM get  %% comarca que explorem
+(decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get
+dup ==
+araDfont 36 scalefont setfont
+arasomX arasomY moveto show
+
+arasomY 23 sub /arasomY exch def
+araDfont 18 scalefont setfont
+
+diccionarisDeFossesD1comarca length %% fosses totals de la comarca
+dup ==
+arasomX arasomY moveto
+4 string cvs show ( fosses comunes localitzades fins ara a la comarca)show
+
+adddfpm length  %% nombre de municipis amb fosses
+dup ==
+arasomX arasomY 18 sub dup /arasomY exch def moveto
+4 string cvs show ( municipis amb fosses comunes)show
+
+arasomX arasomY 18 sub dup /arasomY exch def moveto
+(Dataset del dia )show ddp show
+
+arasomY margE 2 mul sub /arasomY exch def
+
+/maxF 0 def  %% desarem el nombre màxim llegit de fosses per municipi
+
+0 1 AmunicipisOrdenats length 1 sub
+{  %% for per cada municipi de la comarca 
+ dup AmunicipisOrdenats exch get  %% nom del municipi
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get
+
+ dup /araCIPI exch def
+
+ araDfont 24 scalefont setfont
+ arasomX arasomY moveto
+
+ currentpoint exch pop margE 2 mul le
+ {
+  showpage
+  alt margE sub /arasomY exch def
+  arasomX arasomY moveto
+ }if
+
+ show
+
+ araDfont 12 scalefont setfont
+
+ adddfpm exch get dup length  %% nombre de fosses del municipi
+
+ dup maxF gt
+ {
+  araCIPI /maxCIPI exch def
+  dup /maxF exch def
+ }if
+
+ arasomY 12 sub /arasomY exch def
+ arasomX arasomY moveto
+ 4 string cvs show ( fosses comunes)show
+ arasomY 24 sub /arasomY exch def
+
+ currentpoint exch pop margE 2 mul le
+ {
+  showpage
+  alt margE sub /arasomY exch def
+ }if
+
+ {  %% forall per explorar d'1 municipi la clau ID i el diccionari de dades per la reclamació de cada fossa
+  dup /FaF exch def
+  /_exhumada get
+  {
+   0 1 0 setrgbcolor
+  }
+  {
+   FaF /_reclamada get
+   {
+    1 0 0 setrgbcolor
+    %% aquí cal muntar una nova URL amb la ID del tràmit per poder accedir als registres de reclamació i respostes
+   }if
+  }ifelse
+  pop  %% ens carreguem la clau amb la ID de la fossa
+
+  gsave
+  araDfont 12 scalefont setfont
+  arasomX arasomY moveto
+  (NOM:) show
+  grestore
+
+  gsave
+  FaF /_nom get  %% nom de la fossa comuna
+  (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get
+  UbuntuMonoB 18 scalefont setfont
+  arasomX margE add arasomY moveto
+
+%%FEM un petit componedor amb l'operador token i un màxim de línia permesa, per tal de canviar de línia si es supera
+  {  %% loop
+   token
+   {
+    128 string cvs dup stringwidth pop currentpoint pop add maxX ge
+    {  %% canviem de línia!
+     arasomX margE add arasomY 18 sub dup /arasomY exch def moveto
+     show ( ) show  %% l'espai separador de paraules
+    }
+    {  %% seguim component dins la mateixa línia
+     show ( ) show  %% l'espai separador de paraules
+    }ifelse
+   }
+   {  %% sortim quan s'ha esgotat el text i llegeix la cadena buida de la cua
+    exit
+    %(\n\n >>> Hi ha hagut un error component el text amb l'operador token!\n\n)print flush
+   }ifelse
+  }loop
+  grestore
+
+  arasomY 18 sub /arasomY exch def
+
+  araDfont 12 scalefont setfont
+  arasomX arasomY moveto
+  (ID:) show
+  UbuntuMonoB 12 scalefont setfont
+  arasomX margE 2 mul add arasomY moveto
+  FaF /_IDdataset get  %% ID al dataset de la fossa comuna
+  show
+  arasomY 12 sub /arasomY exch def
+  currentpoint exch pop margE 2 mul le
+  {
+   showpage
+   alt margE sub /arasomY exch def
+  }if
+
+  araDfont 12 scalefont setfont
+  arasomX arasomY moveto
+  (MUNICIPI:) show
+  UbuntuMonoB 12 scalefont setfont
+  arasomX margE 2 mul add arasomY moveto
+  FaF /_municipi get  %% nom del municipi de la fossa comuna
+  (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get
+  show
+  arasomY 12 sub /arasomY exch def
+  currentpoint exch pop margE 2 mul le
+  {
+   showpage
+   alt margE sub /arasomY exch def
+  }if
+
+  araDfont 12 scalefont setfont
+  arasomX arasomY moveto
+  (COORDENADES:) show
+  UbuntuMonoB 12 scalefont setfont
+  arasomX margE 2 mul add arasomY moveto
+  FaF /_URLicgc get  %% coordenades geogràfiques de la fossa comuna (cal concretar l'ordre LON/LAT?)
+  (?) search pop pop pop  %% el deslliguem de l'adreça URL encara per concretar
+  show
+  arasomY 12 sub /arasomY exch def
+  currentpoint exch pop margE 2 mul le
+  {
+   showpage
+   alt margE sub /arasomY exch def
+  }if
+
+  araDfont 12 scalefont setfont
+  arasomX arasomY moveto
+  (DATASET:) show
+  UbuntuMonoB 12 scalefont setfont
+  arasomX margE 2 mul add arasomY moveto
+  ddp show
+  arasomY 12 sub /arasomY exch def
+  currentpoint exch pop margE 2 mul le
+  {
+   showpage
+   alt margE sub /arasomY exch def
+  }if
+
+  araDfont 12 scalefont setfont
+  arasomX arasomY moveto
+  (URL FITXA:) show
+  arasomX margE 2 mul add arasomY moveto
+  FaF /_URLbanc get  %% coordenades geogràfiques de la fossa comuna (cal concretar l'ordre LON/LAT?)
+  show
+  arasomY 12 sub /arasomY exch def
+  currentpoint exch pop margE 2 mul le
+  {
+   showpage
+   alt margE sub /arasomY exch def
+  }if
+
+  araDfont 12 scalefont setfont
+  arasomX arasomY moveto
+  (URL TRÀMIT:)
+  (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get
+  show
+  arasomX margE 2 mul add arasomY moveto
+  FaF /_URLtramits get  %% coordenades geogràfiques de la fossa comuna (cal concretar l'ordre LON/LAT?)
+  show
+  arasomY 12 sub /arasomY exch def
+  currentpoint exch pop margE 2 mul le
+  {
+   showpage
+   alt margE sub /arasomY exch def
+  }if
+
+  0 0 0 setrgbcolor
+
+  arasomY 18 sub /arasomY exch def
+
+ }forall  %% per explorar d'1 municipi la clau ID i el diccionari de dades per la reclamació de cada fossa
+
+ arasomY 24 sub /arasomY exch def
+}for  %% for per cada municipi de la comarca
+
+%%Avaluem
+maxCIPI ==
+maxF ==
+
+%%COM fer notar els casos del trasllat a Cuelgamuros o les que consten com a desaparegudes??
+
+showpage  %% darrer showpage que hauria de ser condicional per si queda res a la cua?
+ (BROSSA?)pstack
+
+%% aquí potser hauríem de repetir el mateix: primer ordenar-les per nom i després extraure les dades de cada fossa que ens interessen pel registre de petició
+
+%%Comportament de l'operador token en una string entre els codis decimats 0 i 255, tenint en compte que interpreta les combinatòries UTF8!
+%% separa grups caràcters seguits en base als codis decimals 0 (\000), 9 (\011), 10 (\012), 12 (\014), 13 (\015), 32 (\040)
+%% separa grups caràcters seguits i afegeix un espai (tabulador?) al caràcter següent en base als codi decimal 11 (\013)
+%% esborra 1 caràcter que precedeixi el codi decimal 8 (\010) i també a ell mateix
+%% ignora els caràcter dels decimals 1 (\001), 2 (\002), 3 (\003), 4 (\004), 5 (\005), 6 (\006), 7 (\007)
+%% 14 (\016), 15 (\017), 16 (\020), 17 (\021), 18 (\022), 19 (\023), 20 (\024), 21 (\025), 22 (\026), 23 (\027)
+%% 25 (\031)
+%% 28 (\034), 29 (\035). 30 (\036), 31 (\037)
+%% el decimals 24 (\030), 26 (\032) es transformen en la seqüencia UTF8… \342\226\222 …sense separar res
+%% esborra 1 caràcter que segueixi al codi decimal 27 (\033) i també a ell mateix
+%% ATENCIÓ: una estring tipus (54321E12345) provoca un limitcheck perquè s'interpreta com un nombre real amb la E o e d'exponencial que excedeix la grandària permesa
+%% per explorar de l'1 al 255 tenim a token_analisi.ps
+
+%% també, per tal de muntar la URL al punt cartogràfic, els camps (x) (y) o a l'array de (coordinates)
+%% també a (fitxa) treure'n la (url) a la fitxa del Banc de Memòria
+
+%% descripció de les variables amb dades clau i a quin .ps es creen:
+
+   %% es creen a exhumaDataset_prototip0#.ps (que és cridat per faComarques_faHTMLobriulesfosses_prototip0#.ps)
+%% /arrayFosses és una array de diccionaris (un per fossa) del dataset original segons el format de %0%
+%% /desoriComarcal és un diccionari estàtic construït en base a l'estructura comarcal dels datasets: té de clau el nom de la comarca i de valor les dues lletres d'ID
+%% /datasetComarques és un diccionari dinàmic que clona l'estructura comarcal del dataset: té de clau el nom de la comarca i de valor una array [#totalfosses #exhumades]
+%% pot detectar si hi han hagut canvis en els noms o el nombre de comarques (però si el datatset n'ha omès no ho detecta)
+%% /2glifsAfosses és un diccionari dinàmic que, com a valor, fusiona les dades [#totalfosses #exhumades] de les 3 comarques repetides i té de clau les dues lletres d'ID
+
+   %% es creen a faComarques_faHTMLobriulesfosses_prototip0#.ps
+%% /comarquesVSfosses és un diccionari estàtic que té de clau les dues lletres d'ID de cada comarca i com a valor un diccionari
+%% que s'alimenta de les dades de /2glifsAfosses traslladant-hi el nombre de fosses totals i les exhumades i+
+
+%%FILTRATS QUE HEM DE FER CADA VEGADA QUE S'ACTUALITZA EL DATASET:
+%A% Les comarques repetides tenen dades complementàries o no?
+
+%B% Hi han hagut canvis en el format comarcal?
+   %1% Això passaria si al diccionari /desoriComarcal no s'hi trobés un nom de comarca que ve del dataset
+   %2% O si el nombre de comarques que ve del dataset difereix del nombre de /desoriComarcal
+   %3% Si es compleix %1% i %2% no, és que hi ha hagut un canvi de nom
+   %4% Si es compleix %1% i %2%, és que hi ha hagut un nou afegit de nom de comarca (ara n'hi ha 3 de repetides!)
+   %5% Si no es compleix %1% i %2% sí, és que el dataset ha omès alguna comarca!
+
+%C% Hi han hagut canvis en el format de fosses?
+   %1% nombre de camps
+   %2% denominació dels camps
+
+%D% Hi han hagut canvis en els continguts de fosses?
+   %1% contingut dels camps
+
+%E% Hi han hagut canvis en el nombre de fosses?
+   %1% quines s'hi han afegit en relació al dataset anterior?
+   %2% quines se n'han tret en relació al dataset anterior?
+
+%%PASSEM A L'ACCIÓ
+
+

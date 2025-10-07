@@ -1,0 +1,35 @@
+%!
+%% explorem el comportament de l'operador token en strings
+%% hauríem d'estudiar també el seu comportament en fitxers (varia?)
+%% doncs el seu ús per a compondre text pot ser interessant en segons quins contextos
+%%ATENCIÓ una estring tipus (54321E12345) provoca un limitcheck perquè s'interpreta com un nombre real amb la E o e d'exponencial que excedeix la grandària permesa
+
+1 1 255  %% ho hem d'estudiar per trams
+{  %% for no comencem per zero, que és un dels separadors, per simplificar la neteja de la cua
+ /s256 256 string def
+ s256 /NullEncode filter /wText exch def
+
+ dup == /octet exch def
+ %% escrivim un primer tram de la cadena amb EDCBA
+ 69 -1 65
+ {
+  wText exch write
+ }for
+
+ %% escriu el decimal del mig, a mode de potencial separador, per observar com reacciona amb token
+ wText octet write
+
+ %% escrivim un segon tram de la cadena amb ABCDE
+ 65 1 69
+ {
+  wText exch write
+ }for
+
+ wText dup flushfile closefile
+
+ %% esquilem els zeros de la cua
+ s256 (\000) search pop exch pop exch pop
+ token === === ===
+ (\n- - - - - - - - - - - - - - - -\n)print flush
+}for
+

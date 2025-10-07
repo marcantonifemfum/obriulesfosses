@@ -1,0 +1,117 @@
+%% estudia el funcionament dels enigmàtics IODevices a Ghostscript
+
+%% treu per la pantalleta tots els IODevices de l'intèrpret
+(*) {(/)print print flush (\n)print flush}bind 128 string /IODevice resourceforall
+
+%% ara cal saber quin són de lectura i quins d'escriptura
+%% (%stdin%) és de només lectura (no s'hi pot afegir cap nom!) i reté l'execució fins que no s'escriu un determinat caràcter que podem filtrar amb /SubFileDecode
+%% (%lineedit%) ídem que %stdin però només és sensible al retorn de carro
+%% (%stdout%) és de només escriptura
+%% (%ram%qualsevolnom.txt) permet crear fitxers anomenats com vulguem i és w/r
+%% (%rom%nomsPrivatsDelGS) hauríem de saber quins noms privats té implementats el GS per accedir-hi
+%% (%pipe%pwd) serveix per capturar dades via comandes de la shell Unix, per exemple interrogar a quin directori estem treballant
+%% (%statementedit%) ídem (%lineedit%)
+%% (%stderr%) és de només escriptura però cal experimentar com treballa
+%% (%null%) és de només escriptura però cal experimentar com treballa
+%% (%os%) perquè sigui de lectura primer s'ha d'obrir per escriure amb un nom afegit després del darrer %
+
+
+%(%os%HOLA) (w) file dup dup (ADEU)writestring flushfile closefile
+%(%os%HOLA) (r) file 256 string readstring
+
+%% aquesta estratègia d'escriptura/lectura de dades no està implementada encara al GS 9.55
+%mark /Root (/tmp/disk0/) (%disk0) .putdevparams
+%(%disk0) (w) file dup (HOLA) writestring dup flushfile closefile
+%(%disk0) (r) file 128 string readstring
+
+
+%pstack
+
+%MMMMMMM
+
+
+%%% aquest fitxer el farem servir per esciure els missatges captats per (%stdin)
+%%% sota Distiller OSX...
+%(Macintosh_HD:Users:femfum:elquehallegitstdin.txt) (w) file /aDisc exch def
+%%% sota PSNormalizer OSX...
+(%ram%elquehallegitstdin.txt) (w) file /aDisc exch def
+
+%(%statementedit%)
+(%lineedit%) (r) file
+%% amb aquests 2 IODevice els operadors de prompt… = == === …actuen com instruccions d'escriptura 
+%% el problema és que cal prémer entrada per aturar l'execució del IODevice
+<</A (*) /B /b /c 100>> ===
+(HOLA) ===
+(\r\n)===
+
+quit
+%256 string readstring count pstack quit
+
+%(%pipe%pwd) (r) file /In exch def
+%(%lineedit%) (r) file /In exch def
+%(%stdin%) (r) file /In exch def
+
+
+%%% interroguem la capacitat del buffer de sortida i dividim per 7
+%%% per saber-ne els caracters maxims que pot gestionar?...
+%%% PSNormalizer i Distiller6 sota OSX dona 156?
+%In bytesavailable ==
+
+% aquest fitxer actua tambe de prompt de pantalla de forma que tot el que escrivim dins una string
+% o per mitja del seu codi ascii surt per la pantalla sempre com a representacio grafica estudia
+% del caracter corresponent
+%(%stdout%) (w) file /Out exch def
+
+
+
+%(%stdout%)
+%status pstack quit
+
+%0 1 255  {Out exch write (\n) print flush} for
+%Out 97 write
+%(\n\nPROU\n\n) print flush
+
+
+%%% aquest fitxer (%stdin) captura totes les dades que hi posem a sota sempre que les llegim amb read
+%%% siguin el que siguin aquestes! (d'una manera similar de com ho fa currentfile)
+%%% i si les escrivim a (%stdout) les podem llistar pel prompt
+%%% afegint la intervencio del filtre SubFileDecode podem aturar la lectura alla on volguem...
+
+%%Tal i com treballa Ghostscript amb aquest codi
+
+In 0 (*) /SubFileDecode filter
+
+{
+ dup read
+ {
+
+%  dup Out exch write  % llistem pel prompt
+  aDisc exch write  % llistem a disc
+ }
+ {pop
+  aDisc dup flushfile closefile  % es clau tancar el fitxer!!!!!
+%  Out dup flushfile closefile  % es clau tancar el fitxer!!!!!
+  exit} ifelse
+} loop
+%(\n\nhola aixo hauria de ser abduit per stdin!\n\n)
+%inclosos els canvis de linia
+%just fins l'asterisc que fa de final de lectura
+
+
+
+
+/Courier 12 selectfont
+10 600 moveto (%ram%elquehallegitstdin.txt) (r) file 256 string readline pop show showpage
+
+%{
+% cagada
+%}stopped
+%{
+%<</PageSize[800 200]>>setpagedevice
+%0 1 1 0 setcmykcolor
+%/Courier 20 selectfont
+%20 100 moveto (%ram%elquehallegitstdin.txt) (r) file 256 string readline pop show showpage
+%} if
+
+
+

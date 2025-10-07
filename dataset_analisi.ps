@@ -1,0 +1,119 @@
+%!
+%% explorem les categories dels camps que són crítiques pel registre de la reclamació a Justícia i al mapa dinàmic de la web
+%% d'aquesta manera també ens podrem adonar de canvis crítics dins l'estructura a mida que hi vagi havent actualitzacions
+
+%%Categories
+
+/_conservaci_ <<>> def  %% desarem totes les categories diferents d'aquest camp
+%% <<
+%%   /Excavada null
+%%   /Parcial null
+%%   /Excavada sense resultat null
+%%   /Existent null
+%%   /null null
+%%   /Es desconeix null
+%%   /Desapareguda null
+%%   /Traslladada a Valle de Cuelgamuros (anteriorment Valle de los Caídos) null
+%% >>
+
+/_categoria_de_fosses <<>> def
+%% <<
+%%    /Confirmada null
+%%    /null null
+%%    /Probable null
+%% >>
+
+/_tipologia_inhumats <<>> def
+%% <<
+%%   /Civil, Desconegut, Refugiat, Soldat republicà null
+%%   /Desconegut, Soldat republicà null
+%%   /Civil, Desconegut, Soldat republicà null
+%%   /Maqui null
+%%   /Civil, Refugiat, Soldat republicà null
+%%   /Soldat rebel, Soldat republicà null
+%%   /Refugiat, Soldat republicà null
+%%   /Civil, Maqui null
+%%   /Desconegut, Soldat rebel, Soldat republicà null
+%%   /Civil, Soldat rebel null
+%%   /Civil, Maqui, Refugiat, Soldat republicà null
+%%   /Civil, Soldat rebel, Soldat republicà null
+%%   /Civil, Refugiat null
+%%   /Soldat republicà null
+%%   /Maqui, Soldat rebel null
+%%   / null
+%%   /Desconegut null
+%%   /Civil, Desconegut null
+%%   /Civil null
+%%   /Refugiat, Soldat rebel, Soldat republicà null
+%%   /Soldat rebel null
+%%   /Civil, Refugiat, Soldat rebel, Soldat republicà null
+%%   /Civil, Soldat republicà null
+%%   /Refugiat null
+%% >>
+
+/_context_defunci_ <<>> def
+%% <<
+%%   /Centre sanitari, Mort en combat null
+%%   /Bombardeig null
+%%   /Bombardeig, Repressió franquista, Repressió rereguarda null
+%%   /Centre sanitari, Desconegut null
+%%   /Bombardeig, Mort en combat null
+%%   /Centre sanitari, Desconegut, Mort en combat null
+%%   /Desconegut, Repressió rereguarda null
+%%   /Mort en combat null
+%%   /Lluita guerrillera maquis, Mort en combat, Repressió rereguarda null
+%%   /Repressió franquista null
+%%   /Desconegut, Repressió franquista null
+%%   /Bombardeig, Centre sanitari, Mort en combat, Repressió rereguarda null
+%%   /Bombardeig, Centre sanitari, Desconegut, Repressió franquista, Repressió rereguarda null
+%%   /Lluita guerrillera maquis null
+%%   /Lluita guerrillera maquis, Mort en combat null
+%%   /Centre sanitari, Mort en combat, Repressió franquista null
+%%   /Mort en combat, Repressió franquista null
+%%   /Centre sanitari null
+%%   /Centre sanitari, Repressió franquista null
+%%   /Mort en combat, Repressió rereguarda null
+%%   /Repressió rereguarda null
+%%   /Repressió franquista, Repressió rereguarda null
+%%   /Desconegut, Mort en combat null
+%%   / null
+%%   /Bombardeig, Repressió rereguarda null
+%%   /Desconegut null
+%%   /Bombardeig, Mort en combat, Repressió rereguarda null
+%%   /Centre sanitari, Repressió rereguarda null
+%%   /Bombardeig, Centre sanitari null
+%%   /Bombardeig, Centre sanitari, Mort en combat, Repressió franquista null
+%%   /Lluita guerrillera maquis, Repressió franquista null
+%%   /Bombardeig, Repressió franquista null
+%%   /Lluita guerrillera maquis, Repressió rereguarda null
+%%   /Bombardeig, Centre sanitari, Mort en combat null
+%%   /Desconegut, Mort en combat, Repressió rereguarda null
+%%   /Bombardeig, Centre sanitari, Repressió rereguarda null
+%% >>
+
+/_:@computed_region_bh64_c7uy <<>> def  %% són municipis? hi ha 392 elements
+
+/_:@computed_region_wvic_k925 <<>> def  %% són Comarques? hi ha 41 elements
+
+arrayFosses  %% array de diccionaris amb les dades originals del dataset en l'apartat (properties)
+{  %% forall
+ (properties) get (:@computed_region_wvic_k925) get dup
+
+ dup type /nulltype eq
+ {
+  pop pop _:@computed_region_wvic_k925 (null) null put
+ }
+ {
+  _:@computed_region_wvic_k925 exch known
+  {
+   pop
+  }
+  {
+   _:@computed_region_wvic_k925 exch null put
+  }ifelse
+ }ifelse
+}forall
+
+%% totes les categories diferents del dataset en aquest camp
+_:@computed_region_wvic_k925 ===
+
