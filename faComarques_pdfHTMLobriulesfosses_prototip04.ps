@@ -325,7 +325,7 @@ def
 	/o 0  %% fosses publicades al dataset oficial
 	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 0  %% reclamades
+	/r 42  %% reclamades
 	/n (la Noguera)  %% nom normatiu
 	/i 23  %% codi territorial
       >>
@@ -2130,7 +2130,11 @@ false{
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
 
  currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
- ( Genètica del Govern.)
+ ( Genètica del Govern. Quere-)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
+ AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
+ currentpoint araCos 1.4 mul sub exch pop araXlb exch moveto
+ ( llants en la Causa 4591/10.)
  (decodificaWinAnsiEncoding_a1i2i3octets.ps)(r) file cvx exec
  AliniesD1solOctet 0 get show  %% aquí només decodifica 1 sola string dins d'una array
 
