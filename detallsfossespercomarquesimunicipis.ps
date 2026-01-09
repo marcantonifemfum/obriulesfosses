@@ -1,5 +1,8 @@
 %!
-%% generem unes llistes en html com a guia web i de registre de petició d'exhumació, comarca a comarca
+%% generem una llista comarcal de fosses en pdf (i html?) com a guia web pel registre telemàtic de petició d'exhumació
+%% els municipis s'ordenen per ordre alfabètic i les fosses de cadascun també
+%% podem detectar errors del dataset:
+%%
 
 %0% estructura d'1 fossa al dataset original passat a PS
 %% <<
@@ -8,8 +11,8 @@
 %%                (type) (Point)
 %%                (coordinates) [2.97553539276123 42.2641378583618]
 
-%% com fem el trasllat a l'ICC sens haver de convertir les coordenades geogràfiques a UTM31N-ETRS89 i assenyalem el punt?
-%% http://appmaps.icgc.cat/index.html?zoom=9&lon=497930.9335&lat=4679105.88
+%% ara ja podem treballar amb el visor VISSIR actualitzat de l'ICGC sense haver de convertir les coordenades geogràfiques a UTM31N-ETRS89, però encara sense xinxeta?
+%% https://visors.icgc.cat/vissir/#loc=17/42.80578/0.95818
 
 %%              >>
 %%   (properties) <<
@@ -42,6 +45,25 @@
 %% l'intèpret ens dóna una prefecta equivalència entre la notació decimal i UTF8, com es pot veure en aquest exemple:
 %% GS>(Lluçanès) (Llu\303\247an\303\250s) eq ==
 %% true
+
+%%De moment no hem aconseguit crear objectes amb noms exclusivament numèrics dins d'un {#} i que pdfmark pugui treballar sense que es contaminin les variables
+%% potser jugant amb les memòries locals vs globals ho aconseguiríem, però seria més costós que generar cadenes alfanumèriques
+%% creació d'anotacions amb vincles externs a URL
+%% l'array /Annots, per pàgina, la numerarem a partir de l' 1
+/nAnnots 1 def  %% llavors equivaldrà a un comptador de pàgines
+%% generem la cadena alfanumèrica
+nAnnots 4 string cvs  %% ens servirà com a nom únic de l'objecte diccionari
+({ARAannots_) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+(}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+/ARAannots exch def  %% el nom alfanumèric únic NO contaminable
+
+%% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+mark /_objdef ARAannots cvx exec /type /array /OBJ pdfmark
+mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
+
+%1 aAnnots add /aAnnots exch def
+%{//aAnnots} ===
+%ARRIBES?
 
 /42cIDnom
 <<  %% el codi alfabètic identificatiu de 2 lletres en caixa alta, oficial, i el nom de la comarca
@@ -134,7 +156,7 @@
 >> def
 
 %%PER CERCAR EN EL DATASET ORIGINAL, DEGUT A QUE HI HA COMARQUES REPETIDES, ENS CAL FILTRAR PELS 2 CARÀCTERS NORMATIUS QUE DEFINEIXEN LES 42 COMARQUES CATALANES
-(PS)  %% 2 caràcters indicatius de la comarca
+(VN)  %% 2 caràcters indicatius de la comarca
 /CERQUEM exch def
 
 /diccionarisDeFossesD1comarca [] def  %% hi haurà el diccionari de la clau (properties) de cada fossa!
@@ -274,7 +296,7 @@ datasetMunicipis (features) get
 
     /araDF exch def
     /dFossa <<>> def  %% diccionari amb les dades d'1 fossa
-    %% claus amb dades de cadascuna de les fosses: _municipi _MUNICIPI _Ci _IDdataset _nom _exhumada _URLbanc _URLicgc _reclamada _IDtramit _URLtramits
+    %% claus amb dades de cadascuna de les fosses: _municipi _MUNICIPI _Ci _IDdataset _nom _exhumada _URLbanc _URLosm _URLicgc _LON _LAT _reclamada _IDtramit _URLtramits
     dFossa /_municipi araM put
     dFossa /_MUNICIPI MUNICIPI put
     dFossa /_Ci Ci put
@@ -288,24 +310,69 @@ datasetMunicipis (features) get
      false put
     }ifelse
     dFossa /_URLbanc araDF (fitxa) get (url) get put
-%%UEP! aquí hi hem de posar una adreça OSM perquè la URL d'ICGC treballa amb UTMs
+%% adreça Open Street Maps
 %% https://www.openstreetmap.org/?mlat=41.971010731879886&mlon=0.8592643715470463#map=17/41.971010/0.859262
-    dFossa /_URLicgc (https://icgc.cat/veshi?) dup length dup /araVa exch def araDF (x) get
+    dFossa /_URLosm
+    (https://www.openstreetmap.org/?mlat=) dup length dup /araVa exch def araDF (y) get dup /ARAlat exch def
     dup null eq
     {
 dFossa /_nom get ==
-(sense lat/lon?)==
-     pop (null)
+(sense LAT!)==
+     pop (null) dup /ARAlat exch def
     }if
     dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
-    3 -1 roll araVa exch putinterval dup length dup /araVa exch def (,) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
-    3 -1 roll araVa exch putinterval dup length dup /araVa exch def araDF (y) get
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def (&mlon=) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def araDF (x) get dup /ARAlon exch def
     dup null eq
     {
-     pop (null)
+dFossa /_nom get ==
+(sense LON!)==
+     pop (null) dup /ARAlon exch def
     }if
     dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
-    3 -1 roll araVa exch putinterval put
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def (#map=17/) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def ARAlat dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def (/) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def ARAlon dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    %% cridem una capa que ens detalla el terme municipal N (no podem cridar una vista aèria), variables possibles: N, YN, CN, TN, PN (detall topogràfic), ON, HN
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def (&layers=N) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval
+    put
+
+%% adreça al visor VISSIR de l'Institut Cartogràfic i Geològic de Catalunya
+%% https://visors.icgc.cat/vissir/#loc=17/42.80578/0.95818
+    dFossa /_URLicgc
+    (https://visors.icgc.cat/vissir/#loc=17/) dup length dup /araVa exch def araDF (y) get dup /ARAlat exch def
+    dup null eq
+    {
+dFossa /_nom get ==
+(sense LAT!)==
+     pop (null) dup /ARAlat exch def
+    }if
+    dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def (/) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    3 -1 roll araVa exch putinterval dup length dup /araVa exch def araDF (x) get dup /ARAlon exch def
+    dup null eq
+    {
+dFossa /_nom get ==
+(sense LON!)==
+     pop (null) dup /ARAlon exch def
+    }if
+    dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval
+    dup 3 -1 roll araVa exch putinterval
+%% mentre no tinguem una altra variable per assenyalar amb una xinxeta no hi hem d'afegir res més
+%    dup length dup /araVa exch def (#map=17/) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+%    3 -1 roll araVa exch putinterval dup length dup /araVa exch def ARAlat dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+%    3 -1 roll araVa exch putinterval dup length dup /araVa exch def (/) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+%    3 -1 roll araVa exch putinterval dup length dup /araVa exch def ARAlon dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+    %% cridem una capa que ens detalla el terme municipal N (no podem cridar una vista aèria), variables possibles: N, YN, CN, TN, PN (detall topogràfic), ON, HN
+%    3 -1 roll araVa exch putinterval dup length dup /araVa exch def (&layers=N) dup length 3 -1 roll add string dup 4 -1 roll 0 exch putinterval dup
+%    3 -1 roll araVa exch putinterval
+    put
+
+    %% desem per separat _LON _LAT
+    dFossa /_LON ARAlon put
+    dFossa /_LAT ARAlat put
     dFossa /_reclamada
     %GGtramits (<<>>) %% per saber si ha estat reclamada hauríem de fer una consulta a un diccionari que haguem bastit abans amb aquesta dada, via la seva ID al dataset
     <<>> araDF (id) get known
@@ -317,7 +384,7 @@ dFossa /_nom get ==
     {
      false put
      dFossa /_IDtramit (--) put
-     dFossa /_URLtramits (--) put
+     dFossa /_URLtramits (fossa####_tramitsJusticiAjuntament.pdf) put
     }ifelse
 
     %% desem la fossa amb les dades que ens interessen pel registre amb la clau id del dataset
@@ -416,7 +483,10 @@ alt margE 2 mul sub /arasomY exch def
  4 string cvs show ( municipis amb fosses comunes)show
 
  arasomX arasomY 18 sub dup /arasomY exch def moveto
- (Dataset del dia )show ddp show
+ araDfont 14 scalefont setfont
+ (Dataset publicat pel Departament de Justícia el dia )
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get
+ show ddp show
 
  arasomY margE 2 mul sub /arasomY exch def
 
@@ -440,6 +510,18 @@ alt margE 2 mul sub /arasomY exch def
   {
    currentrgbcolor 3 array astore /araRGB exch def
    showpage
+
+%% generem la cadena alfanumèrica
+nAnnots 1 add dup /nAnnots exch def
+4 string cvs  %% ens servirà com a nom únic de l'objecte diccionari
+({ARAannots_) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+(}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+/ARAannots exch def  %% el nom alfanumèric únic NO contaminable
+
+%% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+mark /_objdef ARAannots cvx exec /type /array /OBJ pdfmark
+mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
+
    araRGB aload pop setrgbcolor
    alt margE sub /arasomY exch def
    arasomX arasomY moveto
@@ -468,6 +550,18 @@ alt margE 2 mul sub /arasomY exch def
   {
    currentrgbcolor 3 array astore /araRGB exch def
    showpage
+
+%% generem la cadena alfanumèrica
+nAnnots 1 add dup /nAnnots exch def
+4 string cvs  %% ens servirà com a nom únic de l'objecte diccionari
+({ARAannots_) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+(}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+/ARAannots exch def  %% el nom alfanumèric únic NO contaminable
+
+%% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+mark /_objdef ARAannots cvx exec /type /array /OBJ pdfmark
+mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
+
    araRGB aload pop setrgbcolor
    alt margE sub /arasomY exch def
   }if
@@ -556,8 +650,10 @@ aload pop  %% desmpaquetem l'array
    /_exhumada get
    {
     0 1 0 setrgbcolor
+currentrgbcolor 3 array astore /araRGB exch def
    }
    {
+currentrgbcolor 3 array astore /araRGB exch def
     FaF /_reclamada get
     {
      1 0 0 setrgbcolor
@@ -644,6 +740,18 @@ aload pop  %% desmpaquetem l'array
    {
     currentrgbcolor 3 array astore /araRGB exch def
     showpage
+
+%% generem la cadena alfanumèrica
+nAnnots 1 add dup /nAnnots exch def
+4 string cvs  %% ens servirà com a nom únic de l'objecte diccionari
+({ARAannots_) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+(}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+/ARAannots exch def  %% el nom alfanumèric únic NO contaminable
+
+%% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+mark /_objdef ARAannots cvx exec /type /array /OBJ pdfmark
+mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
+
     araRGB aload pop setrgbcolor
     alt margE sub /arasomY exch def
    }if
@@ -662,6 +770,18 @@ aload pop  %% desmpaquetem l'array
    {
     currentrgbcolor 3 array astore /araRGB exch def
     showpage
+
+%% generem la cadena alfanumèrica
+nAnnots 1 add dup /nAnnots exch def
+4 string cvs  %% ens servirà com a nom únic de l'objecte diccionari
+({ARAannots_) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+(}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+/ARAannots exch def  %% el nom alfanumèric únic NO contaminable
+
+%% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+mark /_objdef ARAannots cvx exec /type /array /OBJ pdfmark
+mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
+
     araRGB aload pop setrgbcolor
     alt margE sub /arasomY exch def
    }if
@@ -671,16 +791,110 @@ aload pop  %% desmpaquetem l'array
    (COORDENADES:) show
    UbuntuMonoB 12 scalefont setfont
    arasomX margE 2 mul add arasomY moveto
-   FaF /_URLicgc get  %% coordenades geogràfiques de la fossa comuna (cal concretar l'ordre LON/LAT?)
-   (?) search pop pop pop  %% el deslliguem de l'adreça URL encara per concretar
-   show
+   FaF /_URLosm get  %% URL d'Open Street Maps
+   /linkOSM exch def
+   FaF /_URLicgc get  %% URL de l'Institut Cartogràfic i Geològic de Catalunya
+   /linkICGC exch def
+   FaF dup /_LON get show (,)show /_LAT get show
+
+%(?) search pop pop pop  %% el deslliguem de l'adreça URL encara per concretar
+%show
+
    arasomY 12 sub /arasomY exch def
-   currentpoint gsave 0 0 1 setrgbcolor ( [i]) show grestore
+   currentpoint gsave
+   .5 .5 .5 setrgbcolor ( [OSM] )
+   dup gsave true charpath pathbbox 4 array astore /elRectOSM exch def grestore
+   show
+   ([ICGC] ) dup gsave true charpath pathbbox 4 array astore /elRectICGC exch def grestore
+   show
+   grestore
+
+%% comprovem que BBox és correcte?
+%gsave 1 0 0 setrgbcolor elRect aload pop exch 3 index sub exch 2 index sub rectstroke grestore
+
+%%LINK a OSM
+   %% generem els objectes per vincular la geolocalització, xinxeta inclosa, al punt exacte on el dataset indica que es troba la fossa
+   %% crear 1 objecte diccionari que s'inscriu a la data de publicació del darrer dataset i que s'afegirà a {clauAnnots}
+   FaF /_IDdataset get  %% la ID al dataset de la fossa comuna ens servirà com a nom únic de l'objecte diccionari
+   dup /idDataset exch def
+   ({URLmapaOSM) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+   (}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+   /ARAlinkOSM exch def  %% el nom únic
+
+   %% actualitzem el valor
+   %dvURL 1 add /dvURL exch def
+
+   mark /_objdef
+   ARAlinkOSM cvx exec
+   /type /dict /OBJ pdfmark
+   %% incrustar els valors de l'aparença gràfica de l'anotació de la comarca al diccionari
+   mark
+   ARAlinkOSM cvx exec
+   <<
+     /Rect elRectOSM  %% té format Bbox amb origen a LL
+     /Subtype /Link
+     /A <<
+          /URI linkOSM
+          /S /URI
+        >>
+      /Border [0 0 0]
+      %/Border [16 16 1]
+      %/Color [0 0 1]
+      /Type /Annot
+   >> /PUT pdfmark
+   %% fiquem la referència indirecta de cada anotació dins l'array /Annots per pàgina
+   mark ARAannots cvx exec ARAlinkOSM cvx exec /APPEND pdfmark
+
+%%LINK a ICGC
+   %% generem els objectes per vincular la geolocalització, xinxeta inclosa?, al punt exacte on el dataset indica que es troba la fossa
+   %% crear 1 objecte diccionari que s'inscriu a la data de publicació del darrer dataset i que s'afegirà a {clauAnnots}
+   FaF /_IDdataset get  %% la ID al dataset de la fossa comuna ens servirà com a nom únic de l'objecte diccionari
+   dup /idDataset exch def
+   ({URLmapaICGC) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+   (}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+   /ARAlinkICGC exch def  %% el nom únic
+
+   %% actualitzem el valor
+   %dvURL 1 add /dvURL exch def
+
+   mark /_objdef
+   ARAlinkICGC cvx exec
+   /type /dict /OBJ pdfmark
+   %% incrustar els valors de l'aparença gràfica de l'anotació de la comarca al diccionari
+   mark
+   ARAlinkICGC cvx exec
+   <<
+     /Rect elRectICGC  %% té format Bbox amb origen a LL
+     /Subtype /Link
+     /A <<
+          /URI linkICGC
+          /S /URI
+        >>
+      /Border [0 0 0]
+      %/Border [16 16 1]
+      %/Color [0 0 1]
+      /Type /Annot
+   >> /PUT pdfmark
+   %% fiquem la referència indirecta de cada anotació dins l'array /Annots per pàgina
+   mark ARAannots cvx exec ARAlinkICGC cvx exec /APPEND pdfmark
+
 %=== UEP!
    exch pop margE 2 mul le
    {
     currentrgbcolor 3 array astore /araRGB exch def
     showpage
+
+%% generem la cadena alfanumèrica
+nAnnots 1 add dup /nAnnots exch def
+4 string cvs  %% ens servirà com a nom únic de l'objecte diccionari
+({ARAannots_) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+(}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+/ARAannots exch def  %% el nom alfanumèric únic NO contaminable
+
+%% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+mark /_objdef ARAannots cvx exec /type /array /OBJ pdfmark
+mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
+
     araRGB aload pop setrgbcolor
     alt margE sub /arasomY exch def
    }if
@@ -696,6 +910,18 @@ aload pop  %% desmpaquetem l'array
    {
     currentrgbcolor 3 array astore /araRGB exch def
     showpage
+
+%% generem la cadena alfanumèrica
+nAnnots 1 add dup /nAnnots exch def
+4 string cvs  %% ens servirà com a nom únic de l'objecte diccionari
+({ARAannots_) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+(}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+/ARAannots exch def  %% el nom alfanumèric únic NO contaminable
+
+%% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+mark /_objdef ARAannots cvx exec /type /array /OBJ pdfmark
+mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
+
     araRGB aload pop setrgbcolor
     alt margE sub /arasomY exch def
    }if
@@ -705,29 +931,87 @@ aload pop  %% desmpaquetem l'array
    (URL FITXA:) show
    arasomX margE 2 mul add arasomY moveto
    FaF /_URLbanc get  %% coordenades geogràfiques de la fossa comuna (cal concretar l'ordre LON/LAT?)
+   dup gsave true charpath pathbbox 4 array astore /elRect exch def grestore
+   .5 .5 .5 setrgbcolor dup /linkBM exch def
    show
+   araRGB aload pop setrgbcolor
+   %% fem el vincle a la fitxa oficial del Banc de Memòria del departament de Justícia
+   idDataset ({URLFitxaBancMem) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+   (}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+   /ARAlinkURL exch def  %% el nom únic
+
+   %% actualitzem el valor
+   %dvURL 1 add /dvURL exch def
+
+   mark /_objdef
+   ARAlinkURL cvx exec
+   /type /dict /OBJ pdfmark
+   %% incrustar els valors de l'aparença gràfica de l'anotació de la comarca al diccionari
+   mark
+   ARAlinkURL cvx exec
+   <<
+     /Rect elRect  %% té format Bbox amb origen a LL
+     /Subtype /Link
+     /A <<
+          /URI linkBM
+          /S /URI
+        >>
+      /Border [0 0 0]
+      %/Border [16 16 1]
+      %/Color [0 0 1]
+      /Type /Annot
+   >> /PUT pdfmark
+   %% fiquem la referència indirecta de cada anotació dins l'array /Annots per pàgina
+   mark ARAannots cvx exec ARAlinkURL cvx exec /APPEND pdfmark
+
    arasomY 12 sub /arasomY exch def
    currentpoint exch pop margE 2 mul le
    {
     currentrgbcolor 3 array astore /araRGB exch def
     showpage
-    araRGB aload pop setrgbcolor
+
+%% generem la cadena alfanumèrica
+nAnnots 1 add dup /nAnnots exch def
+4 string cvs  %% ens servirà com a nom únic de l'objecte diccionari
+({ARAannots_) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+(}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+/ARAannots exch def  %% el nom alfanumèric únic NO contaminable
+
+%% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+mark /_objdef ARAannots cvx exec /type /array /OBJ pdfmark
+mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
+
+araRGB aload pop setrgbcolor
     alt margE sub /arasomY exch def
    }if
 
+araRGB aload pop setrgbcolor
    araDfont 12 scalefont setfont
    arasomX arasomY moveto
-   (URL TRÀMIT:)
+   (URL TRÀMITS:)
    (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get
    show
    arasomX margE 2 mul add arasomY moveto
-   FaF /_URLtramits get  %% coordenades geogràfiques de la fossa comuna (cal concretar l'ordre LON/LAT?)
+   FaF /_URLtramits get  %% vincle al PDF amb tots els tràmits de la fossa a Justícia i a l'ajuntament
+   dup idDataset dup length 9 exch sub exch putinterval  %% farcim la ID de la fossa al nom del PDF
    show
    arasomY 12 sub /arasomY exch def
    currentpoint exch pop margE 2 mul le
    {
     currentrgbcolor 3 array astore /araRGB exch def
     showpage
+
+%% generem la cadena alfanumèrica
+nAnnots 1 add dup /nAnnots exch def
+4 string cvs  %% ens servirà com a nom únic de l'objecte diccionari
+({ARAannots_) dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+(}) exch dup length dup /ARAva exch def 2 index length add string dup 3 -1 roll 0 exch putinterval dup 3 -1 roll ARAva exch putinterval
+/ARAannots exch def  %% el nom alfanumèric únic NO contaminable
+
+%% plantem l'array d'anotacions de PDF sofisticades a l'arrel /Page per tal siguin llegibles amb qualsevol dispositiu i viewer
+mark /_objdef ARAannots cvx exec /type /array /OBJ pdfmark
+mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
+
     araRGB aload pop setrgbcolor
     alt margE sub /arasomY exch def
    }if
@@ -750,6 +1034,7 @@ aload pop  %% desmpaquetem l'array
 %%COM fer notar els casos del trasllat a Cuelgamuros o les que consten com a desaparegudes??
 
  showpage  %% darrer showpage que hauria de ser condicional per si queda res a la cua?
+
 }
 {  %% el prefix comarcal no existeix
  (\n\n >>> el prefix comarcal... ) print flush CERQUEM print flush ( ...NO existeix!\n\n)print flush

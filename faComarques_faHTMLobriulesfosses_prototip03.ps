@@ -482,7 +482,7 @@ def
 	/o 0  %% fosses publicades al dataset oficial
 	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 0  %% reclamades
+	/r 80  %% reclamades
 	/n (les Garrigues)  %% nom normatiu
 	/i 18  %% codi territorial
       >> 
@@ -1185,7 +1185,7 @@ margeALvoltant gruixF 2 mul yReticula 1 sub mul 2 div add dup /ymapaHTML exch de
 translate
 
 %%CAL trobar una altra estratègia per assenyalar LA COMARCA ON TREBALLEM?
-/laFEM 29 def  %% l'indicador ara és l'índex de com es pinta la comarca segons el mapa (ordre de dalt a baix i d'esquerra a dreta) però hauria de ser un clau de json?
+/laFEM 13 def  %% l'indicador ara és l'índex de com es pinta la comarca segons el mapa (ordre de dalt a baix i d'esquerra a dreta) però hauria de ser un clau de json?
 /ilaFEM 0 def
 
 0 1 yReticula 1 sub
@@ -2486,7 +2486,7 @@ PDFurl.addEventListener\(
  etcp fpd mul exhmds div 365 div 1000 mul cvi  %% juguem amb nombres de 3 xifres pels anys (enters) i els dies (decimals) i apreciar millor com anirà canviant
  16 string cvs dup 0 3 getinterval /elsAnys exch def 3 3 getinterval /elsDies exch def
  elsDies cvx exec 100 div 365 mul 10 div round cvi 3 string cvs /elsDies exch def
- ( 000 anys i 000 dies) dup 12 elsDies putinterval
+ ( 000 anys i 000 dies) dup elsDies dup length 3 exch sub 12 add exch putinterval
  dup 1 elsAnys putinterval  %% ho planxem a la màscara final
 
  dup stringwidth pop maX exch sub 2 div 3 -1 roll moveto

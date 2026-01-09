@@ -1,0 +1,146 @@
+%!
+%% comparem els diccionaris i els camps de 2 geojsonps destacant només les diferències
+%% si volem capturar el prompt en un .log (però llavors el prompt no surt per la pantalla)
+%% gs -q -dNOSAFER -sstdout=comparem.log -o out.pdf -sDEVICE=pdfwrite -f compara2geojsonps.ps
+
+%% geojson més nou
+%(datasets/Fosses_comunes_a_Catalunya_20260107.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20251222.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20251210.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20251124.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20251110.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20251107.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20251017.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20251015.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20251013.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20250925.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20250922.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20250915.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20250908.geojsonps)
+(datasets/Fosses_comunes_a_Catalunya_20250725.geojsonps)
+(r) file cvx exec
+/features get dup length /nombreNOU exch def
+/geojsonNOU exch def  %% array del gieojsonps més nou
+
+%% geojson més antic
+(datasets/Fosses_comunes_a_Catalunya_20250723.geojsonps)
+(r) file cvx exec
+/features get dup length /nombreANTIC exch def
+/geojsonANTIC exch def  %% array del geojsonps més antic
+
+nombreNOU nombreANTIC eq
+{  %% sense canvis
+ (\n\nEl NOMBRE TOTAL DE FOSSES ES IDENTIC: )print flush
+ nombreNOU ==
+ /canvis false def
+}
+{  %% hi ha canvis en el nombre de fosses
+ /canvis true def
+ nombreNOU nombreANTIC gt
+ {
+  (\nHi han... )print flush
+  nombreNOU nombreANTIC sub ==
+  (Fosses afegides!)print flush
+  (\n\nNOU TOTAL DE FOSSES: )print flush
+  nombreNOU ==
+  /afegides true def
+ }
+ {
+  (\nHi han... )print flush
+  nombreNOU nombreANTIC sub ==
+  (Fosses eliminades!)print flush
+  (\n\nNOU TOTAL DE FOSSES: )print flush
+  nombreNOU ==
+  /afegides false def
+ }ifelse
+}ifelse
+
+%{  %% loop comparatiu
+ geojsonNOU
+ {  %% forall pels diccionaris nous de fosses
+  (properties) get dup /araNOVA exch def (id) get /ARAid exch def
+  geojsonANTIC
+  /NOhiES true def
+  {  %% forall pels diccionaris antics de fosses
+   /fossaAMBerrors false def
+   (properties) get dup /araVELLA exch def (id) get ARAid eq
+   {  %% aquí podem comparar els camps de dues fosses amb la mateixa (id) però de 2 actualitzacions diferents
+    /NOhiES false def
+    %% els camps de la nova versió els comparem amb els camps de l'antiga
+    araNOVA
+    {  %% forall al diccionari de la fossa
+     exch dup araVELLA exch known
+     {  %% aquest camp conserva el mateix nom
+      %% el contingut ha canviat?
+      dup /araCAMP exch def
+      %% hi ha un camp d'excepció (fitxa) que és un diccionari i ens cal comparar el valor de (url) 
+      dup (fitxa) eq
+      {  %% és el diccionari de la fitxa amb la URL del Banc de Memòria?
+       araVELLA exch get dup type /dicttype eq
+       {
+        (url) get
+       }if
+       exch dup type /dicttype eq
+       {
+        (url) get
+       }if
+       ne
+      }
+      {
+       araVELLA exch get ne
+      }ifelse
+      {  %% ha canviat!
+       fossaAMBerrors
+       {
+       }
+       {
+        /fossaAMBerrors true def
+        (\n FOSSA ID: )print flush ARAid ==
+        (\n)print flush
+       }ifelse
+       %% aquí treiem la comparativa dels dos camps
+       araCAMP ==
+       araNOVA araCAMP get ==
+       araVELLA araCAMP get ==
+       (\n)print flush
+%COMPARATIVAdels2CONTINGUTScanviatsDUNmateixCAMP
+      }if
+     }
+     {  %% aquest camp és nou o ha canviat de nom
+      /fossaAMBerrors true def
+      (\n>>> fossa ID: )print flush ARAid ==
+      (\n)print flush
+      == ==
+      ( <<< aquest camp clau/valor es nou o ha canviat de nom!\n\n)print flush
+%(PLEGUEM!)== quit
+     }ifelse
+    }forall  %% pel diccionari de la fossa
+    fossaAMBerrors
+    {
+     (\n\n\n)print flush  %% separem les fosses amb camps erronis
+    }if
+   }if
+  }forall  %% pels diccionaris antics de fosses
+  NOhiES
+  {  %% aquesta fossa és nova!
+   (\n!!! NOVA fossa ID: )print flush ARAid ==
+araNOVA dup (municipi) get ==
+araNOVA (comarca) get ==
+%NOVAFOSSA!
+  }if
+ }forall  %% pels diccionaris nous de fosses
+% exit
+%}loop
+
+canvis
+{  %% si hi ha canvis
+ afegides
+ {
+  (\n\n)print flush
+  (BROSSA?) pstack
+  %JASABEMQUINESHANESTATAFEGIDES?
+ }
+ {
+CALSABERQUINESHANESTATSUPRIMIDES
+ }ifelse
+}if
