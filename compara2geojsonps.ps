@@ -4,6 +4,7 @@
 %% gs -q -dNOSAFER -sstdout=comparem.log -o out.pdf -sDEVICE=pdfwrite -f compara2geojsonps.ps
 
 %% geojson més nou
+(datasets/Fosses_comunes_a_Catalunya_20260120.geojsonps)
 %(datasets/Fosses_comunes_a_Catalunya_20260107.geojsonps)
 %(datasets/Fosses_comunes_a_Catalunya_20251222.geojsonps)
 %(datasets/Fosses_comunes_a_Catalunya_20251210.geojsonps)
@@ -17,13 +18,13 @@
 %(datasets/Fosses_comunes_a_Catalunya_20250922.geojsonps)
 %(datasets/Fosses_comunes_a_Catalunya_20250915.geojsonps)
 %(datasets/Fosses_comunes_a_Catalunya_20250908.geojsonps)
-(datasets/Fosses_comunes_a_Catalunya_20250725.geojsonps)
+%(datasets/Fosses_comunes_a_Catalunya_20250725.geojsonps)
 (r) file cvx exec
 /features get dup length /nombreNOU exch def
 /geojsonNOU exch def  %% array del gieojsonps més nou
 
 %% geojson més antic
-(datasets/Fosses_comunes_a_Catalunya_20250723.geojsonps)
+(datasets/Fosses_comunes_a_Catalunya_20260119.geojsonps)
 (r) file cvx exec
 /features get dup length /nombreANTIC exch def
 /geojsonANTIC exch def  %% array del geojsonps més antic
@@ -96,6 +97,9 @@ nombreNOU nombreANTIC eq
        {
         /fossaAMBerrors true def
         (\n FOSSA ID: )print flush ARAid ==
+araNOVA dup (municipi) get ==
+araNOVA dup (comarca) get ==
+araNOVA (titol) get ==
         (\n)print flush
        }ifelse
        %% aquí treiem la comparativa dels dos camps
@@ -109,6 +113,9 @@ nombreNOU nombreANTIC eq
      {  %% aquest camp és nou o ha canviat de nom
       /fossaAMBerrors true def
       (\n>>> fossa ID: )print flush ARAid ==
+araNOVA dup (municipi) get ==
+araNOVA dup (comarca) get ==
+araNOVA (titol) get ==
       (\n)print flush
       == ==
       ( <<< aquest camp clau/valor es nou o ha canviat de nom!\n\n)print flush
@@ -125,7 +132,8 @@ nombreNOU nombreANTIC eq
   {  %% aquesta fossa és nova!
    (\n!!! NOVA fossa ID: )print flush ARAid ==
 araNOVA dup (municipi) get ==
-araNOVA (comarca) get ==
+araNOVA dup (comarca) get ==
+araNOVA (titol) get ==
 %NOVAFOSSA!
   }if
  }forall  %% pels diccionaris nous de fosses

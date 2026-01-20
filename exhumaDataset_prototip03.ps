@@ -6,7 +6,7 @@
 %%+URL
 %% localhost del Tuxedo
 %%(/var/www/html/www.obriulesfosses.cat/exhumeu/datasets/Fosses_comunes_a_Catalunya_20250723.geojsonps)
-(datasets/Fosses_comunes_a_Catalunya_20250925.geojsonps)  %% adreça relativa
+(datasets/Fosses_comunes_a_Catalunya_20260113.geojsonps)  %% adreça relativa
 %% servidor bTactic
 %% ?
 
@@ -48,6 +48,7 @@ dup
 %% al diccionari /comarquesVSfosses i aquí, via comentari, ressaltem les incongruències que ens fan pensar que haurem de revisar en cada actualització del dataset
 %% si aquesta estructura canvia, doncs és molt provable que així sigui en algun moment:
 <<
+  	%(Alta Ribagorça) /AG  %% encara NO HI ÉS a /totalFossesFeatures ???
   (Priorat) /PR
   (Val d'Aran) /VN
   (Osona) /OS
@@ -150,8 +151,47 @@ arrayFosses
 
 datasetComarques length 3 string cvs (NOBRE SUIGENERIS DE COMARQUES SEGONS EL DATASET OFICIAL... ) print flush print flush (\n\n)print flush
 
+
+%%ANÀLISI PUNTUAL
 %(BUIDAT DEL DICCIONARI /datasetComarques ...\n\n)print flush
 %datasetComarques{== ==}forall
+
+%%ANÀLISI PUNTUAL PER FOSSES OCULTES
+false{
+%% explorem l'ID del dataset per detectar forats en la numeració de fosses que ens ajudin a pentinar manualment quines fosses estan publicades a
+%% https://banc.memoria.gencat.cat/ca/results/mapa_fosses/#### i no ho estan al dataset, doncs la ID és correlativa
+%% primer fem un diccionari amb totes les ID del dataset
+/IDSdataset <<>> def
+/IDmesAlt 0 def
+arrayFosses
+{
+  /properties get /id get dup
+  cvx exec dup IDmesAlt gt
+  {
+   /IDmesAlt exch def
+  }
+  {
+   pop
+  }ifelse
+  IDSdataset exch null put
+}forall
+%% després pentinem d'1 fins a 1100 si existeixen com a ID d' /arrayFosses i fiquem per ordre dins una array les que NO hi són
+%% aquestes que NO són al dataset consultarem manualment... https://banc.memoria.gencat.cat/ca/results/mapa_fosses/# ...per saber si existeixen realment
+[
+ 1 1 1100
+ {
+  4 string cvs
+  dup IDSdataset exch known
+  {
+   pop
+  }
+  {
+  }ifelse
+ }for
+]
+%%IMPORTANT saber quin és l'ID més alt del dataset!
+%%=== IDmesAlt == UUUUUUUUUUUUUUUU
+}if
 
 %% cal sumar les fosses de les comarques duplicades (ara 3) via el seu valor ídem de codi alfabètic
 %% llavors, muntem un nou diccionari /2glifsAfosses on hi desarem els parells: codi alfabètic de 2 caràcters i array de dades de fosses
@@ -177,6 +217,7 @@ desoriComarcal
 %% aquest diccionari és el que treballarà a faComarques_faHTMLobriulesfosses_prototip03.ps
 2glifsAfosses
 %{== ==}forall
+
 
 %% tornem a comptar el nombre de fosses per comarca i comprovem si, sumades a /tfxc, coincideix amb /totalFossesFeatures
 /tfxc 0 def
@@ -205,11 +246,12 @@ tfxc totalFossesFeatures cvx exec ne
 %% potser el què ens cal és fer una crida a un nou applet que agafi coses d'aquí i de faComarques_faHTMLobriulesfosses_prototip03.ps
 %% seguiríem la nomenclatura de colors: verd per les exhumades, vermell per les reclamades i negre per les pendents encara de fer el tràmit
 
+%%ATENCIÓ: s'entén per municipi de la fossa el nom oficial o el nom del nucli de població o EMD on estigui situada (això quedarà especificat a MUNICIPI:)
 %%FA una llista de fosses d'1 comarca, ordenades per municipi, fent un PDF amb les dades que necessitem de cada fossa per fer la reclamació a Justícia
 (\n\n + + + + + + + + + + + + + + + + + + + + + \n\n)print flush
 (detallsfossespercomarquesimunicipis.ps) (r) file cvx exec
 
 %%ANALITZA els camps que classifiquen conceptes clau per la reclamació
 %(\n\n + + + + + + + + + + + + + + + + + + + + + \n\n)print flush
-%(dataset_analisi.ps) (r) file cvx exec
+(dataset_analisi.ps) (r) file cvx exec
 

@@ -244,7 +244,7 @@ def
 	/o 0  %% fosses publicades al dataset oficial
 	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 0  %% reclamades
+	/r 4  %% reclamades
 	/n (l'Aran)  %% nom normatiu
 	/i 39  %% codi territorial
       >>
@@ -397,7 +397,7 @@ def
 	/o 0  %% fosses publicades al dataset oficial
 	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 0  %% reclamades
+	/r 46  %% reclamades
 	/n (la Segarra)  %% nom normatiu
 	/i 32  %% codi territorial
       >>
@@ -812,8 +812,8 @@ html, body
 <img src=) writestring
 
 %%URLserver
-%%43c ("http://localhost/www.obriulesfosses.cat/exhumeu/htmls/) writestring
- 43c  ("https://www.obriulesfosses.cat/exhumeu/htmls/) writestring
+ 43c ("http://localhost/www.obriulesfosses.cat/exhumeu/htmls/) writestring
+ %%  ("https://www.obriulesfosses.cat/exhumeu/htmls/) writestring
 
  43c IDunica writestring
 
@@ -1226,8 +1226,8 @@ margeALvoltant gruixF 2 mul xReticula 1 sub mul 2 div sub dup /xmapaHTML exch de
 margeALvoltant gruixF 2 mul yReticula 1 sub mul 2 div add dup /ymapaHTML exch def
 translate
 
-%%CAL trobar una altra estratègia per assenyalar LA COMARCA ON TREBALLEM? …hauria de ser un clau de json??
-/laFEM [36 23] def  %% array amb els índex de les comarques de treball actiu (ordre al mapa de dalt a baix i d'esquerra a dreta) les marquem amb un rectangle vermell
+%%CAL trobar una altra estratègia per assenyalar LA COMARCA ON TREBALLEM …hauria de ser un clau de json??
+/laFEM [36 23 9 0] def  %% array amb els índex de les comarques de treball actiu (ordre al mapa de dalt a baix i d'esquerra a dreta) les marquem amb un rectangle vermell
 /ilaFEM 0 def
 
 0 1 yReticula 1 sub
@@ -1398,7 +1398,7 @@ translate
    }if
 
    %% iniciem les anotacions de PDF compatibles amb qualsevol viewer que hem provat fins ara
-   araC (VN) eq
+   araC (VN) eq  %% som a l'Aran?
    {  %% només 1 vegada perquè aquests objectes són compartits!
     %% Detecta si l'interpret PS duu el recurs %Calendar% (p.e. GS)
     /araCDstring (D:) def  %% cadena d'inici per la Creation Date
@@ -2381,8 +2381,8 @@ false{
   43c (<span style='font-family:mono;color:#000000;font-weight:Regular'>)  writestring
 
 %%URLserver al PDF únic
-%%(http://localhost/www.obriulesfosses.cat/exhumeu/pdfs/)
-  (https://www.obriulesfosses.cat/exhumeu/pdfs/)
+  (http://localhost/www.obriulesfosses.cat/exhumeu/pdfs/)
+%  (https://www.obriulesfosses.cat/exhumeu/pdfs/)
   dup length dup /araVa exch def IDunica length add
   (_obriulesfosses_prototip04.pdf) dup length exch 4 1 roll
   add
