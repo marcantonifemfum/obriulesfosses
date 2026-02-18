@@ -4,6 +4,8 @@
 %% podem detectar errors del dataset:
 %%
 
+%% << (type)  (FeatureCollection)  (features)  [
+
 %0% estructura d'1 fossa al dataset original passat a PS
 %% <<
 %%   (type) (Feature)
@@ -41,6 +43,8 @@
 %%                  (:@computed_region_wvic_k925) (6)
 %%                >>
 %% >>
+
+%% ] >>
 
 %% l'intèpret ens dóna una prefecta equivalència entre la notació decimal i UTF8, com es pot veure en aquest exemple:
 %% GS>(Lluçanès) (Llu\303\247an\303\250s) eq ==
@@ -156,7 +160,7 @@ mark {ThisPage} << /Annots ARAannots cvx exec >> /PUT pdfmark
 >> def
 
 %%PER CERCAR EN EL DATASET ORIGINAL, DEGUT A QUE HI HA COMARQUES REPETIDES, ENS CAL FILTRAR PELS 2 CARÀCTERS NORMATIUS QUE DEFINEIXEN LES 42 COMARQUES CATALANES
-(BD)  %% 2 caràcters indicatius de la comarca
+(BG)  %% 2 caràcters indicatius de la comarca
 /CERQUEM exch def
 
 /diccionarisDeFossesD1comarca [] def  %% hi haurà el diccionari de la clau (properties) de cada fossa!
@@ -399,7 +403,7 @@ dFossa /_nom get ==
 ] /adddfpm exch def  %% array de dicionaris de fosses per municipi 
 
 %%AQUÍ ÉS ON PODRÍEM GENERAR UN PDF/HTML, PER COMARQUES, AMB LES DADES DE LES FOSSES DE CADA MUNICIPI
-(UbuntuMono-R.ttf)
+(UbuntuMono-R.ttf)  %% glifs candidats a marcar errors /uniFFFD /shadedark /shademedium /block /dkshade
 %(Hack-Regular.ttf)  %% adreça relativa
 findfont
 %% codifiquem pels accents catalans i els possibles glifs alternatius de la F
@@ -459,7 +463,7 @@ currentdict end /dUbuntu_WApMono exch definefont pop
 
 /maxX ample margE sub def
 /arasomX margE def
-alt margE 2 mul sub /arasomY exch def
+alt margE 1.5 mul sub /arasomY exch def
 
 42cIDnom CERQUEM known  %% el prefix comarcal existeix?
 {
@@ -488,7 +492,101 @@ alt margE 2 mul sub /arasomY exch def
  (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get
  show ddp show
 
- arasomY margE 2 mul sub /arasomY exch def
+ %% llegenda d'incoherències amb 8 icones acolorides
+ %% només hauríem de fer sortir les que tinguem documentades a cada comarca via ##_errors.ps
+ gsave
+ UbuntuMonoB 24 scalefont setfont
+ currentpoint 24 sub exch pop margE exch moveto /uniFFFD glyphshow
+ gsave
+ currentpoint translate -45 rotate
+ araDfont 7 scalefont setfont 0 -7 moveto
+ (Confón municipi) 0 0 0 setrgbcolor
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ 0 -14 moveto
+ (per nucli de població)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ grestore
+ (  )show
+ .5 .5 .5 setrgbcolor /uniFFFD glyphshow
+ gsave
+ currentpoint translate -45 rotate
+ araDfont 7 scalefont setfont 0 -7 moveto
+ (Municipi equivocat) 0 0 0 setrgbcolor
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ grestore
+ (  )show
+ 0 0 1 setrgbcolor /uniFFFD glyphshow
+ gsave
+ currentpoint translate -45 rotate
+ araDfont 7 scalefont setfont 0 -7 moveto
+ (Nucli de població) 0 0 0 setrgbcolor
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ 0 -14 moveto
+ (en un municipi equivocat)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ grestore
+ (  )show
+ 0 1 1 setrgbcolor /uniFFFD glyphshow
+ gsave
+ currentpoint translate -45 rotate
+ araDfont 7 scalefont setfont 0 -7 moveto
+ (Municipi situat en) 0 0 0 setrgbcolor
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ 0 -14 moveto
+ (una comarca equivocada)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ grestore
+ (  )show
+ 0 1 0 setrgbcolor /uniFFFD glyphshow
+ gsave
+ currentpoint translate -45 rotate
+ araDfont 7 scalefont setfont 0 -7 moveto
+ (Coordenades geogràfiques) 0 0 0 setrgbcolor
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ 0 -14 moveto
+ (Lon/Lat inexistents)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ grestore
+ (  )show
+ 1 0 1 setrgbcolor /uniFFFD glyphshow
+ gsave
+ currentpoint translate -45 rotate
+ araDfont 7 scalefont setfont 0 -7 moveto
+ (Ubicació provablement) 0 0 0 setrgbcolor
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ 0 -14 moveto
+ (il·lògica de la fossa)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ grestore
+ (  )show
+ 1 0 0 setrgbcolor /uniFFFD glyphshow
+ gsave
+ currentpoint translate -45 rotate
+ araDfont 7 scalefont setfont 0 -7 moveto
+ (Les coordenades Lon/Lat) 0 0 0 setrgbcolor
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ 0 -14 moveto
+ (són fora del municipi)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ grestore
+ (  )show
+ 1 .7 0 setrgbcolor /uniFFFD glyphshow
+ gsave
+ currentpoint translate -45 rotate
+ araDfont 7 scalefont setfont 0 -7 moveto
+ (Els camps (x)(y)) 0 0 0 setrgbcolor
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ 0 -14 moveto
+ (i (geometry) difereixen)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ grestore
+
+ araDfont 12 scalefont setfont
+ 0 0 0 setrgbcolor (  INCOHERÈNCIES DETECTADES)
+ (decodificaWinAnsiEncoding_a1i2i3octets.ps) (r) file cvx exec AliniesD1solOctet 0 get show
+ grestore
+
+ arasomY margE 3 mul sub /arasomY exch def
 
  /maxCIPI 0 def
  /maxF 0 def  %% desarem el nombre màxim llegit de fosses per municipi

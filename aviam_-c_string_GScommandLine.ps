@@ -1,0 +1,26 @@
+%!
+%% explorem l'opció de la línia de comanda del GS descrita aquí… https://ghostscript.readthedocs.io/en/latest/Use.html#c-string
+%% on podem incloure porcions de codi PS, no sabem encara si a la cua o a l'inici de l'execució d'altres fitxers .ps
+%% això ens obre la porta p.e. a inocular tota una gamma de pdfmarks per la personalització de metadades i altres (CropBox, ArtBox, anotacions, etc)
+%% la sintaxi via el gatell -c permet treballar de 3 maneres:
+
+%% 1_ invocant a un operador directe, p.e. pstack
+%% gs -q -dNOSAFER -o out.pdf -sDEVICE=pdfwrite -c pstack -f aviam_-c_string_GScommandLine.ps
+
+%% 2_ invocant a una cadena de codi " … "
+%% gs -q -dNOSAFER -o out.pdf -sDEVICE=pdfwrite -c "pstack mark /Title (Ens fa il·lusió aquest títol) /Author (femfum) /Subject (Línies de comanda més genuïnes) /Keywords (pdfmark, exemple, test) /Creator (Fet a mà) /ModificationDate (D:19940912205731) /DOCINFO pdfmark" -f aviam_-c_string_GScommandLine.ps
+
+%% 3_ invocant a un altre fitxer.ps que, per exemple, porti el mateix codi que el de l'exemple de la cadena anterior
+%% gs -q -dNOSAFER -o out.pdf -sDEVICE=pdfwrite -c DOCINFOpdfmark.ps -f aviam_-c_string_GScommandLine.ps
+
+%% aquest fitxer deixa 4 elements a l'stack per tal de detectar en quin moment es crida el codi invocat des del gatell -c
+%% després pinta un rectanble vermell de la mateixa mida de la pàgina quadrada
+
+<</PageSize[400 400]>>setpagedevice
+
+1 0 0 setrgbcolor
+0 0 400 400 4 copy rectfill
+showpage
+
+pstack
+

@@ -343,7 +343,7 @@ def
 	/o 0  %% fosses publicades al dataset oficial
 	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 0  %% reclamades
+	/r 26  %% reclamades
 	/n (el Berguedà)  %% nom normatiu
 	/i 14  %% codi territorial
       >>
@@ -577,7 +577,7 @@ def
 	/o 0  %% fosses publicades al dataset oficial
 	/p 0  %% fosses documentades pendents de publicar
 	/e 0  %% exhumades
-	/r 0  %% reclamades
+	/r 12  %% reclamades
 	/n (la Terra Alta)  %% nom normatiu
 	/i 37  %% codi territorial
       >> 
@@ -1227,7 +1227,14 @@ margeALvoltant gruixF 2 mul yReticula 1 sub mul 2 div add dup /ymapaHTML exch de
 translate
 
 %%CAL trobar una altra estratègia per assenyalar LA COMARCA ON TREBALLEM …hauria de ser un clau de json??
-/laFEM [36 23 9 0] def  %% array amb els índex de les comarques de treball actiu (ordre al mapa de dalt a baix i d'esquerra a dreta) les marquem amb un rectangle vermell
+/laFEM
+[
+ %0  %% Aran
+ 6   %% Garrotxa
+ 9   %% Berguedà
+ 23  %% Segarra
+ 36  %% Terra Alta
+] def  %% array amb els índex de les comarques de treball actiu (ordre al mapa de dalt a baix i d'esquerra a dreta) les marquem amb un rectangle vermell
 /ilaFEM 0 def
 
 0 1 yReticula 1 sub

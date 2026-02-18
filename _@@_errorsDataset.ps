@@ -1,0 +1,69 @@
+%!
+%% ens pot simplificar la generació dels fitxers comarcals d'errors que en una petita part potser s'hagin de completar manualment
+%% la majoria d'errors detectats amb les mateixes dades del dataset de Justícia poden automatitzar-se i d'altres, de moment, ho farem manualment
+
+%% dataset a revisar que hagi estat generat obligatòriament per llegeixJson_prototip01.ps
+(/var/www/html/www.obriulesfosses.cat/exhumeu/datasets/Fosses_comunes_a_Catalunya_20260209.geojsonps)
+(r) file cvx exec dup /dtstArevisar exch def
+
+%%PRIMER NIVELL DE FILTRE on posarem cada fossa errònia (ara de qualsevol comarca) dins un diccionari en aquesta array
+/xy_NOquadra_geometry_coordinates  %% hi ha diferències entre les coordenades geogràfiques dels camps (x)(y) i les de l'array (coordinates) dins a (geometry)
+[  %% no s'inclouen les que són degudes a zeros a l'esquerra
+] def
+/iLONLAT 0 def  %% comptador d'incidències amb les coordenades
+
+%% activem l'operador acurat per comparar dos nombres reals llargs dins d'uns string
+(operadorsAcurats/Aacurat_eq.ps) (r) file cvx exec
+%% els nombres reals llargs (7 o més decimals) escrits amb intervenció de l'intèrpret s'arrodoneixen, la qual cosa fa inviable comparar valors geogràfics
+%% de certa precisió, i només tenim l'opció de transcriure'ls octet a octet llegint-los com a fitxer i ficats dins una string perquè no s'alterin
+
+(features) get
+{  %% forall de l'array (features) de diccionaris fossa a fossa
+ mark exch
+%%Test d'errors de coordenades lat/lon entre els camps (x)(y) i l'array (coordinates) del diccionary (geometry)
+ %% les diferències degudes a zeros a l'esquerra no les detectarem (matemàticament no comptem) malgrat Justícia actualitza datasets per corregir-ho
+ dup (geometry) get (coordinates) get  %% l'array s'ordena en [ longitud latitud ] que manté la precisió perquè els 2 valors a l'array són ara dins d'una string
+ dup /ARAarray exch def
+ %% aquesta és la millora feta a llegeixJson_prototip01.ps que ens permet activar amb seguretat aquesta comparativa
+ exch (properties) get
+ dup dup (x) get dup /ARAx exch def exch (y) get dup /ARAy exch def
+ {  %% stopped per disfuncions en el contingut
+  %% test de la latitud (y)
+  3 index 1 get true Aacurat_eq
+  %% test de la longitud (x)
+  exch 4 -1 roll 0 get true Aacurat_eq and
+  {
+   pop
+   %% com podem veure Aacurat_eq ignora els zeros a l'esquerra
+   %(1.23456789) (1.234567890000) true Aacurat_eq
+  }
+  {  %% hi ha diferències
+   ARAarray ==
+   ARAx ==
+   ARAy ==
+   dup (id) get ==
+   dup (titol) get ==
+   dup (municipi) get ==
+   (comarca) get ==
+
+   (\n + + + + + + + + +\n\n)print flush
+   iLONLAT 1 add /iLONLAT exch def
+  }ifelse
+ }stopped
+ {
+  ARAarray ==
+  ARAx ==
+  ARAy ==
+  pop pop pop pop
+  dup (id) get ==
+  dup (titol) get ==
+  dup (municipi) get ==
+  (comarca) get ==
+  (\n + + + + + + + + +\n\n)print flush
+  iLONLAT 1 add /iLONLAT exch def
+ }if
+ cleartomark
+}forall
+
+(\n\n NOMBRE DE FOSSES AMB DISFUNCIONS LON/LAT... )print flush
+iLONLAT ==
