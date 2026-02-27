@@ -47,31 +47,41 @@ $etcp = $interval->format("%a");
 //exit($SON/365);
 putenv("MRCT_A77=$etcp");  // el temps com a pena (nombre de dies passats)
 
+// calculem el nombre de dies passats entre l'infame «Cautivo i desarmado…» 01.04.1939 i avui mateix
+$fiGuerraDespanya = date_create('1939-04-01');
+$avuiMateix = new DateTime("now");
+//$avuiMateix = date_create('2026-01-02');
+$putaespanya = $fiGuerraDespanya->diff($avuiMateix);
+//echo = "N'han passat: ", $putaespanya->format("%a"), "\n";
+$ficid = $putaespanya->format("%a");
+//exit($ficid/365);
+putenv("MRCT_cid39=$ficid");  // nombre de dies passats des de la fi de la guerra d'espanya
+
 //amb l'hora del servidor en tenim prou com a nom únic?
 $PDFunic = date("d"."B"."H"."i"."s");
 
-//@URLserver
+//@URL
 // EP! aquí cal veure si al servidor de bTactic podem posar-hi o no les 3 www al davant
-//$baseURL = "http://localhost/www.obriulesfosses.cat/exhumeu/";  // localhost de Tuxedo
-$baseURL = "https://www.obriulesfosses.cat/exhumeu/";  // servidor bTactic
+$baseURL = "http://localhost/www.obriulesfosses.cat/exhumeu/";  // localhost de Tuxedo
+//$baseURL = "https://www.obriulesfosses.cat/exhumeu/";  // servidor bTactic
 
 //@URL
 // adreça absoluta al directori dels PDFs resultants
 //$somaPDF = "/var/www/html/www.obriulesfosses.cat/exhumeu/pdfs/";  // localhost Tuxedo
-$somaPDF = "pdfs/";  // el GS del servidor bTactic també escriu sobre una adreça relativa
+$somaPDF = "pdfs/";  // EP! el GS del servidor bTactic escriur sobre una adreça relativa?
 
 //@URL
 // adreça absoluta al directori dels HTMLs resultants
 //$somaHTML = "/var/www/html/www.obriulesfosses.cat/exhumeu/htmls/";  // localhost Tuxedo
-$somaHTML = "htmls/";  // el servidor bTactic també escriu sobre una adreça relativa
+$somaHTML = "htmls/";  // el servidor bTactic escriu sobre una adreça relativa?
 
 //@URL
 //$somaGS = "/usr/bin/";  // path a l'executable de Ghostscript al localhost de Tuxedo
 $somaGS = "/usr/bin/";  // sembla que també pot cridar-se sense path a l'executable de Ghostscript 10.0.0 al servidor de bTactic
 
-//@URLserver
-//$baseurlPDF = "http://localhost/www.obriulesfosses.cat/exhumeu/pdfs/";  // base url al pdf al localhost de Tuxedo
-$baseurlPDF = "https://www.obriulesfosses.cat/exhumeu/pdfs/";  // base url al pdf del servidor de bTactic
+//@URL
+$baseurlPDF = "http://localhost/www.obriulesfosses.cat/exhumeu/pdfs/";  // base url al pdf al localhost de Tuxedo
+//$baseurlPDF = "https://www.obriulesfosses.cat/exhumeu/pdfs/";  // base url al pdf del servidor de bTactic
 
 $PSapplet = "faComarques_pdfHTMLobriulesfosses_prototip04.ps";
 
@@ -166,7 +176,7 @@ echo "</body></html>";
 // això és com un alert però més controlat per tal de redirigir un resultat cap a on es vulgui
 	  //$pr0mpt = rtrim($prompt);
 	  //text pel 2n prompt
-          $pr0mpt = "A Catalunya hi ha més d\\'un miler de fosses comunes de les quals se n\\'ha exhumat només un 10%.\\n\\nO B R I U   L E S   F O S S E S  emprèn la reclamació d\\'exhumació sistemàtica, comarca a comarca, de cadascuna de les fosses comunes del nostre país al departament de Justícia de la Generalitat i als ajuntaments.\\n\\nLa Desaparició Forçada o Involuntària dels nostres parents ens empeny a denunciar aquesta vergonya 87 anys després de la Guerra d\\'Espanya i de 50 anys de polítiques de memòria d\\'aparador.\\n\\nSi prems…  [ Cancel·la ]  …podràs veure l\\'HTML de l\\'estat de l\\'actuació que ara mateix es centra a la comarca de les Garrigues\\n\\nSi prems…  [ D\\'acord ]  …s\\'obrirà un PDF amb la mateixa informació\\n\\n";
+          $pr0mpt = "A Catalunya hi ha més d\\'un miler de fosses comunes de les quals se n\\'ha exhumat només un 10%.\\n\\nO B R I U   L E S   F O S S E S  emprèn la reclamació d\\'exhumació sistemàtica, comarca a comarca, de cadascuna de les fosses comunes del nostre país al departament de Justícia de la Generalitat i als ajuntaments.\\n\\nLa Desaparició Forçada o Involuntària dels nostres parents ens empeny a denunciar aquesta vergonya 87 anys després de la Guerra d\\'Espanya i de 50 anys de polítiques de memòria d\\'aparador.\\n\\nSi prems…  [ Cancel·la ]  …podràs veure l\\'HTML de l\\'estat de l\\'actuació que ja ha treballat 9 comarques i ara som al Bages.\\n\\nSi prems…  [ D\\'acord ]  …s\\'obrirà un PDF amb la mateixa informació\\n\\n";
 
 // què caracu es desa quan llistem l'stack del ps?
 //var_dump($pr0mpt);
