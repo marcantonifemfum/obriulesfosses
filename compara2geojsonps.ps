@@ -4,7 +4,7 @@
 %% gs -q -dNOSAFER -sstdout=comparem.log -o out.pdf -sDEVICE=pdfwrite -f compara2geojsonps.ps
 
 %% geojson més nou
-(datasets/Fosses_comunes_a_Catalunya_20260225.geojsonps)
+(datasets/Fosses_comunes_a_Catalunya_20260305.geojsonps)
 %(datasets/Fosses_comunes_a_Catalunya_20260107.geojsonps)
 %(datasets/Fosses_comunes_a_Catalunya_20251222.geojsonps)
 %(datasets/Fosses_comunes_a_Catalunya_20251210.geojsonps)
@@ -24,35 +24,38 @@
 /geojsonNOU exch def  %% array del gieojsonps més nou
 
 %% geojson més antic
-(datasets/Fosses_comunes_a_Catalunya_20260220.geojsonps)
+(datasets/Fosses_comunes_a_Catalunya_20260304.geojsonps)
 (r) file cvx exec
 /features get dup length /nombreANTIC exch def
 /geojsonANTIC exch def  %% array del geojsonps més antic
+
+/iNOVAFOSSA 0 def  %% comptador de fosses noves
+/afegides false def  %% cap d'afegida?
 
 nombreNOU nombreANTIC eq
 {  %% sense canvis
  (\n\nEl NOMBRE TOTAL DE FOSSES ES IDENTIC: )print flush
  nombreNOU ==
- /canvis false def
+ /eliminades false def
 }
 {  %% hi ha canvis en el nombre de fosses
  /canvis true def
  nombreNOU nombreANTIC gt
  {
-  (\nHi han... )print flush
+  (\nSi es confirma que no ha desaparegut cap fossa, inicialment hi haurien... )print flush
   nombreNOU nombreANTIC sub ==
   (Fosses afegides!)print flush
   (\n\nNOU TOTAL DE FOSSES: )print flush
   nombreNOU ==
-  /afegides true def
+  /eliminades false def
  }
  {
-  (\nHi han... )print flush
+  (\nSi es confirma que no s'hi ha afegit cap fossa, inicialment hi haurien... )print flush
   nombreNOU nombreANTIC sub ==
   (Fosses eliminades!)print flush
   (\n\nNOU TOTAL DE FOSSES: )print flush
   nombreNOU ==
-  /afegides false def
+  /eliminades true def
  }ifelse
 }ifelse
 
@@ -97,9 +100,9 @@ nombreNOU nombreANTIC eq
        {
         /fossaAMBerrors true def
         (\n FOSSA ID: )print flush ARAid ==
-araNOVA dup (municipi) get ==
-araNOVA dup (comarca) get ==
-araNOVA (titol) get ==
+        araNOVA dup (municipi) get ==
+        dup (comarca) get ==
+        (titol) get ==
         (\n)print flush
        }ifelse
        %% aquí treiem la comparativa dels dos camps
@@ -113,9 +116,9 @@ araNOVA (titol) get ==
      {  %% aquest camp és nou o ha canviat de nom
       /fossaAMBerrors true def
       (\n>>> fossa ID: )print flush ARAid ==
-araNOVA dup (municipi) get ==
-araNOVA dup (comarca) get ==
-araNOVA (titol) get ==
+      araNOVA dup (municipi) get ==
+      dup (comarca) get ==
+      (titol) get ==
       (\n)print flush
       == ==
       ( <<< aquest camp clau/valor es nou o ha canviat de nom!\n\n)print flush
@@ -131,24 +134,65 @@ araNOVA (titol) get ==
   NOhiES
   {  %% aquesta fossa és nova!
    (\n!!! NOVA fossa ID: )print flush ARAid ==
-araNOVA dup (municipi) get ==
-araNOVA dup (comarca) get ==
-araNOVA (titol) get ==
+   araNOVA dup (municipi) get ==
+   dup (comarca) get ==
+   dup (titol) get ==
+   (conservaci_) get ==
+   (\n\n)print flush
+   iNOVAFOSSA 1 add /iNOVAFOSSA exch def
+   /afegides true def
 %NOVAFOSSA!
   }if
  }forall  %% pels diccionaris nous de fosses
 % exit
 %}loop
 
-canvis
-{  %% si hi ha canvis
- afegides
- {
+%%AFEGIDES?
+afegides
+{
+ (\n >>> NOMBRE DE FOSSES QUE S'HAN AFEGIT AL DATASET MES NOU... )print flush
+ iNOVAFOSSA ==
+}if
+
+%%HAN DESAPAREGUT FOSSES SI:
+%%#1 el nombre total de fosses és menor
+%%#2 apareixent-hi noves fosses, sumades al nombre total de fosses del dataset anterior, si el nombre és superior al total de fosses del dataset més nou
+eliminades iNOVAFOSSA nombreANTIC add nombreNOU gt or
+{
+ (\n >>> AL DATASET MES NOU HAN DESAPAREGUT LES FOSSES COMUNES QUE SEGUEIXEN:)print flush
+ %% llavors haurem de pentinar tots els IDs del dataset més antic per saber quins són els que ja NO surten al dataset més nou
+ geojsonANTIC
+ {  %% forall pels diccionaris de fosses del dataset més antic
+  (properties) get dup /araVELLA exch def (id) get /ARAid exch def
+  geojsonNOU
+  /NOhiES true def
+  {  %% forall pels diccionaris de fosses del dataset més nou
+   (properties) get dup /araNOVA exch def (id) get ARAid eq
+   {  %% aquí podem comparar els camps de dues fosses amb la mateixa (id) però de 2 actualitzacions diferents
+    /NOhiES false def
+   }if
+  }forall  %% pels diccionaris de fosses del dataset més nou
+  NOhiES
+  {  %% dades clau de la fossa comuna que ha desaparegut del dataset més antic
+   araVELLA dup (id) get (\n\n +++ ID: ) print flush ==
+   dup (municipi) get ==
+   dup (comarca) get ==
+   dup (titol) get ==
+   (conservaci_) get ==
+  }if
+ }forall  %% pels diccionaris de fosses del dataset més antic
+}if
+
+%canvis
+%{  %% si hi ha canvis
+% afegides
+% {
   (\n\n)print flush
   (BROSSA?) pstack
   %JASABEMQUINESHANESTATAFEGIDES?
- }
- {
-CALSABERQUINESHANESTATSUPRIMIDES
- }ifelse
-}if
+% }
+% {
+%CALSABERQUINESHANESTATSUPRIMIDES
+% }ifelse
+%}if
+
